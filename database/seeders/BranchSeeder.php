@@ -22,9 +22,14 @@ class BranchSeeder extends Seeder
             Branch::firstOrCreate(['name' => $data['name']], $data);
         }
 
-        User::firstOrCreate(
+        User::unguarded(fn () => User::firstOrCreate(
             ['email' => 'admin@erp.test'],
-            ['name' => 'Super Admin', 'password' => 'password', 'role' => Role::SuperAdmin]
-        );
+            [
+                'name' => 'Super Admin',
+                'password' => 'password',
+                'role' => Role::SuperAdmin,
+                'email_verified_at' => now(),
+            ]
+        ));
     }
 }
