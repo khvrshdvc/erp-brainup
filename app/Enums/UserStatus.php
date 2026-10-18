@@ -15,7 +15,15 @@ enum UserStatus: string
     {
         return match ($this) {
             self::Active => 'Faol',
-            self::Inactive => 'Nofaol',
+            self::Inactive => 'To‘xtatilgan',
+        };
+    }
+
+    public function badge(): string
+    {
+        return match ($this) {
+            self::Active => 'ok',
+            self::Inactive => 'warn',
         };
     }
 }

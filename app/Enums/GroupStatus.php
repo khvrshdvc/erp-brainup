@@ -19,7 +19,16 @@ enum GroupStatus: string
             self::Planned => 'Yangi',
             self::Active => 'Faol',
             self::Finished => 'Yakunlangan',
-            self::Archived => 'Arxiv',
+            self::Archived => 'Arxivlangan',
+        };
+    }
+
+    public function badge(): string
+    {
+        return match ($this) {
+            self::Planned => 'info',
+            self::Active => 'ok',
+            self::Finished, self::Archived => 'neutral',
         };
     }
 }

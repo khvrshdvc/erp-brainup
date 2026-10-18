@@ -14,6 +14,12 @@ class DashboardController extends Controller
 
         $groups = $student->studyGroups()->with('teacher')->orderBy('name')->get();
 
-        return view('student.dashboard', compact('student', 'groups'));
+        $attendances = $student->attendances()
+            ->with('studyGroup')
+            ->latest('lesson_date')
+            ->limit(10)
+            ->get();
+
+        return view('student.dashboard', compact('student', 'groups', 'attendances'));
     }
 }

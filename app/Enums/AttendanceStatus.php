@@ -37,4 +37,14 @@ enum AttendanceStatus: string
             self::Excused => 'Sababli',
         };
     }
+
+    public function badge(): string
+    {
+        return match ($this) {
+            self::Present => 'ok',
+            self::Late => 'warn',
+            self::Absent => 'err',
+            self::Excused => 'info',
+        };
+    }
 }

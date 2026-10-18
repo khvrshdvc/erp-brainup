@@ -4,33 +4,54 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
-
-        <title>{{ config('app.name', 'Laravel') }}</title>
-
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-
-        <!-- Scripts -->
+        <title>{{ $attributes->get('title') ? $attributes->get('title').' · ' : '' }}{{ config('app.name') }}</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <link rel="stylesheet" href="{{ asset('css/erp.css') }}">
     </head>
-    <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
-            @include('layouts.navigation')
+    <body class="erp-body">
+        <div class="erp">
+            @include('layouts.partials.sidebar')
 
-            <!-- Page Heading -->
-            @isset($header)
-                <header class="bg-white dark:bg-gray-800 shadow">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
-                    </div>
-                </header>
-            @endisset
+            <div class="erp-main">
+                @include('layouts.partials.topbar')
 
-            <!-- Page Content -->
-            <main>
-                {{ $slot }}
-            </main>
+                <main class="erp-content">
+                    @if (session('status'))
+                        <div class="alert alert-ok">{{ session('status') }}</div>
+                    @endif
+
+                    @if ($errors->any())
+                        <div class="alert alert-err">
+                            @foreach ($errors->all() as $error)
+                                <div>{{ $error }}</div>
+                            @endforeach
+                        </div>
+                    @endif
+
+                    @if ($attributes->get('title'))
+                        <div class="page-head">
+                            <div class="stack" style="gap: 4px">
+                                @if ($attributes->get('crumb'))
+                                    <div class="crumb">{{ $attributes->get('crumb') }}</div>
+                                @endif
+                                <h1 class="page-title">{{ $attributes->get('title') }}</h1>
+                                @if ($attributes->get('subtitle'))
+                                    <div class="page-sub">{{ $attributes->get('subtitle') }}</div>
+                                @endif
+                            </div>
+                            @isset($actions)
+                                <div class="page-actions">{{ $actions }}</div>
+                            @endisset
+                        </div>
+                    @elseif (isset($header))
+                        <div class="page-head">{{ $header }}</div>
+                    @endif
+
+                    {{ $slot }}
+                </main>
+            </div>
         </div>
     </body>
 </html>

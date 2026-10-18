@@ -16,8 +16,17 @@ enum SubmissionStatus: string
     {
         return match ($this) {
             self::Submitted => 'Tekshirilmoqda',
-            self::Graded => 'Baholangan',
-            self::Returned => 'Qayta topshirish uchun qaytarilgan',
+            self::Graded => 'Tekshirildi',
+            self::Returned => 'Qayta topshirish kerak',
+        };
+    }
+
+    public function badge(): string
+    {
+        return match ($this) {
+            self::Submitted => 'warn',
+            self::Graded => 'ok',
+            self::Returned => 'err',
         };
     }
 }

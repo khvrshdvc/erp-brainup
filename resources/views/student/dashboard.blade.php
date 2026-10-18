@@ -1,36 +1,57 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200">O‘quvchi paneli</h2>
-    </x-slot>
+<x-app-layout
+    crumb="Bosh sahifa"
+    :title="'Salom, '.\Illuminate\Support\Str::before(auth()->user()->name, ' ').'!'"
+    :subtitle="\App\Support\UzDate::long(now())">
 
-    <div class="py-8 max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-4">
-        <div class="grid gap-4 sm:grid-cols-3">
-            <x-stat-card label="XP" :value="$student->xp" />
-            <x-stat-card label="Daraja" :value="$student->level?->name ?? 'Boshlovchi'" />
-            <x-stat-card label="Davomat seriyasi" :value="$student->streak" />
-        </div>
-
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
-            <table class="w-full text-sm text-left text-gray-700 dark:text-gray-300">
-                <thead class="bg-gray-50 dark:bg-gray-700 text-xs uppercase">
-                    <tr>
-                        <th class="px-6 py-3">Guruh</th>
-                        <th class="px-6 py-3">O‘qituvchi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($groups as $group)
-                        <tr class="border-t dark:border-gray-700">
-                            <td class="px-6 py-3 font-medium">{{ $group->name }}</td>
-                            <td class="px-6 py-3">{{ $group->teacher?->name ?? '—' }}</td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="2" class="px-6 py-6 text-center text-gray-500">Guruhga biriktirilmagan</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
+    <div class="kpi-grid">
+        <x-stat-card label="XP" :value="$student->xp" icon="xp" note="To‘plangan ballar" />
+        <x-stat-card label="Daraja" :value="$student->level?->name ?? 'Boshlovchi'" icon="level" note="Joriy daraja" />
+        <x-stat-card label="Davomat seriyasi" :value="$student->streak" icon="streak" note="Ketma-ket darslar" />
     </div>
+
+    <section class="card" style="overflow: hidden">
+        <div class="card-head">
+            <h2 class="card-title">Mening guruhlarim</h2>
+        </div>
+        <div class="t-scroll">
+            <div class="t-min" style="min-width: 520px">
+                <div class="t-head" style="--cols: 2fr 2fr">
+                    <div>Guruh</div>
+                    <div>O‘qituvchi</div>
+                </div>
+                @forelse ($groups as $group)
+                    <div class="t-row" style="--cols: 2fr 2fr">
+                        <div style="font-weight: 600">{{ $group->name }}</div>
+                        <div>{{ $group->teacher?->name ?? '—' }}</div>
+                    </div>
+                @empty
+                    <div class="t-empty">Guruhga biriktirilmagan</div>
+                @endforelse
+            </div>
+        </div>
+    </section>
+
+    <section class="card" style="overflow: hidden">
+        <div class="card-head">
+            <h2 class="card-title">So‘nggi davomat</h2>
+        </div>
+        <div class="t-scroll">
+            <div class="t-min" style="min-width: 520px">
+                <div class="t-head" style="--cols: 1fr 2fr 1.4fr">
+                    <div>Sana</div>
+                    <div>Guruh</div>
+                    <div>Holat</div>
+                </div>
+                @forelse ($attendances as $attendance)
+                    <div class="t-row" style="--cols: 1fr 2fr 1.4fr">
+                        <div>{{ $attendance->lesson_date->format('d.m.Y') }}</div>
+                        <div style="font-weight: 600">{{ $attendance->studyGroup?->name }}</div>
+                        <div><x-badge :type="$attendance->status->badge()">{{ $attendance->status->label() }}</x-badge></div>
+                    </div>
+                @empty
+                    <div class="t-empty">Hali davomat belgilanmagan</div>
+                @endforelse
+            </div>
+        </div>
+    </section>
 </x-app-layout>
