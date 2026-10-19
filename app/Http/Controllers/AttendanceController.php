@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\AttendanceStatus;
+use App\Events\AttendanceMarked;
 use App\Http\Requests\StoreAttendanceRequest;
 use App\Models\Attendance;
 use App\Models\StudyGroup;
@@ -52,7 +53,7 @@ class AttendanceController extends Controller
             foreach ($data['records'] as $studentId => $status) {
                 abort_unless(in_array((int) $studentId, $studentIds, true), 422);
 
-                Attendance::updateOrCreate(
+                $attendance = Attendance::updateOrCreate(
                     [
                         'study_group_id' => $studyGroup->id,
                         'student_id' => (int) $studentId,
@@ -64,6 +65,8 @@ class AttendanceController extends Controller
                         'marked_by' => $request->user()->id,
                     ]
                 );
+
+                event(new AttendanceMarked($attendance));
             }
         });
 

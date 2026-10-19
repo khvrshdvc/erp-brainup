@@ -37,7 +37,7 @@
         ]);
 
         if ($user->isSuperAdmin()) {
-            $items[] = ['Gamifikatsiya', 'trophy', '#', false];
+            $items[] = ['Gamifikatsiya', 'trophy', route('admin.gamification.index'), request()->routeIs('admin.gamification.*')];
         }
 
         $items = array_merge($items, [
@@ -58,7 +58,7 @@
             ['Guruhim', 'groups', '#', false],
             ['Vazifalar', 'tasks', '#', false],
             ['Topshirganlarim', 'students', '#', false],
-            ['Yutuqlar', 'trophy', '#', false],
+            ['Yutuqlar', 'trophy', route('student.achievements'), request()->routeIs('student.achievements')],
             ['Profil', 'teachers', route('profile.edit'), request()->routeIs('profile.*')],
         ];
     }

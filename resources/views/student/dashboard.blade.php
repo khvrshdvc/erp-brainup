@@ -3,6 +3,10 @@
     :title="'Salom, '.\Illuminate\Support\Str::before(auth()->user()->name, ' ').'!'"
     :subtitle="\App\Support\UzDate::long(now())">
 
+    <x-slot name="actions">
+        <a href="{{ route('student.achievements') }}" class="btn btn-primary">Yutuqlarim</a>
+    </x-slot>
+
     <div class="kpi-grid">
         <x-stat-card label="XP" :value="$student->xp" icon="xp" note="To‘plangan ballar" />
         <x-stat-card label="Daraja" :value="$student->level?->name ?? 'Boshlovchi'" icon="level" note="Joriy daraja" />

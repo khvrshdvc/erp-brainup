@@ -11,4 +11,5 @@ enum XpReason: string
     case Attendance = 'attendance';
     case StreakBonus = 'streak_bonus';
     case Assignment = 'assignment';
+    case AssignmentScore = 'assignment_score';
 }
