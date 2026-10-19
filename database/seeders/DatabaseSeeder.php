@@ -11,6 +11,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             GamificationSeeder::class,
             BranchSeeder::class,
+            CourseSeeder::class,
         ]);
     }
 }

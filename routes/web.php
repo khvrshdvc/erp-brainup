@@ -1,15 +1,24 @@
 <?php
 
+use App\Http\Controllers\Admin\BranchController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\GamificationController;
+use App\Http\Controllers\Admin\GroupController as AdminGroupController;
+use App\Http\Controllers\Admin\StudentController as AdminStudentController;
+use App\Http\Controllers\Admin\TeacherController as AdminTeacherController;
+use App\Http\Controllers\AttachmentController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\BranchSwitchController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Student\AchievementController;
+use App\Http\Controllers\Student\AssignmentController as StudentAssignmentController;
 use App\Http\Controllers\Student\DashboardController as StudentDashboardController;
+use App\Http\Controllers\Student\SubmissionController as StudentSubmissionController;
+use App\Http\Controllers\Teacher\AssignmentController as TeacherAssignmentController;
 use App\Http\Controllers\Teacher\DashboardController as TeacherDashboardController;
+use App\Http\Controllers\Teacher\SubmissionController as TeacherSubmissionController;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/dashboard');
@@ -17,6 +26,7 @@ Route::redirect('/', '/dashboard');
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::post('/branch/switch', BranchSwitchController::class)->name('branch.switch');
+    Route::get('/attachments/{attachment}', [AttachmentController::class, 'download'])->name('attachments.download');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -30,20 +40,44 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware('role:super_admin,branch_admin')->prefix('admin')->name('admin.')->group(function () {
         Route::get('/', AdminDashboardController::class)->name('dashboard');
+
+        Route::resource('groups', AdminGroupController::class)
+            ->except(['destroy'])
+            ->parameters(['groups' => 'studyGroup']);
+        Route::post('/groups/{studyGroup}/students', [AdminGroupController::class, 'addStudent'])->name('groups.students.add');
+        Route::delete('/groups/{studyGroup}/students/{student}', [AdminGroupController::class, 'removeStudent'])->name('groups.students.remove');
+
+        Route::resource('students', AdminStudentController::class)->except(['destroy']);
+        Route::patch('/students/{student}/status', [AdminStudentController::class, 'toggleStatus'])->name('students.status');
+
+        Route::resource('teachers', AdminTeacherController::class)->except(['show', 'destroy']);
+        Route::patch('/teachers/{teacher}/status', [AdminTeacherController::class, 'toggleStatus'])->name('teachers.status');
     });
 
     Route::middleware('role:super_admin')->prefix('admin')->name('admin.')->group(function () {
+        Route::resource('branches', BranchController::class)->except(['show', 'destroy']);
+
         Route::get('/gamification', [GamificationController::class, 'index'])->name('gamification.index');
         Route::put('/gamification', [GamificationController::class, 'update'])->name('gamification.update');
     });
 
     Route::middleware('role:teacher')->prefix('teacher')->name('teacher.')->group(function () {
         Route::get('/', TeacherDashboardController::class)->name('dashboard');
+
+        Route::resource('assignments', TeacherAssignmentController::class)->except(['destroy']);
+        Route::post('/assignments/{assignment}/publish', [TeacherAssignmentController::class, 'publish'])->name('assignments.publish');
+        Route::put('/submissions/{submission}', [TeacherSubmissionController::class, 'update'])->name('submissions.update');
     });
 
     Route::middleware('role:student')->prefix('student')->name('student.')->group(function () {
         Route::get('/', StudentDashboardController::class)->name('dashboard');
         Route::get('/achievements', AchievementController::class)->name('achievements');
+
+        Route::get('/assignments', [StudentAssignmentController::class, 'index'])->name('assignments.index');
+        Route::get('/assignments/{assignment}', [StudentAssignmentController::class, 'show'])->name('assignments.show');
+        Route::get('/assignments/{assignment}/submit', [StudentAssignmentController::class, 'create'])->name('assignments.submit');
+        Route::post('/assignments/{assignment}/submit', [StudentAssignmentController::class, 'store'])->name('assignments.submit.store');
+        Route::get('/submissions', [StudentSubmissionController::class, 'index'])->name('submissions.index');
     });
 });
 

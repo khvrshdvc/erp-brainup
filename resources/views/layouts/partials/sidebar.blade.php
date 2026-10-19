@@ -25,15 +25,15 @@
         ];
 
         if ($user->isSuperAdmin()) {
-            $items[] = ['Filiallar', 'branch', '#', false];
+            $items[] = ['Filiallar', 'branch', route('admin.branches.index'), request()->routeIs('admin.branches.*')];
         }
 
         $items = array_merge($items, [
-            ['Guruhlar', 'groups', route('groups.index'), request()->routeIs('groups.*')],
-            ['O‘quvchilar', 'students', '#', false],
-            ['O‘qituvchilar', 'teachers', '#', false],
+            ['Guruhlar', 'groups', route('admin.groups.index'), request()->routeIs('admin.groups.*')],
+            ['O‘quvchilar', 'students', route('admin.students.index'), request()->routeIs('admin.students.*')],
+            ['O‘qituvchilar', 'teachers', route('admin.teachers.index'), request()->routeIs('admin.teachers.*')],
             ['Vazifalar', 'tasks', '#', false],
-            ['Davomat', 'calendar', route('groups.index'), request()->routeIs('attendance.*')],
+            ['Davomat', 'calendar', route('groups.index'), request()->routeIs('groups.index', 'attendance.*')],
         ]);
 
         if ($user->isSuperAdmin()) {
@@ -49,15 +49,15 @@
             ['Bosh sahifa', 'home', route('teacher.dashboard'), request()->routeIs('teacher.dashboard')],
             ['Guruhlar', 'groups', route('groups.index'), request()->routeIs('groups.*')],
             ['Davomat', 'calendar', route('groups.index'), request()->routeIs('attendance.*')],
-            ['Vazifalar', 'tasks', '#', false],
+            ['Vazifalar', 'tasks', route('teacher.assignments.index'), request()->routeIs('teacher.assignments.*', 'teacher.submissions.*')],
             ['Profil', 'teachers', route('profile.edit'), request()->routeIs('profile.*')],
         ];
     } else {
         $items = [
             ['Bosh sahifa', 'home', route('student.dashboard'), request()->routeIs('student.dashboard')],
             ['Guruhim', 'groups', '#', false],
-            ['Vazifalar', 'tasks', '#', false],
-            ['Topshirganlarim', 'students', '#', false],
+            ['Vazifalar', 'tasks', route('student.assignments.index'), request()->routeIs('student.assignments.*')],
+            ['Topshirganlarim', 'students', route('student.submissions.index'), request()->routeIs('student.submissions.*')],
             ['Yutuqlar', 'trophy', route('student.achievements'), request()->routeIs('student.achievements')],
             ['Profil', 'teachers', route('profile.edit'), request()->routeIs('profile.*')],
         ];
@@ -66,8 +66,8 @@
 
 <aside class="erp-sidebar">
     <div class="erp-brand">
-        <div class="logo">B</div>
-        <span>BrainUp</span>
+        <div class="logo">O</div>
+        <span>O‘quv ERP</span>
     </div>
 
     <nav class="erp-nav">
