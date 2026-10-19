@@ -14,10 +14,12 @@ use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\BranchSwitchController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GroupController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Student\AchievementController;
 use App\Http\Controllers\Student\AssignmentController as StudentAssignmentController;
 use App\Http\Controllers\Student\DashboardController as StudentDashboardController;
+use App\Http\Controllers\Student\GroupController as StudentGroupController;
 use App\Http\Controllers\Student\SubmissionController as StudentSubmissionController;
 use App\Http\Controllers\Teacher\AssignmentController as TeacherAssignmentController;
 use App\Http\Controllers\Teacher\DashboardController as TeacherDashboardController;
@@ -33,7 +35,11 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'read'])->name('notifications.read');
 
     Route::middleware('role:super_admin,branch_admin,teacher')->group(function () {
         Route::get('/groups', [GroupController::class, 'index'])->name('groups.index');
@@ -88,6 +94,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:student')->prefix('student')->name('student.')->group(function () {
         Route::get('/', StudentDashboardController::class)->name('dashboard');
         Route::get('/achievements', AchievementController::class)->name('achievements');
+        Route::get('/group', [StudentGroupController::class, 'index'])->name('groups.index');
 
         Route::get('/assignments', [StudentAssignmentController::class, 'index'])->name('assignments.index');
         Route::get('/assignments/{assignment}', [StudentAssignmentController::class, 'show'])->name('assignments.show');

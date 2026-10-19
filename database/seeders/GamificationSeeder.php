@@ -26,6 +26,8 @@ class GamificationSeeder extends Seeder
             ['code' => 'attendance_present', 'title' => 'Darsga kelish', 'points' => 10],
             ['code' => 'attendance_late', 'title' => 'Kechikib kelish', 'points' => 5],
             ['code' => 'streak_7', 'title' => '7 darslik seriya', 'points' => 30],
+            ['code' => 'assignment_on_time', 'title' => 'Vazifani o‘z vaqtida topshirish', 'points' => 20],
+            ['code' => 'assignment_high_score', 'title' => 'Vazifadan 90–100 ball', 'points' => 50],
         ];
 
         foreach ($rules as $rule) {
@@ -36,6 +38,9 @@ class GamificationSeeder extends Seeder
             ['code' => 'first_step', 'title' => 'Birinchi qadam', 'icon' => '★'],
             ['code' => 'streak_7', 'title' => '7 dars seriya', 'icon' => '🔥'],
             ['code' => 'streak_30', 'title' => '30 dars seriya', 'icon' => '⚡'],
+            ['code' => 'first_assignment', 'title' => 'Birinchi vazifa', 'icon' => '📝'],
+            ['code' => 'excellent', 'title' => 'A‘lochi', 'icon' => '🎯'],
+            ['code' => 'ten_assignments', 'title' => '10 ta vazifa', 'icon' => '📚'],
         ];
 
         foreach ($badges as $badge) {

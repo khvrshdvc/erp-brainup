@@ -55,7 +55,7 @@
     } else {
         $items = [
             ['Bosh sahifa', 'home', route('student.dashboard'), request()->routeIs('student.dashboard')],
-            ['Guruhim', 'groups', '#', false],
+            ['Guruhim', 'groups', route('student.groups.index'), request()->routeIs('student.groups.*')],
             ['Vazifalar', 'tasks', route('student.assignments.index'), request()->routeIs('student.assignments.*')],
             ['Topshirganlarim', 'students', route('student.submissions.index'), request()->routeIs('student.submissions.*')],
             ['Yutuqlar', 'trophy', route('student.achievements'), request()->routeIs('student.achievements')],

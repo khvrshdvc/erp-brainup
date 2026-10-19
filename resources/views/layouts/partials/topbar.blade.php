@@ -1,5 +1,6 @@
 @php
     $user = auth()->user();
+    $unread = $user->unreadNotifications()->count();
 @endphp
 
 <header class="erp-topbar">
@@ -14,11 +15,14 @@
 
     <x-branch-switcher />
 
-    <button type="button" class="iconbtn" aria-label="Bildirishnomalar">
+    <a href="{{ route('notifications.index') }}" class="iconbtn" aria-label="Bildirishnomalar">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0"/>
         </svg>
-    </button>
+        @if ($unread > 0)
+            <span class="count">{{ $unread > 9 ? '9+' : $unread }}</span>
+        @endif
+    </a>
 
     <div class="erp-user">
         <div class="avatar">{{ $user->initials }}</div>

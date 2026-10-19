@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Teacher;
 
 use App\Enums\AssignmentStatus;
 use App\Enums\SubmissionStatus;
+use App\Events\AssignmentPublished;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AssignmentRequest;
 use App\Models\Assignment;
@@ -63,6 +64,10 @@ class AssignmentController extends Controller
 
         if ($file = $request->file('material')) {
             $attachments->replace($assignment, $file, $request->user(), 'assignments/'.$assignment->id);
+        }
+
+        if ($publish) {
+            event(new AssignmentPublished($assignment));
         }
 
         return redirect()
@@ -130,6 +135,10 @@ class AssignmentController extends Controller
             $attachments->replace($assignment, $file, $request->user(), 'assignments/'.$assignment->id);
         }
 
+        if ($publish) {
+            event(new AssignmentPublished($assignment));
+        }
+
         return redirect()
             ->route('teacher.assignments.show', $assignment)
             ->with('status', $publish ? 'Vazifa e‘lon qilindi' : 'Vazifa saqlandi');
@@ -142,6 +151,8 @@ class AssignmentController extends Controller
         abort_unless($assignment->isDraft(), 422);
 
         $assignment->update(['status' => AssignmentStatus::Published, 'published_at' => now()]);
+
+        event(new AssignmentPublished($assignment));
 
         return back()->with('status', 'Vazifa e‘lon qilindi');
     }
