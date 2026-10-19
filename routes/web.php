@@ -1,9 +1,12 @@
 <?php
 
+use App\Http\Controllers\Admin\AssignmentController as AdminAssignmentController;
 use App\Http\Controllers\Admin\BranchController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\GamificationController;
 use App\Http\Controllers\Admin\GroupController as AdminGroupController;
+use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\StudentController as AdminStudentController;
 use App\Http\Controllers\Admin\TeacherController as AdminTeacherController;
 use App\Http\Controllers\AttachmentController;
@@ -52,6 +55,17 @@ Route::middleware('auth')->group(function () {
 
         Route::resource('teachers', AdminTeacherController::class)->except(['show', 'destroy']);
         Route::patch('/teachers/{teacher}/status', [AdminTeacherController::class, 'toggleStatus'])->name('teachers.status');
+
+        Route::get('/assignments', [AdminAssignmentController::class, 'index'])->name('assignments.index');
+        Route::get('/assignments/{assignment}', [AdminAssignmentController::class, 'show'])->name('assignments.show');
+
+        Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+        Route::get('/reports/export', [ReportController::class, 'export'])->name('reports.export');
+
+        Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');
+        Route::put('/settings/center', [SettingsController::class, 'updateCenter'])->name('settings.center');
+        Route::put('/settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.profile');
+        Route::put('/settings/password', [SettingsController::class, 'updatePassword'])->name('settings.password');
     });
 
     Route::middleware('role:super_admin')->prefix('admin')->name('admin.')->group(function () {
@@ -66,6 +80,8 @@ Route::middleware('auth')->group(function () {
 
         Route::resource('assignments', TeacherAssignmentController::class)->except(['destroy']);
         Route::post('/assignments/{assignment}/publish', [TeacherAssignmentController::class, 'publish'])->name('assignments.publish');
+        Route::post('/assignments/{assignment}/close', [TeacherAssignmentController::class, 'close'])->name('assignments.close');
+        Route::post('/assignments/{assignment}/reopen', [TeacherAssignmentController::class, 'reopen'])->name('assignments.reopen');
         Route::put('/submissions/{submission}', [TeacherSubmissionController::class, 'update'])->name('submissions.update');
     });
 

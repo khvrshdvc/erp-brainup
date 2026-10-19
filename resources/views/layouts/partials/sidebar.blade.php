@@ -32,7 +32,7 @@
             ['Guruhlar', 'groups', route('admin.groups.index'), request()->routeIs('admin.groups.*')],
             ['O‘quvchilar', 'students', route('admin.students.index'), request()->routeIs('admin.students.*')],
             ['O‘qituvchilar', 'teachers', route('admin.teachers.index'), request()->routeIs('admin.teachers.*')],
-            ['Vazifalar', 'tasks', '#', false],
+            ['Vazifalar', 'tasks', route('admin.assignments.index'), request()->routeIs('admin.assignments.*')],
             ['Davomat', 'calendar', route('groups.index'), request()->routeIs('groups.index', 'attendance.*')],
         ]);
 
@@ -41,8 +41,8 @@
         }
 
         $items = array_merge($items, [
-            ['Hisobotlar', 'reports', '#', false],
-            ['Sozlamalar', 'settings', '#', false],
+            ['Hisobotlar', 'reports', route('admin.reports.index'), request()->routeIs('admin.reports.*')],
+            ['Sozlamalar', 'settings', route('admin.settings.edit'), request()->routeIs('admin.settings.*')],
         ]);
     } elseif ($user->isTeacher()) {
         $items = [
@@ -82,7 +82,7 @@
     </nav>
 
     <div class="erp-org">
-        <b>{{ $currentBranch?->name ?? 'Barcha filiallar' }}</b>
-        Joriy filial
+        <b>{{ \App\Models\Setting::get('center_name', 'O‘quv markazi') }}</b>
+        {{ $currentBranch?->name ?? 'Barcha filiallar' }}
     </div>
 </aside>

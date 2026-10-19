@@ -146,6 +146,28 @@ class AssignmentController extends Controller
         return back()->with('status', 'Vazifa e‘lon qilindi');
     }
 
+    public function close(Request $request, Assignment $assignment): RedirectResponse
+    {
+        $this->authorizeOwner($request, $assignment);
+
+        abort_unless($assignment->status === AssignmentStatus::Published, 422);
+
+        $assignment->update(['status' => AssignmentStatus::Closed]);
+
+        return back()->with('status', 'Vazifa yopildi, yangi topshiriq qabul qilinmaydi');
+    }
+
+    public function reopen(Request $request, Assignment $assignment): RedirectResponse
+    {
+        $this->authorizeOwner($request, $assignment);
+
+        abort_unless($assignment->isClosed(), 422);
+
+        $assignment->update(['status' => AssignmentStatus::Published]);
+
+        return back()->with('status', 'Vazifa qayta ochildi');
+    }
+
     private function groups(Request $request)
     {
         return $request->user()->teachingGroups()->active()->orderBy('name')->get(['id', 'name']);

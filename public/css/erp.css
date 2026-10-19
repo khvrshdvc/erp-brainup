@@ -300,3 +300,9 @@
 .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
 .check-row { display: flex; flex-wrap: wrap; gap: 16px 24px; }
 .pager { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; }
+
+.bar-row { display: grid; grid-template-columns: 150px minmax(0, 1fr) 90px; gap: 12px; align-items: center; }
+.bar-row .name { font-weight: 600; }
+.bar-row .val { text-align: right; font-size: 13px; color: var(--ink2); }
+.chart-days.wide { max-width: none; }
+.chart.wide { max-width: none; }
