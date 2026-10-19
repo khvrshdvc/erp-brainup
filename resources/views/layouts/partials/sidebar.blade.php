@@ -66,8 +66,8 @@
 
 <aside class="erp-sidebar">
     <div class="erp-brand">
-        <div class="logo">O</div>
-        <span>O‘quv ERP</span>
+        <div class="logo">B</div>
+        <span>BrainUp</span>
     </div>
 
     <nav class="erp-nav">

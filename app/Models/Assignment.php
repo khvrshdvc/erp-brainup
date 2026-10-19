@@ -52,14 +52,48 @@ class Assignment extends Model
         return $this->hasMany(Submission::class);
     }
 
+    public function isDraft(): bool
+    {
+        return $this->status === AssignmentStatus::Draft;
+    }
+
+    public function isClosed(): bool
+    {
+        return $this->status === AssignmentStatus::Closed;
+    }
+
     public function isOverdue(): bool
     {
         return $this->due_at !== null && $this->due_at->isPast();
     }
 
+    public function studentState(?Submission $submission): array
+    {
+        if ($submission) {
+            return [$submission->status->label(), $submission->status->badge()];
+        }
+
+        return $this->isOverdue() ? ['Muddat o‘tgan', 'err'] : ['Topshirilmagan', 'neutral'];
+    }
+
+    public function teacherState(int $pending): array
+    {
+        return match (true) {
+            $this->isDraft() => ['Qoralama', 'neutral'],
+            $this->isClosed() => ['Yopilgan', 'neutral'],
+            $pending > 0 => ['Tekshirilmoqda', 'warn'],
+            default => ['E‘lon qilingan', 'info'],
+        };
+    }
+
     public function scopePublished(Builder $query): Builder
     {
         return $query->where('status', AssignmentStatus::Published->value);
+    }
+
+    public function scopeVisibleToStudents(Builder $query): Builder
+    {
+        return $query->whereIn('status', [AssignmentStatus::Published->value, AssignmentStatus::Closed->value]);
     }
 
     public function scopeOverdue(Builder $query): Builder
