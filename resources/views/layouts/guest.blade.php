@@ -13,8 +13,11 @@
     <body class="erp-body">
         <div class="auth-wrap">
             <div class="auth-brand">
-                <div class="logo">O</div>
-                <span>O‘quv ERP</span>
+                <img
+                    src="{{ asset('images/logo-brainup-dark.png') }}"
+                    alt="BrainUp Academy"
+                    class="erp-brand-logo"
+                >
             </div>
             <div class="auth-card">
                 {{ $slot }}

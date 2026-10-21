@@ -10,10 +10,10 @@ class CourseSeeder extends Seeder
     public function run(): void
     {
         $courses = [
-            ['name' => 'IELTS', 'slug' => 'ielts', 'duration_months' => 6],
-            ['name' => 'General English', 'slug' => 'general-english', 'duration_months' => 9],
+            ['name' => 'Ingliz tili', 'slug' => 'english', 'duration_months' => 6],
+            ['name' => 'Ingliz tili (ru)', 'slug' => 'english-ru', 'duration_months' => 9],
             ['name' => 'Frontend dasturlash', 'slug' => 'frontend', 'duration_months' => 8],
-            ['name' => 'Python', 'slug' => 'python', 'duration_months' => 6],
+            ['name' => 'Matematika', 'slug' => 'math', 'duration_months' => 6],
         ];
 
         foreach ($courses as $course) {

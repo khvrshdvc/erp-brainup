@@ -109,29 +109,79 @@
                     </div>
                 @endif
 
-                <form method="POST" action="{{ route('teacher.submissions.update', $selected) }}" class="stack">
-                    @csrf
-                    @method('PUT')
+                @php
+                    $editing = $selected->status === \App\Enums\SubmissionStatus::Submitted || request()->boolean('edit');
+                @endphp
 
-                    <div class="field" style="max-width: 200px">
-                        <label for="score">Baho <span class="card-sub" style="font-weight: 400">(ixtiyoriy)</span></label>
-                        <div style="display: flex; align-items: center; gap: 8px">
-                            <input id="score" class="input" type="number" name="score" min="0" max="{{ $assignment->max_score }}"
-                                value="{{ old('score', $selected->score) }}">
-                            <span class="card-sub">/ {{ $assignment->max_score }}</span>
+                @if (! $editing)
+                    <div class="stack">
+                        <div class="split" style="gap: 32px">
+                            @if ($selected->status === \App\Enums\SubmissionStatus::Graded)
+                                <div>
+                                    <div class="label-up">Baho</div>
+                                    <div class="grade">
+                                        {{ $selected->score !== null ? $selected->score.' / '.$assignment->max_score : 'Ball qo‘yilmagan' }}
+                                    </div>
+                                </div>
+                            @else
+                                <div>
+                                    <div class="label-up">Holat</div>
+                                    <b>O‘quvchi qayta topshirishi kutilmoqda</b>
+                                </div>
+                            @endif
+
+                            <div>
+                                <div class="label-up">Tekshirilgan</div>
+                                <b>{{ $selected->graded_at?->format('d.m.Y, H:i') ?? '—' }}</b>
+                            </div>
+
+                            <div>
+                                <div class="label-up">Tekshirdi</div>
+                                <b>{{ $selected->grader?->name ?? '—' }}</b>
+                            </div>
+                        </div>
+
+                        @if ($selected->feedback)
+                            <div class="stack" style="gap: 8px">
+                                <div class="label-up">Fikr-mulohaza</div>
+                                <div class="quote">{{ $selected->feedback }}</div>
+                            </div>
+                        @endif
+
+                        <div>
+                            <a href="{{ route('teacher.assignments.show', [$assignment, 'student' => $selected->student_id, 'edit' => 1]) }}" class="btn">
+                                {{ $selected->status === \App\Enums\SubmissionStatus::Graded ? 'Bahoni o‘zgartirish' : 'Baholash' }}
+                            </a>
                         </div>
                     </div>
+                @else
+                    <form method="POST" action="{{ route('teacher.submissions.update', $selected) }}" class="stack">
+                        @csrf
+                        @method('PUT')
 
-                    <div class="field">
-                        <label for="feedback">Fikr-mulohaza <span class="card-sub" style="font-weight: 400">(qaytarishda majburiy)</span></label>
-                        <textarea id="feedback" name="feedback" class="textarea" maxlength="2000">{{ old('feedback', $selected->feedback) }}</textarea>
-                    </div>
+                        <div class="field" style="max-width: 200px">
+                            <label for="score">Baho <span class="card-sub" style="font-weight: 400">(ixtiyoriy)</span></label>
+                            <div style="display: flex; align-items: center; gap: 8px">
+                                <input id="score" class="input" type="number" name="score" min="0" max="{{ $assignment->max_score }}"
+                                    value="{{ old('score', $selected->score) }}">
+                                <span class="card-sub">/ {{ $assignment->max_score }}</span>
+                            </div>
+                        </div>
 
-                    <div class="form-actions">
-                        <button type="submit" name="action" value="return" class="btn">Qayta topshirishga qaytarish</button>
-                        <button type="submit" name="action" value="grade" class="btn btn-primary">Tekshirildi deb saqlash</button>
-                    </div>
-                </form>
+                        <div class="field">
+                            <label for="feedback">Fikr-mulohaza <span class="card-sub" style="font-weight: 400">(qaytarishda majburiy)</span></label>
+                            <textarea id="feedback" name="feedback" class="textarea" maxlength="2000">{{ old('feedback', $selected->feedback) }}</textarea>
+                        </div>
+
+                        <div class="form-actions">
+                                @if ($selected->status !== \App\Enums\SubmissionStatus::Submitted)
+                                    <a href="{{ route('teacher.assignments.show', [$assignment, 'student' => $selected->student_id]) }}" class="btn">Bekor qilish</a>
+                                @endif
+                            <button type="submit" name="action" value="return" class="btn">Qayta topshirishga qaytarish</button>
+                            <button type="submit" name="action" value="grade" class="btn btn-primary">Tekshirildi deb saqlash</button>
+                        </div>
+                    </form>
+                @endif
             </section>
         @else
             <section class="card">
