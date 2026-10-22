@@ -4,6 +4,12 @@
 @endphp
 
 <header class="erp-topbar">
+    <button type="button" class="iconbtn erp-menu" @click="nav = true" aria-label="Menyuni ochish" :aria-expanded="nav.toString()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+            <path d="M4 7h16M4 12h16M4 17h16"/>
+        </svg>
+    </button>
+
     @if ($user->role->isStaff())
     <form class="erp-search" method="GET" action="{{ route('search') }}" role="search">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" aria-hidden="true">
@@ -34,7 +40,7 @@
         </div>
     </div>
 
-    <form method="POST" action="{{ route('logout') }}">
+    <form method="POST" action="{{ route('logout') }}" class="erp-logout">
         @csrf
         <button type="submit" class="btn btn-sm">Chiqish</button>
     </form>

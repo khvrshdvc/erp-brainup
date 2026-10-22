@@ -64,7 +64,13 @@
     }
 @endphp
 
-<aside class="erp-sidebar">
+<aside class="erp-sidebar" id="erp-sidebar">
+    <button type="button" class="erp-sidebar-close" @click="nav = false" aria-label="Menyuni yopish">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+            <path d="M6 6l12 12M18 6L6 18"/>
+        </svg>
+    </button>
+
     <img
         src="{{ asset('images/logo-brainup-white.png') }}"
         alt="BrainUp Academy"
@@ -86,4 +92,9 @@
         <b>{{ \App\Models\Setting::get('center_name', 'O‘quv markazi') }}</b>
         {{ $currentBranch?->name ?? 'Barcha filiallar' }}
     </div>
+
+    <form method="POST" action="{{ route('logout') }}" class="erp-logout-mobile">
+        @csrf
+        <button type="submit" class="btn">Chiqish</button>
+    </form>
 </aside>

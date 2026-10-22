@@ -8,11 +8,13 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
         @vite(['resources/css/app.css', 'resources/js/app.js'])
-        <link rel="stylesheet" href="{{ asset('css/erp.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/erp.css') }}?v={{ filemtime(public_path('css/erp.css')) }}">
     </head>
     <body class="erp-body">
-        <div class="erp">
+        <div class="erp" x-data="{ nav: false }" :class="{ 'nav-open': nav }" @keydown.escape.window="nav = false">
             @include('layouts.partials.sidebar')
+
+            <div class="erp-overlay" x-show="nav" x-cloak x-transition.opacity @click="nav = false" aria-hidden="true"></div>
 
             <div class="erp-main">
                 @include('layouts.partials.topbar')
@@ -53,5 +55,6 @@
                 </main>
             </div>
         </div>
+        <script src="{{ asset('js/erp.js') }}?v={{ filemtime(public_path('js/erp.js')) }}" defer></script>
     </body>
 </html>
