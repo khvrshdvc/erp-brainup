@@ -90,8 +90,8 @@ class ReportController extends Controller
                 $attended = collect(AttendanceStatus::attendedValues())->sum(fn ($value) => $counts->get($value, 0));
 
                 fputcsv($out, [
-                    $student->name,
-                    $student->branch?->name,
+                    $this->csvSafe($student->name),
+                    $this->csvSafe($student->branch?->name),
                     $counts->get('present', 0),
                     $counts->get('late', 0),
                     $counts->get('absent', 0),
@@ -103,6 +103,14 @@ class ReportController extends Controller
 
             fclose($out);
         }, 'davomat-hisoboti-'.now()->format('Y-m-d').'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
+    /**
+     * Spreadsheets run cells starting with = + - @ as formulas, so neutralise them with a leading quote.
+     */
+    private function csvSafe(?string $value): ?string
+    {
+        return $value !== null && preg_match('/^[=+\-@\t\r]/', $value) ? "'".$value : $value;
     }
 
     private function period(Request $request): array

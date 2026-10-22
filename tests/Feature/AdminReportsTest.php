@@ -12,6 +12,7 @@ use App\Models\Setting;
 use App\Models\StudyGroup;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class AdminReportsTest extends TestCase
@@ -101,6 +102,32 @@ class AdminReportsTest extends TestCase
         $this->assertStringContainsString('Talaba 0', $response->streamedContent());
     }
 
+    public function test_export_neutralises_spreadsheet_formulas(): void
+    {
+        [$branch, , $group] = $this->makeBranchWithGroup('Formula');
+
+        $student = User::factory()->create([
+            'role' => Role::Student,
+            'branch_id' => $branch->id,
+            'name' => '=HYPERLINK("http://evil.test","bosing")',
+        ]);
+
+        Attendance::create([
+            'branch_id' => $branch->id,
+            'study_group_id' => $group->id,
+            'student_id' => $student->id,
+            'lesson_date' => today(),
+            'status' => AttendanceStatus::Present,
+        ]);
+
+        $admin = User::factory()->create(['role' => Role::SuperAdmin]);
+
+        $csv = $this->actingAs($admin)->get(route('admin.reports.export'))->streamedContent();
+
+        $this->assertStringContainsString("'=HYPERLINK", $csv);
+        $this->assertStringNotContainsString('"=HYPERLINK', $csv);
+    }
+
     public function test_teacher_can_close_and_reopen_assignment(): void
     {
         [$branch, $teacher, $group] = $this->makeBranchWithGroup('Yopish');
@@ -148,6 +175,22 @@ class AdminReportsTest extends TestCase
         $this->assertSame('2026–2027', Setting::get('academic_year'));
     }
 
+    public function test_super_admin_sets_the_attendance_edit_window(): void
+    {
+        $superAdmin = User::factory()->create(['role' => Role::SuperAdmin]);
+        $payload = ['center_name' => 'Brainup', 'attendance_edit_days' => 7];
+
+        $this->assertSame(3, Setting::attendanceEditDays());
+
+        $this->actingAs($superAdmin)->put(route('admin.settings.center'), $payload)->assertRedirect();
+
+        $this->assertSame(7, Setting::attendanceEditDays());
+
+        $this->actingAs($superAdmin)
+            ->put(route('admin.settings.center'), [...$payload, 'attendance_edit_days' => -1])
+            ->assertSessionHasErrors('attendance_edit_days');
+    }
+
     public function test_profile_and_password_updates(): void
     {
         $admin = User::factory()->create(['role' => Role::SuperAdmin, 'password' => 'oldpassword1']);
@@ -171,7 +214,7 @@ class AdminReportsTest extends TestCase
             'password_confirmation' => 'newpassword1',
         ])->assertSessionHasNoErrors();
 
-        $this->assertTrue(\Illuminate\Support\Facades\Hash::check('newpassword1', $admin->fresh()->password));
+        $this->assertTrue(Hash::check('newpassword1', $admin->fresh()->password));
     }
 
     public function test_settings_and_report_pages_open(): void

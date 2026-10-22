@@ -26,6 +26,10 @@
                         <div class="alert alert-ok">{{ session('status') }}</div>
                     @endif
 
+                    @if (session('warning'))
+                        <div class="alert alert-warn">{{ session('warning') }}</div>
+                    @endif
+
                     @if ($errors->any())
                         <div class="alert alert-err">
                             @foreach ($errors->all() as $error)

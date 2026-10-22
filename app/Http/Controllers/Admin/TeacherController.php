@@ -66,6 +66,7 @@ class TeacherController extends Controller
 
         return view('admin.teachers.edit', [
             'teacher' => $teacher->load('branches'),
+            'canEditCredentials' => Gate::allows('manageTeacherCredentials', $teacher),
             ...$this->formData(),
         ]);
     }
@@ -76,8 +77,8 @@ class TeacherController extends Controller
 
         $teacher->fill([
             'name' => $data['name'],
-            'email' => $data['email'],
             'phone' => $data['phone'] ?? null,
+            ...(isset($data['email']) ? ['email' => $data['email']] : []),
         ]);
 
         if (! empty($data['password'])) {

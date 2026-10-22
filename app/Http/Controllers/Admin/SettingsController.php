@@ -21,6 +21,8 @@ class SettingsController extends Controller
             ->mapWithKeys(fn (string $key) => [$key => Setting::get($key, '')])
             ->all();
 
+        $center['attendance_edit_days'] = Setting::attendanceEditDays();
+
         return view('admin.settings.edit', [
             'center' => $center,
             'user' => $request->user(),

@@ -1,5 +1,6 @@
 @php
     $editing = isset($teacher) && $teacher;
+    $canEditCredentials = $canEditCredentials ?? true;
     $selected = collect(old('branches', $editing ? $teacher->branches->pluck('id')->all() : [$defaultBranchId]))
         ->filter()->map(fn ($id) => (int) $id)->all();
 @endphp
@@ -21,11 +22,13 @@
                     value="{{ old('name', $teacher->name ?? '') }}">
             </div>
 
-            <div class="field">
-                <label for="email">Email *</label>
-                <input id="email" class="input" type="email" name="email" maxlength="255" required autocomplete="off"
-                    value="{{ old('email', $teacher->email ?? '') }}">
-            </div>
+            @if ($canEditCredentials)
+                <div class="field">
+                    <label for="email">Email *</label>
+                    <input id="email" class="input" type="email" name="email" maxlength="255" required autocomplete="off"
+                        value="{{ old('email', $teacher->email ?? '') }}">
+                </div>
+            @endif
 
             <div class="field">
                 <label for="phone">Telefon</label>
@@ -33,13 +36,19 @@
                     value="{{ old('phone', $teacher->phone ?? '') }}">
             </div>
 
-            <div class="field">
-                <label for="password">Parol {{ $editing ? '' : '*' }}</label>
-                <input id="password" class="input" type="password" name="password" minlength="8" autocomplete="new-password"
-                    {{ $editing ? '' : 'required' }}>
-                <div class="field-hint">{{ $editing ? 'O‘zgartirmasangiz, bo‘sh qoldiring' : 'Kamida 8 ta belgi' }}</div>
-            </div>
+            @if ($canEditCredentials)
+                <div class="field">
+                    <label for="password">Parol {{ $editing ? '' : '*' }}</label>
+                    <input id="password" class="input" type="password" name="password" minlength="8" autocomplete="new-password"
+                        {{ $editing ? '' : 'required' }}>
+                    <div class="field-hint">{{ $editing ? 'O‘zgartirmasangiz, bo‘sh qoldiring' : 'Kamida 8 ta belgi' }}</div>
+                </div>
+            @endif
         </div>
+
+        @unless ($canEditCredentials)
+            <div class="field-hint">Bu o‘qituvchi boshqa filiallarda ham ishlaydi, shuning uchun email va parolni faqat super admin o‘zgartira oladi.</div>
+        @endunless
     </section>
 
     <section class="card card-pad stack">

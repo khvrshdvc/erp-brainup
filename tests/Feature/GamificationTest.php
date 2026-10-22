@@ -8,6 +8,7 @@ use App\Enums\XpReason;
 use App\Models\Attendance;
 use App\Models\Branch;
 use App\Models\Level;
+use App\Models\Setting;
 use App\Models\StudyGroup;
 use App\Models\User;
 use App\Models\XpTransaction;
@@ -24,6 +25,8 @@ class GamificationTest extends TestCase
         parent::setUp();
 
         $this->seed(GamificationSeeder::class);
+
+        Setting::put('attendance_edit_days', 365);
     }
 
     private function makeGroup(): array

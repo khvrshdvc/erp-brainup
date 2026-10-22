@@ -41,6 +41,13 @@
                     <input id="academic_year" class="input" type="text" name="academic_year" maxlength="20"
                         placeholder="2026–2027" value="{{ old('academic_year', $center['academic_year']) }}">
                 </div>
+
+                <div class="field">
+                    <label for="attendance_edit_days">Davomatni tahrirlash muddati (kun) *</label>
+                    <input id="attendance_edit_days" class="input" type="number" name="attendance_edit_days" min="0" max="365" required
+                        value="{{ old('attendance_edit_days', $center['attendance_edit_days']) }}">
+                    <div class="field-hint">O‘qituvchilar faqat shuncha kun ichidagi davomatni belgilay oladi. Adminlar uchun cheklov yo‘q</div>
+                </div>
             </div>
 
             @if ($canEditCenter)

@@ -75,15 +75,23 @@ class StudentController extends Controller
             'birth_date' => $data['birth_date'] ?? null,
         ]);
 
+        $groupFull = null;
+
         if (! empty($data['group_id'])) {
             $group = StudyGroup::findOrFail($data['group_id']);
 
             if ($group->hasFreeSeats()) {
                 $group->students()->syncWithoutDetaching([$student->id]);
+            } else {
+                $groupFull = $group;
             }
         }
 
-        return redirect()->route('admin.students.show', $student)->with('status', 'O‘quvchi qo‘shildi');
+        $redirect = redirect()->route('admin.students.show', $student)->with('status', 'O‘quvchi qo‘shildi');
+
+        return $groupFull
+            ? $redirect->with('warning', "“{$groupFull->name}” guruhida bo‘sh joy qolmagan, o‘quvchi guruhga biriktirilmadi.")
+            : $redirect;
     }
 
     public function show(User $student): View

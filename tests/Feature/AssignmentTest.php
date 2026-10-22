@@ -234,6 +234,28 @@ class AssignmentTest extends TestCase
         $this->assertSame(SubmissionStatus::Graded, $submission->fresh()->status);
     }
 
+    public function test_assignment_group_cannot_be_changed_on_edit(): void
+    {
+        [$branch, $teacher, , $group] = $this->makeGroup();
+        $assignment = $this->createAssignment($teacher, $group);
+
+        $other = StudyGroup::create(['branch_id' => $branch->id, 'teacher_id' => $teacher->id, 'name' => 'Boshqa guruh']);
+
+        $this->actingAs($teacher)->put(route('teacher.assignments.update', $assignment), [
+            'title' => 'Yangi nom',
+            'study_group_id' => $other->id,
+            'description' => 'Insho yozing',
+            'max_score' => 100,
+            'due_at' => now()->addDays(2)->format('Y-m-d\TH:i'),
+            'action' => 'publish',
+        ])->assertSessionHasNoErrors()->assertRedirect();
+
+        $assignment->refresh();
+
+        $this->assertSame('Yangi nom', $assignment->title);
+        $this->assertSame($group->id, $assignment->study_group_id);
+    }
+
     public function test_student_outside_group_cannot_open_assignment(): void
     {
         [$branch, $teacher, , $group] = $this->makeGroup();

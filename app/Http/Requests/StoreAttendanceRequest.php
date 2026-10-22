@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\AttendanceStatus;
+use App\Models\Setting;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -16,9 +17,20 @@ class StoreAttendanceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'lesson_date' => ['required', 'date', 'before_or_equal:today'],
+            'lesson_date' => ['required', 'date', 'before_or_equal:today', ...$this->windowRules()],
             'records' => ['required', 'array', 'min:1'],
             'records.*' => ['required', Rule::enum(AttendanceStatus::class)],
+        ];
+    }
+
+    public function messages(): array
+    {
+        $days = Setting::attendanceEditDays();
+
+        return [
+            'lesson_date.after_or_equal' => $days > 0
+                ? "Davomatni faqat oxirgi {$days} kun ichida belgilash yoki o‘zgartirish mumkin."
+                : 'Davomatni faqat bugungi sana uchun belgilash mumkin.',
         ];
     }
 
@@ -28,5 +40,17 @@ class StoreAttendanceRequest extends FormRequest
             'lesson_date' => 'dars sanasi',
             'records' => 'davomat',
         ];
+    }
+
+    /**
+     * Teachers can only touch recent lessons; admins are not limited.
+     */
+    private function windowRules(): array
+    {
+        if (! $this->user()->isTeacher()) {
+            return [];
+        }
+
+        return ['after_or_equal:'.today()->subDays(Setting::attendanceEditDays())->toDateString()];
     }
 }

@@ -26,7 +26,7 @@ class GroupRequest extends FormRequest
             'teacher_id' => ['nullable', 'integer', Rule::exists('branch_user', 'user_id')->where('branch_id', $branchId)],
             'starts_on' => ['nullable', 'date'],
             'ends_on' => ['nullable', 'date', 'after_or_equal:starts_on'],
-            'capacity' => ['required', 'integer', 'min:1', 'max:100'],
+            'capacity' => ['required', 'integer', 'min:'.max(1, $group?->students()->count() ?? 0), 'max:100'],
             'status' => ['required', Rule::enum(GroupStatus::class)],
             'schedule_days' => ['nullable', 'array'],
             'schedule_days.*' => [Rule::enum(WeekDay::class)],
@@ -39,6 +39,17 @@ class GroupRequest extends FormRequest
         }
 
         return $rules;
+    }
+
+    public function messages(): array
+    {
+        $enrolled = $this->group()?->students()->count() ?? 0;
+
+        return [
+            'capacity.min' => $enrolled > 1
+                ? "Sig‘im guruhdagi o‘quvchilar sonidan ({$enrolled}) kam bo‘lishi mumkin emas."
+                : 'Sig‘im kamida 1 bo‘lishi kerak.',
+        ];
     }
 
     public function attributes(): array

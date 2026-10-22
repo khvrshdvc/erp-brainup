@@ -8,6 +8,7 @@ use App\Models\Branch;
 use App\Models\StudyGroup;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class AdminManagementTest extends TestCase
@@ -150,6 +151,65 @@ class AdminManagementTest extends TestCase
         $this->assertSame(1, $group->students()->count());
     }
 
+    public function test_group_capacity_cannot_drop_below_enrolled_students(): void
+    {
+        [$first] = $this->branches();
+        $admin = $this->branchAdmin($first);
+
+        $group = StudyGroup::create(['branch_id' => $first->id, 'name' => 'Guruh', 'capacity' => 10]);
+        $group->students()->attach([$this->student($first)->id, $this->student($first)->id, $this->student($first)->id]);
+
+        $payload = fn (int $capacity) => ['name' => 'Guruh', 'capacity' => $capacity, 'status' => 'active'];
+
+        $this->actingAs($admin)
+            ->put(route('admin.groups.update', $group), $payload(2))
+            ->assertSessionHasErrors(['capacity' => 'Sig‘im guruhdagi o‘quvchilar sonidan (3) kam bo‘lishi mumkin emas.']);
+
+        $this->actingAs($admin)
+            ->put(route('admin.groups.update', $group), $payload(3))
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame(3, $group->fresh()->capacity);
+    }
+
+    public function test_inactive_student_cannot_be_added_to_group(): void
+    {
+        [$first] = $this->branches();
+        $admin = $this->branchAdmin($first);
+
+        $group = StudyGroup::create(['branch_id' => $first->id, 'name' => 'Guruh', 'capacity' => 5]);
+        $student = $this->student($first);
+        $student->update(['status' => UserStatus::Inactive]);
+
+        $this->actingAs($admin)
+            ->post(route('admin.groups.students.add', $group), ['student_id' => $student->id])
+            ->assertSessionHasErrors('student_id');
+
+        $this->assertSame(0, $group->students()->count());
+    }
+
+    public function test_creating_a_student_for_a_full_group_shows_a_warning(): void
+    {
+        [$first] = $this->branches();
+        $admin = $this->branchAdmin($first);
+
+        $group = StudyGroup::create(['branch_id' => $first->id, 'name' => 'To‘lgan', 'capacity' => 1]);
+        $group->students()->attach($this->student($first)->id);
+
+        $this->actingAs($admin)->post(route('admin.students.store'), [
+            'name' => 'Yangi talaba',
+            'email' => 'yangi@test.uz',
+            'password' => 'password123',
+            'branch_id' => $first->id,
+            'group_id' => $group->id,
+        ])
+            ->assertRedirect()
+            ->assertSessionHas('warning', '“To‘lgan” guruhida bo‘sh joy qolmagan, o‘quvchi guruhga biriktirilmadi.');
+
+        $this->assertSame(1, $group->students()->count());
+        $this->assertDatabaseHas('users', ['email' => 'yangi@test.uz']);
+    }
+
     public function test_student_can_be_removed_from_group(): void
     {
         [$first] = $this->branches();
@@ -173,7 +233,6 @@ class AdminManagementTest extends TestCase
 
         $this->actingAs($this->branchAdmin($first))->put(route('admin.teachers.update', $teacher), [
             'name' => $teacher->name,
-            'email' => $teacher->email,
             'branches' => [$first->id],
         ])->assertRedirect();
 
@@ -181,6 +240,68 @@ class AdminManagementTest extends TestCase
             [$first->id, $second->id],
             $teacher->branches()->pluck('branches.id')->all()
         );
+    }
+
+    public function test_branch_admin_cannot_change_credentials_of_a_shared_teacher(): void
+    {
+        [$first, $second] = $this->branches();
+        $teacher = $this->teacher($first, $second);
+        $email = $teacher->email;
+        $password = $teacher->password;
+        $admin = $this->branchAdmin($first);
+
+        $this->actingAs($admin)->put(route('admin.teachers.update', $teacher), [
+            'name' => 'Yangi ism',
+            'email' => 'hijack@example.com',
+            'password' => 'new-password-1',
+            'branches' => [$first->id],
+        ])->assertSessionHasErrors(['email', 'password']);
+
+        $teacher->refresh();
+        $this->assertSame($email, $teacher->email);
+        $this->assertSame($password, $teacher->password);
+        $this->assertNotSame('Yangi ism', $teacher->name);
+
+        $this->actingAs($admin)->get(route('admin.teachers.edit', $teacher))
+            ->assertOk()
+            ->assertDontSee('name="email"', false)
+            ->assertDontSee('name="password"', false);
+    }
+
+    public function test_branch_admin_can_change_credentials_of_own_branch_teacher(): void
+    {
+        [$first] = $this->branches();
+        $teacher = $this->teacher($first);
+        $admin = $this->branchAdmin($first);
+
+        $this->actingAs($admin)->get(route('admin.teachers.edit', $teacher))
+            ->assertSee('name="email"', false)
+            ->assertSee('name="password"', false);
+
+        $this->actingAs($admin)->put(route('admin.teachers.update', $teacher), [
+            'name' => $teacher->name,
+            'email' => 'new@example.com',
+            'password' => 'new-password-1',
+            'branches' => [$first->id],
+        ])->assertRedirect();
+
+        $teacher->refresh();
+        $this->assertSame('new@example.com', $teacher->email);
+        $this->assertTrue(Hash::check('new-password-1', $teacher->password));
+    }
+
+    public function test_super_admin_can_change_credentials_of_a_shared_teacher(): void
+    {
+        [$first, $second] = $this->branches();
+        $teacher = $this->teacher($first, $second);
+
+        $this->actingAs($this->superAdmin())->put(route('admin.teachers.update', $teacher), [
+            'name' => $teacher->name,
+            'email' => 'super@example.com',
+            'branches' => [$first->id, $second->id],
+        ])->assertRedirect();
+
+        $this->assertSame('super@example.com', $teacher->fresh()->email);
     }
 
     public function test_status_can_be_toggled_and_inactive_user_is_logged_out(): void

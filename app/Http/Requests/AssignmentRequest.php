@@ -21,11 +21,12 @@ class AssignmentRequest extends FormRequest
 
         return [
             'title' => ['required', 'string', 'max:160'],
-            'study_group_id' => [
+            // The group is fixed once the assignment exists.
+            ...($creating ? ['study_group_id' => [
                 'required',
                 'integer',
                 Rule::exists('study_groups', 'id')->where('teacher_id', $this->user()->id),
-            ],
+            ]] : []),
             'description' => ['required', 'string', 'max:2000'],
             'max_score' => ['required', 'integer', 'min:1', 'max:1000'],
             'due_at' => $creating ? ['required', 'date', 'after:now'] : ['required', 'date'],

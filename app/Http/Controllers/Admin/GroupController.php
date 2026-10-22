@@ -103,13 +103,24 @@ class GroupController extends Controller
 
     public function addStudent(AddGroupStudentRequest $request, StudyGroup $studyGroup): RedirectResponse
     {
-        $data = $request->validated();
+        $studentId = $request->validated('student_id');
 
-        if (! $studyGroup->hasFreeSeats()) {
+        // Lock the group row so two admins adding students at once cannot exceed the capacity.
+        $added = DB::transaction(function () use ($studyGroup, $studentId) {
+            $group = StudyGroup::withoutGlobalScopes()->lockForUpdate()->findOrFail($studyGroup->id);
+
+            if (! $group->hasFreeSeats()) {
+                return false;
+            }
+
+            $group->students()->syncWithoutDetaching([$studentId]);
+
+            return true;
+        });
+
+        if (! $added) {
             return back()->withErrors(['student_id' => 'Guruhda bo‘sh joy qolmagan']);
         }
-
-        $studyGroup->students()->syncWithoutDetaching([$data['student_id']]);
 
         return back()->with('status', 'O‘quvchi guruhga qo‘shildi');
     }

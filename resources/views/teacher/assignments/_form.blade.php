@@ -28,7 +28,6 @@
             <div class="field">
                 <label for="study_group_id">Guruh *</label>
                 @if ($editing)
-                    <input type="hidden" name="study_group_id" value="{{ $assignment->study_group_id }}">
                     <input id="study_group_id" class="input" type="text" value="{{ $assignment->studyGroup?->name }}" disabled>
                     <div class="field-hint">Guruhni vazifa yaratilgandan keyin o‘zgartirib bo‘lmaydi</div>
                 @else
