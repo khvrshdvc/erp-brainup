@@ -10,3 +10,6 @@ Artisan::command('inspire', function () {
 
 // Read notifications are only history after two months; unread ones are never touched.
 Schedule::command('notifications:prune --days=60')->daily()->withoutOverlapping();
+
+// Graded work keeps its score and feedback, but the uploaded file is dropped after the retention period.
+Schedule::command('submissions:prune-files')->daily()->withoutOverlapping();

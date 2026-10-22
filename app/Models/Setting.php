@@ -11,6 +11,8 @@ class Setting extends Model
 {
     public const DEFAULT_ATTENDANCE_EDIT_DAYS = 3;
 
+    public const DEFAULT_SUBMISSION_FILE_RETENTION_DAYS = 180;
+
     private const CACHE_TTL = 3600;
 
     protected $fillable = ['branch_id', 'key', 'value'];
@@ -75,6 +77,16 @@ class Setting extends Model
         $days = static::get('attendance_edit_days');
 
         return is_numeric($days) ? max(0, (int) $days) : self::DEFAULT_ATTENDANCE_EDIT_DAYS;
+    }
+
+    /**
+     * How many days after grading submission files are kept (0 = forever).
+     */
+    public static function submissionFileRetentionDays(): int
+    {
+        $days = static::get('submission_file_retention_days');
+
+        return is_numeric($days) ? max(0, (int) $days) : self::DEFAULT_SUBMISSION_FILE_RETENTION_DAYS;
     }
 
     public static function put(string $key, mixed $value, ?int $branchId = null): void

@@ -27,6 +27,7 @@
                 @foreach ($submission->attachments as $attachment)
                     <x-file-chip :attachment="$attachment" />
                 @endforeach
+                <x-file-expired :submission="$submission" />
 
                 @if ($submission->body)
                     <div class="stack" style="gap: 8px">

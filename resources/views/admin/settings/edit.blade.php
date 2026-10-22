@@ -48,6 +48,13 @@
                         value="{{ old('attendance_edit_days', $center['attendance_edit_days']) }}">
                     <div class="field-hint">O‘qituvchilar faqat shuncha kun ichidagi davomatni belgilay oladi. Adminlar uchun cheklov yo‘q</div>
                 </div>
+
+                <div class="field">
+                    <label for="submission_file_retention_days">Topshiriq fayllarini saqlash muddati (kun) *</label>
+                    <input id="submission_file_retention_days" class="input" type="number" name="submission_file_retention_days" min="0" max="3650" required
+                        value="{{ old('submission_file_retention_days', $center['submission_file_retention_days']) }}">
+                    <div class="field-hint">Tekshirilgan topshiriqlarning fayllari shuncha kundan keyin o‘chiriladi. Ball va fikr saqlanadi. 0 — fayllar doimiy saqlanadi</div>
+                </div>
             </div>
 
             @if ($canEditCenter)

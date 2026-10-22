@@ -21,6 +21,7 @@ class CenterSettingsRequest extends FormRequest
             'center_hours' => ['nullable', 'string', 'max:120'],
             'academic_year' => ['nullable', 'string', 'max:20'],
             'attendance_edit_days' => ['sometimes', 'required', 'integer', 'min:0', 'max:365'],
+            'submission_file_retention_days' => ['sometimes', 'required', 'integer', 'min:0', 'max:3650'],
         ];
     }
 
@@ -33,6 +34,7 @@ class CenterSettingsRequest extends FormRequest
             'center_hours' => 'ish vaqti',
             'academic_year' => 'o‘quv yili',
             'attendance_edit_days' => 'davomatni tahrirlash muddati',
+            'submission_file_retention_days' => 'fayllarni saqlash muddati',
         ];
     }
 }

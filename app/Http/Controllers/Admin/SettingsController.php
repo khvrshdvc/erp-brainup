@@ -22,6 +22,7 @@ class SettingsController extends Controller
             ->all();
 
         $center['attendance_edit_days'] = Setting::attendanceEditDays();
+        $center['submission_file_retention_days'] = Setting::submissionFileRetentionDays();
 
         return view('admin.settings.edit', [
             'center' => $center,

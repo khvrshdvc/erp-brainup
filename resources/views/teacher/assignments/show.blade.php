@@ -98,7 +98,11 @@
                     @forelse ($selected->attachments as $attachment)
                         <x-file-chip :attachment="$attachment" />
                     @empty
-                        <div class="card-sub">Fayl yo‘q</div>
+                        @if ($selected->filesExpired())
+                            <x-file-expired :submission="$selected" />
+                        @else
+                            <div class="card-sub">Fayl yo‘q</div>
+                        @endif
                     @endforelse
                 </div>
 

@@ -58,6 +58,14 @@ class Submission extends Model
         return $this->status === SubmissionStatus::Graded;
     }
 
+    /**
+     * Every submission starts with a file, so a graded one without any was cleaned up by the retention policy.
+     */
+    public function filesExpired(): bool
+    {
+        return $this->isGraded() && $this->attachments->isEmpty();
+    }
+
     public function isPending(): bool
     {
         return $this->status === SubmissionStatus::Submitted;
