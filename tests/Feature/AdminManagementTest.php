@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\GroupStatus;
 use App\Enums\Role;
 use App\Enums\UserStatus;
 use App\Models\Branch;
@@ -345,5 +346,24 @@ class AdminManagementTest extends TestCase
         ] as $url) {
             $this->actingAs($admin)->get($url)->assertOk();
         }
+    }
+
+    public function test_dashboard_groups_use_the_same_status_switch_as_the_groups_page(): void
+    {
+        [$first] = $this->branches();
+        $admin = $this->branchAdmin($first);
+        $group = StudyGroup::create(['branch_id' => $first->id, 'name' => 'Bosh sahifa guruhi', 'capacity' => 10]);
+
+        $this->actingAs($admin)->get(route('admin.dashboard'))
+            ->assertOk()
+            ->assertSee('Bosh sahifa guruhi')
+            ->assertSee(route('admin.groups.status', $group), false)
+            ->assertSee('role="switch"', false);
+
+        $this->actingAs($admin)->from(route('admin.dashboard'))
+            ->patch(route('admin.groups.status', $group))
+            ->assertRedirect(route('admin.dashboard'));
+
+        $this->assertSame(GroupStatus::Archived, $group->fresh()->status);
     }
 }

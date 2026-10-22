@@ -1,30 +1,30 @@
 <x-app-layout
-    crumb="Bosh sahifa"
-    :title="'Xush kelibsiz, '.\Illuminate\Support\Str::before(auth()->user()->name, ' ').'!'"
-    :subtitle="\App\Support\UzDate::long(now()).' · '.($branch?->name ?? 'Barcha filiallar')">
+    :crumb="__('Bosh sahifa')"
+    :title="__('Xush kelibsiz, :name!', ['name' => \Illuminate\Support\Str::before(auth()->user()->name, ' ')])"
+    :subtitle="\App\Support\UzDate::long(now()).' · '.($branch?->name ?? __('Barcha filiallar'))">
 
     <x-slot name="actions">
-        <a href="{{ route('groups.index') }}" class="btn btn-primary">Guruhlar va davomat</a>
+        <a href="{{ route('groups.index') }}" class="btn btn-primary">{{ __('Guruhlar va davomat') }}</a>
     </x-slot>
 
     <div class="kpi-grid">
-        <x-stat-card label="Jami o‘quvchilar" :value="$students" icon="students" :note="$branch ? $branch->name : 'Barcha filiallar'" />
-        <x-stat-card label="Jami o‘qituvchilar" :value="$teachers" icon="teachers" note="Faol xodimlar" />
-        <x-stat-card label="Faol guruhlar" :value="$activeGroups" icon="groups" :note="'Jami '.$allGroups.' ta guruh'" />
-        <x-stat-card label="Bugungi davomat" :value="$todayMarked" icon="calendar" note="Belgilangan yozuvlar" />
+        <x-stat-card :label="__('Jami o‘quvchilar')" :value="$students" icon="students" :note="$branch ? $branch->name : 'Barcha filiallar'" />
+        <x-stat-card :label="__('Jami o‘qituvchilar')" :value="$teachers" icon="teachers" :note="__('Faol xodimlar')" />
+        <x-stat-card :label="__('Faol guruhlar')" :value="$activeGroups" icon="groups" :note="__('Jami :count ta guruh', ['count' => $allGroups])" />
+        <x-stat-card :label="__('Bugungi davomat')" :value="$todayMarked" icon="calendar" :note="__('Belgilangan yozuvlar')" />
     </div>
 
     <section class="card card-pad stack-lg">
         <div class="card-head" style="padding: 0; border: 0">
             <div>
-                <h2 class="card-title">Haftalik davomat</h2>
-                <div class="card-sub">{{ $weekRange }} · tanlangan filial bo‘yicha o‘rtacha</div>
+                <h2 class="card-title">{{ __('Haftalik davomat') }}</h2>
+                <div class="card-sub">{{ __(':weekrange · tanlangan filial bo‘yicha o‘rtacha', ['weekrange' => $weekRange]) }}</div>
             </div>
-            <a href="{{ route('groups.index') }}" class="link" style="font-size: 13px">Batafsil →</a>
+            <a href="{{ route('groups.index') }}" class="link" style="font-size: 13px">{{ __('Batafsil →') }}</a>
         </div>
 
         @if ($weekTotal === 0)
-            <div class="t-empty">Bu hafta hali davomat belgilanmagan</div>
+            <div class="t-empty">{{ __('Bu hafta hali davomat belgilanmagan') }}</div>
         @else
             <div class="split">
                 <div style="flex: 1 1 280px">
@@ -57,26 +57,28 @@
 
     <section class="card" style="overflow: hidden">
         <div class="card-head">
-            <h2 class="card-title">Guruhlar</h2>
-            <a href="{{ route('groups.index') }}" class="link" style="font-size: 13px">Barchasini ko‘rish →</a>
+            <h2 class="card-title">{{ __('Guruhlar') }}</h2>
+            <a href="{{ route('groups.index') }}" class="link" style="font-size: 13px">{{ __('Barchasini ko‘rish →') }}</a>
         </div>
         <div class="t-scroll">
             <div class="t-min">
                 <div class="t-head" style="--cols: 2.4fr 1.8fr 1fr 1fr">
-                    <div>Guruh</div>
-                    <div>O‘qituvchi</div>
-                    <div>O‘quvchilar</div>
-                    <div>Holat</div>
+                    <div>{{ __('Guruh') }}</div>
+                    <div>{{ __('O‘qituvchi') }}</div>
+                    <div>{{ __('O‘quvchilar') }}</div>
+                    <div>{{ __('Holat') }}</div>
                 </div>
                 @forelse ($recentGroups as $group)
                     <div class="t-row" style="--cols: 2.4fr 1.8fr 1fr 1fr">
                         <div style="font-weight: 600">{{ $group->name }}</div>
                         <div>{{ $group->teacher?->name ?? '—' }}</div>
                         <div>{{ $group->students_count }}</div>
-                        <div><x-badge :type="$group->status->badge()">{{ $group->status->label() }}</x-badge></div>
+                        <div><x-status-switch :action="route('admin.groups.status', $group)"
+                                :active="$group->isActive()"
+                                :label="$group->status->label()" /></div>
                     </div>
                 @empty
-                    <div class="t-empty">Guruh yo‘q</div>
+                    <div class="t-empty">{{ __('Guruh yo‘q') }}</div>
                 @endforelse
             </div>
         </div>
