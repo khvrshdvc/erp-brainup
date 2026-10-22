@@ -4,11 +4,13 @@
     :subtitle="\App\Support\UzDate::long(now())">
 
     <x-slot name="actions">
-        <a href="{{ route('student.achievements') }}" class="btn btn-primary">Yutuqlarim</a>
+        <a href="{{ route('student.achievements') }}" class="btn">Yutuqlarim</a>
+        <a href="{{ route('student.shop.index') }}" class="btn btn-primary">Do‘kon</a>
     </x-slot>
 
     <div class="kpi-grid">
-        <x-stat-card label="XP" :value="$student->xp" icon="xp" note="To‘plangan ballar" />
+        <x-stat-card label="BrainCoin" :value="number_format($balance, 0, '', ' ')" icon="coin"
+            :note="'Hamyonda · jami topilgan: '.number_format((int) $student->xp, 0, '', ' ')" />
         <x-stat-card label="Daraja" :value="$student->level?->name ?? 'Boshlovchi'" icon="level" note="Joriy daraja" />
         <x-stat-card label="Davomat seriyasi" :value="$student->streak" icon="streak" note="Ketma-ket darslar" />
     </div>

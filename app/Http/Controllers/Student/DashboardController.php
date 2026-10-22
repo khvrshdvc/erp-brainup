@@ -25,6 +25,7 @@ class DashboardController extends Controller
 
         return view('student.dashboard', [
             'student' => $student,
+            'balance' => $student->coinBalance(),
             'groups' => $groups,
             'attendances' => $attendances,
             'attended' => $attended,

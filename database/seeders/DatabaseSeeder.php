@@ -12,6 +12,7 @@ class DatabaseSeeder extends Seeder
             GamificationSeeder::class,
             BranchSeeder::class,
             CourseSeeder::class,
+            ShopSeeder::class,
         ]);
 
         if (! app()->isProduction()) {

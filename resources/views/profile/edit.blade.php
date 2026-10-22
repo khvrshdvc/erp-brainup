@@ -19,7 +19,7 @@
         @if ($user->isStudent())
             <div class="profile-stats">
                 <div><b>{{ $user->level?->name ?? 'Boshlovchi' }}</b><span>Daraja</span></div>
-                <div><b>{{ (int) $user->xp }}</b><span>XP</span></div>
+                <div><b>{{ number_format($user->coinBalance(), 0, '', ' ') }}</b><span>BrainCoin</span></div>
                 <div><b>{{ (int) $user->streak }}</b><span>Seriya</span></div>
             </div>
         @endif

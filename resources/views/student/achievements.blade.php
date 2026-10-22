@@ -1,4 +1,4 @@
-<x-app-layout crumb="Bosh sahifa" title="Yutuqlarim" subtitle="XP, daraja, nishonlar va reyting">
+<x-app-layout crumb="Bosh sahifa" title="Yutuqlarim" subtitle="BrainCoin, daraja, nishonlar va reyting">
     <section class="card level-card">
         <div class="level-badge">{{ $levelNumber }}</div>
 
@@ -6,15 +6,15 @@
             <div class="level-title">Daraja {{ $levelNumber }} · {{ $student->level?->name ?? 'Boshlovchi' }}</div>
             <div class="page-sub" style="margin: 4px 0 12px">
                 @if ($next)
-                    Keyingi daraja: {{ $next->name }} — {{ $next->min_xp - $student->xp }} XP qoldi
+                    Keyingi daraja: {{ $next->name }} — {{ $next->min_xp - $student->xp }} BrainCoin qoldi
                 @else
                     Siz eng yuqori darajadasiz
                 @endif
             </div>
             <div class="progress"><i style="width: {{ $progress }}%"></i></div>
             <div class="level-meta">
-                <span>{{ $student->xp }} XP</span>
-                <span>{{ $next?->min_xp ?? $student->xp }} XP</span>
+                <span>{{ $student->xp }} BrainCoin</span>
+                <span>{{ $next?->min_xp ?? $student->xp }} BrainCoin</span>
             </div>
         </div>
 
@@ -51,7 +51,7 @@
                     <div>O‘quvchi</div>
                     <div>Filial</div>
                     <div>Daraja</div>
-                    <div class="t-right">XP</div>
+                    <div class="t-right">BrainCoin</div>
                 </div>
 
                 @forelse ($leaderboard['rows'] as $row)
@@ -63,7 +63,7 @@
                         </div>
                         <div>{{ $row['branch'] ?? '—' }}</div>
                         <div>{{ $row['level'] }}</div>
-                        <div class="t-right" style="font-weight: 700">{{ $row['xp'] }} XP</div>
+                        <div class="t-right" style="font-weight: 700">{{ $row['xp'] }} BrainCoin</div>
                     </div>
                 @empty
                     <div class="t-empty">Reyting hali bo‘sh</div>
@@ -78,7 +78,7 @@
                         </div>
                         <div>{{ $student->branch?->name ?? '—' }}</div>
                         <div>{{ $student->level?->name ?? 'Boshlovchi' }}</div>
-                        <div class="t-right" style="font-weight: 700">{{ $student->xp }} XP</div>
+                        <div class="t-right" style="font-weight: 700">{{ $student->xp }} BrainCoin</div>
                     </div>
                 @endunless
             </div>

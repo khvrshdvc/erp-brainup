@@ -7,6 +7,8 @@ use App\Http\Controllers\Admin\GamificationController;
 use App\Http\Controllers\Admin\GroupController as AdminGroupController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\ShopItemController;
+use App\Http\Controllers\Admin\ShopOrderController;
 use App\Http\Controllers\Admin\StudentController as AdminStudentController;
 use App\Http\Controllers\Admin\TeacherController as AdminTeacherController;
 use App\Http\Controllers\AttachmentController;
@@ -17,11 +19,13 @@ use App\Http\Controllers\GroupController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\ShopImageController;
 use App\Http\Controllers\SubmissionListController;
 use App\Http\Controllers\Student\AchievementController;
 use App\Http\Controllers\Student\AssignmentController as StudentAssignmentController;
 use App\Http\Controllers\Student\DashboardController as StudentDashboardController;
 use App\Http\Controllers\Student\GroupController as StudentGroupController;
+use App\Http\Controllers\Student\ShopController as StudentShopController;
 use App\Http\Controllers\Student\SubmissionController as StudentSubmissionController;
 use App\Http\Controllers\Teacher\AssignmentController as TeacherAssignmentController;
 use App\Http\Controllers\Teacher\DashboardController as TeacherDashboardController;
@@ -34,6 +38,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::post('/branch/switch', BranchSwitchController::class)->name('branch.switch');
     Route::get('/attachments/{attachment}', [AttachmentController::class, 'download'])->name('attachments.download');
+    Route::get('/shop/items/{shopItem}/image', ShopImageController::class)->name('shop.items.image');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -70,6 +75,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/assignments', [AdminAssignmentController::class, 'index'])->name('assignments.index');
         Route::get('/assignments/{assignment}', [AdminAssignmentController::class, 'show'])->name('assignments.show');
 
+        Route::get('/shop/orders', [ShopOrderController::class, 'index'])->name('shop.orders.index');
+        Route::patch('/shop/orders/{shopOrder}/deliver', [ShopOrderController::class, 'deliver'])->name('shop.orders.deliver');
+        Route::patch('/shop/orders/{shopOrder}/cancel', [ShopOrderController::class, 'cancel'])->name('shop.orders.cancel');
+
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
         Route::get('/reports/export', [ReportController::class, 'export'])->name('reports.export');
 
@@ -83,6 +92,11 @@ Route::middleware('auth')->group(function () {
         Route::resource('branches', BranchController::class)->except(['show', 'destroy']);
 
         Route::patch('/branches/{branch}/status', [BranchController::class, 'toggleStatus'])->name('branches.status');
+        Route::resource('shop-items', ShopItemController::class)
+            ->except(['show', 'destroy'])
+            ->parameters(['shop-items' => 'shopItem']);
+        Route::patch('/shop-items/{shopItem}/status', [ShopItemController::class, 'toggleStatus'])->name('shop-items.status');
+
         Route::get('/gamification', [GamificationController::class, 'index'])->name('gamification.index');
         Route::put('/gamification', [GamificationController::class, 'update'])->name('gamification.update');
     });
@@ -107,6 +121,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/assignments/{assignment}/submit', [StudentAssignmentController::class, 'create'])->name('assignments.submit');
         Route::post('/assignments/{assignment}/submit', [StudentAssignmentController::class, 'store'])->name('assignments.submit.store');
         Route::get('/submissions', [StudentSubmissionController::class, 'index'])->name('submissions.index');
+
+        Route::get('/shop', [StudentShopController::class, 'index'])->name('shop.index');
+        Route::get('/shop/orders', [StudentShopController::class, 'orders'])->name('shop.orders');
+        Route::post('/shop/{shopItem}/buy', [StudentShopController::class, 'buy'])->name('shop.buy');
+        Route::delete('/shop/orders/{shopOrder}', [StudentShopController::class, 'cancel'])->name('shop.orders.cancel');
     });
 });
 

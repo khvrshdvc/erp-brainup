@@ -1,4 +1,4 @@
-<x-app-layout crumb="Sozlamalar" title="Gamifikatsiya" subtitle="XP qoidalari, darajalar va nishonlar">
+<x-app-layout crumb="Sozlamalar" title="Gamifikatsiya" subtitle="BrainCoin qoidalari, darajalar va nishonlar">
     <form method="POST" action="{{ route('admin.gamification.update') }}" class="stack-lg">
         @csrf
         @method('PUT')
@@ -6,7 +6,7 @@
         <section class="card" style="overflow: hidden">
             <div class="card-head">
                 <div>
-                    <h2 class="card-title">XP qoidalari</h2>
+                    <h2 class="card-title">BrainCoin qoidalari</h2>
                     <div class="card-sub">O‘zgartirilgan qoidalar faqat yangi davomatlarga ta‘sir qiladi</div>
                 </div>
                 <button type="submit" class="btn btn-primary">Saqlash</button>
@@ -16,7 +16,7 @@
                 <div class="t-min" style="min-width: 560px">
                     <div class="t-head" style="--cols: 3fr 1.2fr 1fr">
                         <div>Qoida</div>
-                        <div>XP</div>
+                        <div>BrainCoin</div>
                         <div>Faol</div>
                     </div>
 
@@ -47,7 +47,7 @@
                 <div class="t-row" style="--cols: 48px 1fr auto">
                     <span class="avatar avatar-sm">{{ $loop->iteration }}</span>
                     <div style="font-weight: 600">{{ $level->name }}</div>
-                    <div class="card-sub">{{ number_format($level->min_xp, 0, '', ' ') }} XP</div>
+                    <div class="card-sub">{{ number_format($level->min_xp, 0, '', ' ') }} BrainCoin</div>
                 </div>
             @endforeach
         </section>

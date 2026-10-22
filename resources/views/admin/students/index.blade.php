@@ -40,7 +40,7 @@
                     <div>Telefon</div>
                     <div>Filial</div>
                     <div>Guruhlar</div>
-                    <div>Daraja · XP</div>
+                    <div>Daraja · BrainCoin</div>
                     <div>Holat</div>
                     <div></div>
                 </div>

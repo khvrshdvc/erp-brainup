@@ -9,7 +9,7 @@
     </x-slot>
 
     <div class="kpi-grid">
-        <x-stat-card label="XP" :value="$student->xp" icon="xp" note="To‘plangan ballar" />
+        <x-stat-card label="BrainCoin" :value="number_format($student->coinBalance(), 0, '', ' ')" icon="coin" :note="'Jami topilgan: '.number_format((int) $student->xp, 0, '', ' ')" />
         <x-stat-card label="Daraja" :value="$student->level?->name ?? 'Boshlovchi'" icon="level" note="Joriy daraja" />
         <x-stat-card label="Davomat seriyasi" :value="$student->streak" icon="streak" note="Ketma-ket darslar" />
         <x-stat-card label="Guruhlar" :value="$student->studyGroups->count()" icon="groups" :note="$student->status->label()" />

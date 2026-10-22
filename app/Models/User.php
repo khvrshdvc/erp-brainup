@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Role;
+use App\Enums\ShopOrderStatus;
 use App\Enums\UserStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -142,6 +143,25 @@ class User extends Authenticatable
     public function badges(): BelongsToMany
     {
         return $this->belongsToMany(Badge::class)->withPivot('awarded_at');
+    }
+
+    public function shopOrders(): HasMany
+    {
+        return $this->hasMany(ShopOrder::class);
+    }
+
+    /**
+     * BrainCoins the student can still spend: everything earned (users.xp, which also
+     * drives levels and the leaderboard) minus pending and delivered shop orders.
+     */
+    public function coinBalance(): int
+    {
+        $spent = (int) ShopOrder::withoutGlobalScopes()
+            ->where('user_id', $this->id)
+            ->whereIn('status', ShopOrderStatus::spendingValues())
+            ->sum('price');
+
+        return max(0, (int) $this->xp - $spent);
     }
 
     public function xpTransactions(): HasMany

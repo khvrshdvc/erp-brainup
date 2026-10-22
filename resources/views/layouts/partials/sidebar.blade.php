@@ -16,6 +16,7 @@
         'calendar' => 'M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z',
         'trophy' => 'M8 21h8M12 17v4M7 4h10v5a5 5 0 01-10 0V4zM17 5h3v2a3 3 0 01-3 3M7 5H4v2a3 3 0 003 3',
         'reports' => 'M4 20V10M10 20V4M16 20v-7M22 20H2',
+        'shop' => 'M6 7h12l1 13H5L6 7zM9 7V5a3 3 0 016 0v2',
         'settings' => 'M12 15a3 3 0 100-6 3 3 0 000 6M4 12h2M18 12h2M12 4v2M12 18v2M6.3 6.3l1.4 1.4M16.3 16.3l1.4 1.4M17.7 6.3l-1.4 1.4M7.7 16.3l-1.4 1.4',
     ];
 
@@ -41,6 +42,8 @@
             $items[] = ['Gamifikatsiya', 'trophy', route('admin.gamification.index'), request()->routeIs('admin.gamification.*')];
         }
 
+        $items[] = ['Do‘kon', 'shop', route('admin.shop.orders.index'), request()->routeIs('admin.shop.*', 'admin.shop-items.*')];
+
         $items = array_merge($items, [
             ['Hisobotlar', 'reports', route('admin.reports.index'), request()->routeIs('admin.reports.*')],
             ['Sozlamalar', 'settings', route('admin.settings.edit'), request()->routeIs('admin.settings.*')],
@@ -61,6 +64,7 @@
             ['Vazifalar', 'tasks', route('student.assignments.index'), request()->routeIs('student.assignments.*')],
             ['Topshirganlarim', 'students', route('student.submissions.index'), request()->routeIs('student.submissions.*')],
             ['Yutuqlar', 'trophy', route('student.achievements'), request()->routeIs('student.achievements')],
+            ['Do‘kon', 'shop', route('student.shop.index'), request()->routeIs('student.shop.*')],
             ['Profil', 'teachers', route('profile.edit'), request()->routeIs('profile.*')],
         ];
     }

@@ -599,3 +599,77 @@ form[aria-busy="true"] button[type="submit"] { opacity: .6; cursor: progress; }
     .profile-stats { width: 100%; }
     .profile-stats > div { flex: 1 1 0; min-width: 0; }
 }
+
+/* BrainCoin and shop */
+.coin { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.coin svg { width: 16px; height: 16px; flex: 0 0 auto; }
+.coin b { font-weight: 700; }
+.coin-lg svg { width: 20px; height: 20px; }
+.coin-lg b { font-size: 16px; }
+.coin-xl { gap: 10px; }
+.coin-xl svg { width: 34px; height: 34px; }
+.coin-xl b { font-size: 34px; letter-spacing: -0.02em; line-height: 1; }
+
+.wallet { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px; padding: 22px 24px; }
+.wallet-main { display: flex; flex-direction: column; gap: 10px; }
+.wallet-label { font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
+.wallet-stats { display: flex; gap: 8px; }
+.wallet-stats > div {
+    min-width: 120px; padding: 10px 14px; border-radius: 10px; background: var(--bg); border: 1px solid var(--line);
+    display: flex; flex-direction: column; gap: 2px;
+}
+.wallet-stats b { font-size: 18px; font-weight: 700; }
+.wallet-stats span { font-size: 12px; color: var(--muted); }
+
+.shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; }
+.shop-card { display: flex; flex-direction: column; overflow: hidden; }
+.shop-media {
+    position: relative; aspect-ratio: 4 / 3; background: var(--accent-soft); color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+}
+.shop-media img { width: 100%; height: 100%; object-fit: cover; }
+.shop-stock {
+    position: absolute; top: 10px; left: 10px; padding: 2px 8px; border-radius: 999px;
+    background: rgba(255, 255, 255, .92); color: var(--ink2); font-size: 12px; font-weight: 600;
+}
+.shop-stock.out { background: var(--err-bg); color: var(--err); }
+.shop-body { flex: 1 1 auto; padding: 14px 16px 4px; }
+.shop-body h3 { margin: 0; font-size: 15px; font-weight: 600; }
+.shop-body p {
+    margin: 4px 0 0; color: var(--muted); font-size: 13px;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.shop-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 12px 16px 16px; min-height: 64px; }
+.shop-missing { font-size: 12px; color: var(--muted); text-align: right; }
+.shop-confirm { display: flex; gap: 6px; margin: 0; }
+
+.order-row { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; padding: 14px 20px; border-bottom: 1px solid var(--line2); }
+.order-row:last-child { border-bottom: 0; }
+.order-thumb {
+    flex: 0 0 auto; width: 44px; height: 44px; border-radius: 8px; overflow: hidden; background: var(--accent-soft);
+    color: var(--accent); display: flex; align-items: center; justify-content: center;
+}
+.order-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.order-body { flex: 1 1 200px; min-width: 0; display: flex; flex-direction: column; }
+.order-body b { font-weight: 600; }
+.order-body .card-sub { margin: 0; }
+.order-cancel { margin: 0; }
+.order-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+.order-actions form { margin: 0; }
+.order-cancel-form { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; width: 100%; }
+
+@media (max-width: 768px) {
+    .wallet { padding: 18px 16px; }
+    .wallet-stats { width: 100%; }
+    .wallet-stats > div { flex: 1 1 0; min-width: 0; }
+    .order-row { padding: 14px 16px; }
+    .order-actions { justify-content: flex-start; }
+}
+@media (max-width: 480px) {
+    .shop-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .shop-body { padding: 10px 12px 2px; }
+    .shop-foot { flex-direction: column; align-items: stretch; padding: 10px 12px 12px; }
+    .shop-foot .btn, .shop-confirm { width: 100%; justify-content: center; }
+    .shop-confirm .btn { flex: 1 1 0; }
+    .coin-xl b { font-size: 28px; }
+}

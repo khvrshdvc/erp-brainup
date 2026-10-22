@@ -53,7 +53,7 @@
                 <div class="t-head" style="--cols: 2.4fr 1.4fr 1fr 1fr">
                     <div>O‘quvchi</div>
                     <div>Daraja</div>
-                    <div>XP</div>
+                    <div>BrainCoin</div>
                     <div></div>
                 </div>
 
