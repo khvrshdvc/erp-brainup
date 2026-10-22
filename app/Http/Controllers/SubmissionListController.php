@@ -17,8 +17,8 @@ class SubmissionListController extends Controller
 
         $base = Submission::query()
             ->when($user->isTeacher(), fn ($query) => $query->whereHas(
-                'assignment',
-                fn ($assignment) => $assignment->where('teacher_id', $user->id)
+                'assignment.studyGroup',
+                fn ($group) => $group->where('teacher_id', $user->id)
             ));
 
         $byStatus = (clone $base)

@@ -17,6 +17,12 @@ class EnvExampleTest extends TestCase
             });
 
         $this->assertSame('mysql', $env['DB_CONNECTION']);
+        $this->assertSame('mysql', $env['DB_HOST']);
+        $this->assertSame('3306', $env['DB_PORT']);
+        $this->assertSame('erp_brainup', $env['DB_DATABASE']);
+        $this->assertSame('sail', $env['DB_USERNAME']);
+        $this->assertSame('password', $env['DB_PASSWORD']);
+        $this->assertSame('redis', $env['REDIS_HOST']);
         $this->assertSame('redis', $env['CACHE_STORE']);
         $this->assertSame('redis', $env['SESSION_DRIVER']);
         $this->assertSame('redis', $env['QUEUE_CONNECTION']);

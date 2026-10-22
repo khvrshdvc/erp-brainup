@@ -14,7 +14,8 @@ Run every PHP, Composer, Artisan and npm command through Sail, never on the host
 vendor/bin/sail up -d          # start containers (stop with: vendor/bin/sail down)
 vendor/bin/sail composer install
 vendor/bin/sail npm run dev    # Vite dev server (or: sail npm run build)
-vendor/bin/sail artisan queue:work   # QUEUE_CONNECTION=database, so queued work needs a worker
+vendor/bin/sail artisan queue:work   # required: AwardAttendanceXp is queued, so no XP is awarded without a worker (.env.example uses QUEUE_CONNECTION=redis)
+vendor/bin/sail artisan schedule:work   # runs the daily notifications:prune (read notifications older than 60 days); in production run schedule:run every minute
 
 vendor/bin/sail test                                         # whole suite
 vendor/bin/sail test --filter=AttendanceTest                 # single test class
@@ -25,6 +26,8 @@ vendor/bin/sail pint           # code style (Laravel Pint)
 
 vendor/bin/sail artisan migrate:fresh --seed   # seeds levels/XP rules/badges, branches, courses, and DemoSeeder outside production
 vendor/bin/sail artisan gamification:rebuild [--branch=ID] [--fresh]   # recompute XP, levels, streaks and badges from attendance and submissions
+vendor/bin/sail artisan db:seed --class=ChirchiqSeeder   # real Chirchiq branch: 4 teachers, 13 groups, 104 Uzbek-named students, 3 assignments per group; idempotent, not part of DatabaseSeeder
+vendor/bin/sail artisan db:seed --class=LoadTestSeeder   # 2000 students and 3 months of data for local performance checks; not part of DatabaseSeeder
 vendor/bin/sail artisan tinker
 ```
 
@@ -46,15 +49,18 @@ Super-admin-only routes (branches, gamification) share the `admin.` prefix and n
 - Code that has to cross branches (gamification, console commands, cross-branch lookups) calls `withoutGlobalScopes()`. Keep this in mind when queries unexpectedly return nothing, for example in tests or CLI, where there is no authenticated user.
 - `CurrentBranch` caches its result per user id. Call `forget()` after changing the session branch inside one request or test.
 - `User` is **not** branch-scoped. Filter users explicitly with `scopeInBranch`, `students()`, `teachers()` and `active()`.
-- `Setting::get($key)` looks up the current branch's value and falls back to the global row (`branch_id` null).
+- `Setting::get($key)` looks up the current branch's value and falls back to the global row (`branch_id` null). Results are cached per (branch, key) for an hour and cleared by the model's `saved`/`deleted` hooks, so write settings with `Setting::put()` or Eloquent, never raw queries.
+- `attendance_edit_days` (global setting, default 3, editable by the super admin on the settings page, read with `Setting::attendanceEditDays()`): teachers may mark or edit attendance only for today and the previous N days. `StoreAttendanceRequest` enforces it with an Uzbek message; super admin and branch admin are unlimited.
+- **Teacher access follows the group's current teacher**, not `assignments.teacher_id`: `Assignment::isTaughtBy()` backs `AssignmentPolicy::manage`, `SubmissionPolicy::grade` and `AttachmentPolicy`, and the teacher assignment and submission lists filter with `whereHas('studyGroup', teacher_id = me)`. Changing a group's teacher in `Admin\GroupController::update` also moves the group's non-closed assignments to the new teacher; closed ones keep their author but are still reachable by the new teacher through the group.
+- Branch admins may change a teacher's email and password only when all of the teacher's branches are among theirs (`UserPolicy::manageTeacherCredentials`).
 
 ### Events → listeners → gamification
 Controllers fire domain events, and listeners are auto-discovered from `app/Listeners`:
-- `AttendanceMarked` → `AwardAttendanceXp`
+- `AttendanceMarked` → `AwardAttendanceXp` (**queued**, `ShouldQueue` with `$afterCommit`; a queue worker must run or attendance awards no XP)
 - `SubmissionUpdated` → `SyncSubmissionXp`, `SendSubmissionNotification`
 - `AssignmentPublished` → `NotifyStudentsOfAssignment`
 
-`GamificationService` is **idempotent**. Each award is an `XpTransaction` upserted on `(user_id, reason, source_id)`, so re-syncing the same attendance or submission overwrites the earlier award instead of adding a second one. After each sync it recalculates the user's cached `xp`, `level_id`, `streak` and badges. Point values come from the `XpRule` table (`XpRule::pointsFor('attendance_present')` and so on, seeded by `GamificationSeeder`, editable by the super admin). If you change the rules, run `gamification:rebuild` to recompute. `LeaderboardService` ranks students within a scope.
+`GamificationService` is **idempotent**. Each award is an `XpTransaction` upserted on `(user_id, reason, source_id)`, so re-syncing the same attendance or submission overwrites the earlier award instead of adding a second one. After each sync it recalculates the user's cached `xp`, `level_id`, `streak` and badges. Point values come from the `XpRule` table (`XpRule::pointsFor('attendance_present')` and so on, seeded by `GamificationSeeder`, editable by the super admin). `pointsFor()` is cached forever per code and forgotten by the model's `saved`/`deleted` hooks, so always change rules through Eloquent, not raw queries. If you change the rules, run `gamification:rebuild` to recompute. `LeaderboardService` ranks students within a scope.
 
 ### Other conventions
 - Enums in `app/Enums` use the `HasValues` concern and provide `label()` methods with Uzbek text. Use them for casts and validation.

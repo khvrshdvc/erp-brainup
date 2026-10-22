@@ -22,8 +22,9 @@ class AssignmentController extends Controller
         $user = $request->user();
         $status = $request->query('status');
 
+        // Same rule as the policies: an assignment belongs to whoever currently teaches its group.
         $assignments = Assignment::query()
-            ->where('teacher_id', $user->id)
+            ->whereHas('studyGroup', fn ($group) => $group->where('teacher_id', $user->id))
             ->with(['studyGroup' => fn ($query) => $query->withCount('students')])
             ->withCount([
                 'submissions',

@@ -256,6 +256,45 @@ class AssignmentTest extends TestCase
         $this->assertSame($group->id, $assignment->study_group_id);
     }
 
+    public function test_lists_follow_the_current_group_teacher_including_closed_assignments(): void
+    {
+        [$branch, $oldTeacher, $student, $group] = $this->makeGroup();
+        $assignment = $this->createAssignment($oldTeacher, $group);
+        $this->submit($student, $assignment);
+        $assignment->update(['status' => AssignmentStatus::Closed]);
+
+        $newTeacher = User::factory()->create(['role' => Role::Teacher]);
+        $newTeacher->branches()->attach($branch->id);
+        $admin = User::factory()->create(['role' => Role::SuperAdmin]);
+
+        $this->actingAs($oldTeacher)->get(route('teacher.assignments.index'))->assertSee('Writing Task 2');
+        $this->actingAs($oldTeacher)->get(route('submissions.index'))->assertSee($student->name);
+
+        $this->actingAs($admin)->put(route('admin.groups.update', $group), [
+            'name' => $group->name,
+            'capacity' => 20,
+            'status' => 'active',
+            'teacher_id' => $newTeacher->id,
+        ])->assertRedirect();
+
+        // The closed assignment keeps its original author, yet follows the group's teacher.
+        $this->assertSame($oldTeacher->id, $assignment->fresh()->teacher_id);
+
+        $this->actingAs($newTeacher)->get(route('teacher.assignments.index'))
+            ->assertOk()
+            ->assertSee('Writing Task 2');
+        $this->actingAs($newTeacher)->get(route('submissions.index'))
+            ->assertOk()
+            ->assertSee($student->name);
+
+        $this->actingAs($oldTeacher)->get(route('teacher.assignments.index'))
+            ->assertOk()
+            ->assertDontSee('Writing Task 2');
+        $this->actingAs($oldTeacher)->get(route('submissions.index'))
+            ->assertOk()
+            ->assertDontSee($student->name);
+    }
+
     public function test_student_outside_group_cannot_open_assignment(): void
     {
         [$branch, $teacher, , $group] = $this->makeGroup();
