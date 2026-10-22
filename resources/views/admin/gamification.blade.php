@@ -6,7 +6,7 @@
         <section class="card" style="overflow: hidden">
             <div class="card-head">
                 <div>
-                    <h2 class="card-title">{{ __('BrainCoin qoidalari') }}</h2>
+                    <h2 class="card-title">@coins(__('BrainCoin qoidalari'))</h2>
                     <div class="card-sub">{{ __('O‘zgartirilgan qoidalar faqat yangi davomatlarga ta‘sir qiladi') }}</div>
                 </div>
                 <button type="submit" class="btn btn-primary">{{ __('Saqlash') }}</button>
@@ -16,7 +16,7 @@
                 <div class="t-min" style="min-width: 560px">
                     <div class="t-head" style="--cols: 3fr 1.2fr 1fr">
                         <div>{{ __('Qoida') }}</div>
-                        <div><span class="brand-name">{{ __('BrainCoin') }}</span></div>
+                        <div>@coins(__('BrainCoin'))</div>
                         <div>{{ __('Faol') }}</div>
                     </div>
 
@@ -47,7 +47,7 @@
                 <div class="t-row" style="--cols: 48px 1fr auto">
                     <span class="avatar avatar-sm">{{ $loop->iteration }}</span>
                     <div style="font-weight: 600">{{ __($level->name) }}</div>
-                    <div class="card-sub">{{ __(':min_xp BrainCoin', ['min_xp' => number_format($level->min_xp, 0, '', ' ')]) }}</div>
+                    <div class="card-sub">@coins(__(':min_xp BrainCoin', ['min_xp' => number_format($level->min_xp, 0, '', ' ')]))</div>
                 </div>
             @endforeach
         </section>
@@ -56,7 +56,7 @@
             <h2 class="card-title">{{ __('Nishonlar') }}</h2>
             <div class="achv-grid">
                 @foreach ($badges as $badge)
-                    <x-achievement :badge="$badge" :show-status="false" />
+                    <x-achievement :badge="$badge" :show-status="false" :style="'--i: '.$loop->index" />
                 @endforeach
             </div>
         </section>

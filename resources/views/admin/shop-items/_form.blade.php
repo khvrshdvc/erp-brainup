@@ -21,7 +21,7 @@
 
         <div class="form-grid">
             <div class="field">
-                <label for="price">{{ __('Narx (BrainCoin) *') }}</label>
+                <label for="price">@coins(__('Narx (BrainCoin) *'))</label>
                 <input id="price" type="number" name="price" min="1" required inputmode="numeric"
                     @class(['input', 'is-invalid' => $errors->has('price')])
                     value="{{ old('price', $item->price ?? '') }}">

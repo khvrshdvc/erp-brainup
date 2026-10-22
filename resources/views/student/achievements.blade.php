@@ -3,18 +3,18 @@
         <div class="level-badge">{{ $levelNumber }}</div>
 
         <div class="level-body">
-            <div class="level-title">{{ __('Daraja :level · :name', ['level' => $levelNumber, 'name' => __($student->level?->name ?? 'Boshlovchi')]) }}</div>
+            <div class="level-title">{{ __('Daraja :level · :name', ['level' => $levelNumber, 'name' => __($student->level?->name ?? 'Uchqun')]) }}</div>
             <div class="page-sub" style="margin: 4px 0 12px">
                 @if ($next)
-                    {{ __('Keyingi daraja: :name — :min_xp BrainCoin qoldi', ['name' => __($next->name), 'min_xp' => $next->min_xp - $student->xp]) }}
+                    @coins(__('Keyingi daraja: :name — :min_xp BrainCoin qoldi', ['name' => __($next->name), 'min_xp' => $next->min_xp - $student->xp]))
                 @else
                     {{ __('Siz eng yuqori darajadasiz') }}
                 @endif
             </div>
             <div class="progress"><i style="width: {{ $progress }}%"></i></div>
             <div class="level-meta">
-                <span>{{ __(':xp BrainCoin', ['xp' => $student->xp]) }}</span>
-                <span>{{ $next?->min_xp ?? $student->xp }} {{ __('BrainCoin') }}</span>
+                <span>@coins(__(':xp BrainCoin', ['xp' => $student->xp]))</span>
+                <span>{{ $next?->min_xp ?? $student->xp }} @coins(__('BrainCoin'))</span>
             </div>
         </div>
 
@@ -28,7 +28,7 @@
         <h2 class="card-title">{{ __('Nishonlar') }}</h2>
         <div class="achv-grid">
             @foreach ($badges as $item)
-                <x-achievement :badge="$item['badge']" :earned="$item['earned']" :awarded-at="$item['awarded_at']" />
+                <x-achievement :badge="$item['badge']" :earned="$item['earned']" :awarded-at="$item['awarded_at']" :style="'--i: '.$loop->index" />
             @endforeach
         </div>
     </section>
@@ -47,7 +47,7 @@
                     <div>{{ __('O‘quvchi') }}</div>
                     <div>{{ __('Filial') }}</div>
                     <div>{{ __('Daraja') }}</div>
-                    <div class="t-right"><span class="brand-name">{{ __('BrainCoin') }}</span></div>
+                    <div class="t-right">@coins(__('BrainCoin'))</div>
                 </div>
 
                 @forelse ($leaderboard['rows'] as $row)
@@ -59,7 +59,7 @@
                         </div>
                         <div>{{ $row['branch'] ?? '—' }}</div>
                         <div>{{ __($row['level']) }}</div>
-                        <div class="t-right" style="font-weight: 600">{{ $row['xp'] }} {{ __('BrainCoin') }}</div>
+                        <div class="t-right" style="font-weight: 600">{{ $row['xp'] }} @coins(__('BrainCoin'))</div>
                     </div>
                 @empty
                     <div class="t-empty">{{ __('Reyting hali bo‘sh') }}</div>
@@ -73,8 +73,8 @@
                             {{ __(':name (siz)', ['name' => $student->name]) }}
                         </div>
                         <div>{{ $student->branch?->name ?? '—' }}</div>
-                        <div>{{ __($student->level?->name ?? 'Boshlovchi') }}</div>
-                        <div class="t-right" style="font-weight: 600">{{ __(':xp BrainCoin', ['xp' => $student->xp]) }}</div>
+                        <div>{{ __($student->level?->name ?? 'Uchqun') }}</div>
+                        <div class="t-right" style="font-weight: 600">@coins(__(':xp BrainCoin', ['xp' => $student->xp]))</div>
                     </div>
                 @endunless
             </div>

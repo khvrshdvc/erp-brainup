@@ -40,7 +40,7 @@
                     <div>{{ __('Telefon') }}</div>
                     <div>{{ __('Filial') }}</div>
                     <div>{{ __('Guruhlar') }}</div>
-                    <div>{{ __('Daraja') }} · <span class="brand-name">{{ __('BrainCoin') }}</span></div>
+                    <div>{{ __('Daraja') }} · @coins(__('BrainCoin'))</div>
                     <div>{{ __('Holat') }}</div>
                     <div></div>
                 </div>
@@ -57,7 +57,7 @@
                         <div>{{ $student->phone ?? '—' }}</div>
                         <div>{{ $student->branch?->name }}</div>
                         <div>{{ $student->study_groups_count }}</div>
-                        <div>{{ __($student->level?->name ?? 'Boshlovchi') }} · {{ $student->xp }}</div>
+                        <div>{{ __($student->level?->name ?? 'Uchqun') }} · {{ $student->xp }}</div>
                         <div>
                             <x-status-switch :action="route('admin.students.status', $student)"
                                 :active="$student->isActive()"

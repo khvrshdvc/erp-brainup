@@ -155,12 +155,14 @@ class ShopTest extends TestCase
         $this->assertSame(0, $otherAdmin->notifications()->count());
     }
 
-    public function test_braincoin_keeps_its_spelling_in_uppercase_labels(): void
+    public function test_the_wallet_label_shows_the_coin_and_screen_readers_still_hear_braincoin(): void
     {
         $student = $this->student(100);
 
+        // The uppercase label no longer prints the word (which needed its own spelling): it shows the coin instead.
         $this->actingAs($student)->get(route('student.shop.index'))
             ->assertOk()
-            ->assertSee('<span class="brand-name">BrainCoin</span>', false);
+            ->assertSee('<span class="coin-inline" title="BrainCoin">', false)
+            ->assertSee('<span class="sr-only">BrainCoin</span>', false);
     }
 }

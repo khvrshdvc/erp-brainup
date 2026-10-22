@@ -1,6 +1,6 @@
 <section class="card wallet">
     <div class="wallet-main">
-        <span class="wallet-label">{{ __('Hamyonimdagi') }} <span class="brand-name">{{ __('BrainCoin') }}</span></span>
+        <span class="wallet-label">{{ __('Hamyonimdagi') }} @coins(__('BrainCoin'))</span>
         <x-coin :amount="$balance" size="xl" count-up />
     </div>
     <div class="wallet-stats">

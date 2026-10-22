@@ -16,7 +16,7 @@
                     <span class="notif-dot {{ $notification->read_at ? 'off' : '' }}"></span>
                     <span style="flex: 1; min-width: 0">
                         <b>{{ __($notification->data['title'] ?? 'Bildirishnoma') }}</b>
-                        <span class="notif-body">{{ isset($notification->data['body_key']) ? __($notification->data['body_key'], $notification->data['body_params'] ?? []) : ($notification->data['body'] ?? '') }}</span>
+                        <span class="notif-body">@coins(isset($notification->data['body_key']) ? __($notification->data['body_key'], $notification->data['body_params'] ?? []) : ($notification->data['body'] ?? ''))</span>
                     </span>
                     <span class="card-sub">{{ $notification->created_at->format('d.m.Y, H:i') }}</span>
                 </button>

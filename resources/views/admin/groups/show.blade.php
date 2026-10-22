@@ -93,7 +93,7 @@
                 <div class="t-head" style="--cols: 2.4fr 1.4fr 1fr 1fr">
                     <div>{{ __('O‘quvchi') }}</div>
                     <div>{{ __('Daraja') }}</div>
-                    <div><span class="brand-name">{{ __('BrainCoin') }}</span></div>
+                    <div>@coins(__('BrainCoin'))</div>
                     <div></div>
                 </div>
 
@@ -103,7 +103,7 @@
                             <span class="avatar avatar-sm">{{ $student->initials }}</span>
                             <a class="link" href="{{ route('admin.students.show', $student) }}">{{ $student->name }}</a>
                         </div>
-                        <div>{{ __($student->level?->name ?? 'Boshlovchi') }}</div>
+                        <div>{{ __($student->level?->name ?? 'Uchqun') }}</div>
                         <div>{{ $student->xp }}</div>
                         <div class="t-right">
                             <form method="POST" action="{{ route('admin.groups.students.remove', [$group, $student]) }}"

@@ -18,8 +18,8 @@
 
         @if ($user->isStudent())
             <div class="profile-stats">
-                <div><b>{{ __($user->level?->name ?? 'Boshlovchi') }}</b><span>{{ __('Daraja') }}</span></div>
-                <div><b class="coin-stat"><x-coin-mark />{{ number_format($user->coinBalance(), 0, '', ' ') }}</b><span><span class="brand-name">{{ __('BrainCoin') }}</span></span></div>
+                <div><b>{{ __($user->level?->name ?? 'Uchqun') }}</b><span>{{ __('Daraja') }}</span></div>
+                <div><b class="coin-stat"><x-coin-mark />{{ number_format($user->coinBalance(), 0, '', ' ') }}</b><span>{{ __('Hamyon') }}</span></div>
                 <div><b>{{ (int) $user->streak }}</b><span>{{ __('Seriya') }}</span></div>
             </div>
         @endif

@@ -24,7 +24,7 @@ class LeaderboardService
             'name' => $user->name,
             'initials' => $user->initials,
             'branch' => $user->branch?->name,
-            'level' => __($user->level?->name ?? 'Boshlovchi'),
+            'level' => __($user->level?->name ?? 'Uchqun'),
             'xp' => $user->xp,
             'me' => $user->id === $student->id,
         ])->all();

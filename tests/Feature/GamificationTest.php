@@ -220,8 +220,8 @@ class GamificationTest extends TestCase
 
     public function test_level_is_chosen_by_xp(): void
     {
-        $this->assertSame('Boshlovchi', Level::forXp(499)->name);
-        $this->assertSame('Izlanuvchi', Level::forXp(500)->name);
+        $this->assertSame('Uchqun', Level::forXp(499)->name);
+        $this->assertSame('Mash’al', Level::forXp(500)->name);
     }
 
     public function test_rebuild_command_recalculates_xp(): void

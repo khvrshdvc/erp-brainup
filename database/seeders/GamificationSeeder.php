@@ -12,10 +12,10 @@ class GamificationSeeder extends Seeder
     public function run(): void
     {
         $levels = [
-            ['name' => 'Boshlovchi', 'min_xp' => 0],
-            ['name' => 'Izlanuvchi', 'min_xp' => 500],
-            ['name' => 'Bilimdon', 'min_xp' => 1500],
-            ['name' => 'Ustoz', 'min_xp' => 3000],
+            ['name' => 'Uchqun', 'min_xp' => 0],
+            ['name' => 'Mash’al', 'min_xp' => 500],
+            ['name' => 'Kometa', 'min_xp' => 1500],
+            ['name' => 'Daho', 'min_xp' => 3000],
         ];
 
         foreach ($levels as $level) {
@@ -35,12 +35,12 @@ class GamificationSeeder extends Seeder
         }
 
         $badges = [
-            ['code' => 'first_step', 'title' => 'Dars boshlandi', 'icon' => '🚀', 'description' => 'Birinchi darsga qatnashdingiz'],
-            ['code' => 'streak_7', 'title' => 'Olovli hafta', 'icon' => '🔥', 'description' => 'Ketma-ket 7 ta darsga qatnashdingiz'],
-            ['code' => 'streak_30', 'title' => 'Temir intizom', 'icon' => '⚡', 'description' => 'Ketma-ket 30 ta darsga qatnashdingiz'],
-            ['code' => 'first_assignment', 'title' => 'Birinchi topshiriq', 'icon' => '✏️', 'description' => 'Birinchi vazifangizni topshirdingiz'],
-            ['code' => 'excellent', 'title' => 'A‘lo natija', 'icon' => '🏆', 'description' => 'Vazifadan kamida 90% ball oldingiz'],
-            ['code' => 'ten_assignments', 'title' => 'Mehnatkash', 'icon' => '📚', 'description' => '10 ta vazifa topshirdingiz'],
+            ['code' => 'first_step', 'title' => 'Yo‘l boshi', 'icon' => '🧭', 'description' => 'Birinchi darsga qatnashdingiz'],
+            ['code' => 'streak_7', 'title' => 'Olov yurak', 'icon' => '🔥', 'description' => 'Ketma-ket 7 ta darsga qatnashdingiz'],
+            ['code' => 'streak_30', 'title' => 'Po‘lat iroda', 'icon' => '🛡️', 'description' => 'Ketma-ket 30 ta darsga qatnashdingiz'],
+            ['code' => 'first_assignment', 'title' => 'Ilk qalam', 'icon' => '✒️', 'description' => 'Birinchi vazifangizni topshirdingiz'],
+            ['code' => 'excellent', 'title' => 'Oltin aql', 'icon' => '🧠', 'description' => 'Vazifadan kamida 90% ball oldingiz'],
+            ['code' => 'ten_assignments', 'title' => 'Vazifa ovchisi', 'icon' => '🏹', 'description' => '10 ta vazifa topshirdingiz'],
         ];
 
         foreach ($badges as $badge) {
