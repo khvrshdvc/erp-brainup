@@ -90,13 +90,50 @@ class ChirchiqSeederTest extends TestCase
             $this->assertSame(3, Assignment::withoutGlobalScopes()->where('study_group_id', $group->id)->count());
         }
 
-        // Group names are "<Fan> <HH:MM> (<days>)", with the teacher's first name added on a collision.
-        $names = $groups->pluck('name');
-        $this->assertContains('Ingliz tili 09:00 (Se-Pa-Sh)', $names);
-        $this->assertContains('IT 14:00 (Du-Ch-Ju)', $names);
-        $this->assertContains('Matematika 18:30 (Du-Ch-Ju)', $names);
-        $this->assertContains('Ingliz tili 15:30 (Se-Pa-Sh) Robiya', $names);
-        $this->assertSame($names->unique()->count(), $names->count());
+        // Group names are "<Course>-<Teacher>-<n>", numbered per teacher and course in timetable order.
+        $this->assertSame([
+            'English-Utkirbek-1', 'English-Utkirbek-2', 'English-Utkirbek-3', 'English-Utkirbek-4',
+            'English-Robiya-1', 'English-Robiya-2',
+            'IT-Utkirbek-1', 'IT-Utkirbek-2', 'IT-Utkirbek-3',
+            'Math-Olimjon-1', 'Math-Olimjon-2', 'Math-Olimjon-3',
+            'English-Sabina-1',
+        ], $groups->pluck('name')->all());
+
+        $this->assertSame('09:00', $groups->firstWhere('name', 'English-Utkirbek-1')->schedule['time']);
+        $this->assertSame('17:00', $groups->firstWhere('name', 'English-Utkirbek-4')->schedule['time']);
+        $this->assertSame('18:30', $groups->firstWhere('name', 'Math-Olimjon-3')->schedule['time']);
+    }
+
+    public function test_groups_seeded_with_the_old_names_are_renamed_not_duplicated(): void
+    {
+        $this->seedChirchiq();
+
+        $ids = StudyGroup::withoutGlobalScopes()->orderBy('id')->pluck('name', 'id')->all();
+
+        $legacy = [
+            'English-Utkirbek-1' => 'Ingliz tili 09:00 (Se-Pa-Sh)',
+            'English-Robiya-1' => 'Ingliz tili 15:30 (Se-Pa-Sh) Robiya',
+            'Math-Olimjon-3' => 'Matematika 18:30 (Du-Ch-Ju)',
+        ];
+
+        foreach ($legacy as $new => $old) {
+            StudyGroup::withoutGlobalScopes()->where('name', $new)->update(['name' => $old]);
+        }
+
+        // A name an admin chose by hand is not recognised as a seeded group, so it is left as it is.
+        StudyGroup::withoutGlobalScopes()->where('name', 'IT-Utkirbek-2')->update(['name' => 'Qo‘lda o‘zgartirilgan nom']);
+
+        $this->seedChirchiq();
+
+        $after = StudyGroup::withoutGlobalScopes()->orderBy('id')->pluck('name', 'id')->all();
+
+        foreach ($ids as $id => $name) {
+            $this->assertSame($name === 'IT-Utkirbek-2' ? 'Qo‘lda o‘zgartirilgan nom' : $name, $after[$id]);
+        }
+
+        // Only the hand-renamed group gets a fresh seeded twin.
+        $this->assertCount(14, $after);
+        $this->assertSame(1, collect($after)->filter(fn ($name) => $name === 'IT-Utkirbek-2')->count());
     }
 
     public function test_no_teacher_has_two_groups_at_the_same_day_and_time(): void
@@ -210,9 +247,9 @@ class ChirchiqSeederTest extends TestCase
     {
         $path = tempnam(sys_get_temp_dir(), 'roster');
         file_put_contents($path, "full_name,phone,birth_date,group_name\n".
-            "Karimova Madina,+998901112233,2011-04-02,Matematika 18:30 (Du-Ch-Ju)\n".
-            "Jo‘rayev Ulug‘bek,+998931234567,2009-09-15,Matematika 18:30 (Du-Ch-Ju)\n".
-            "Noma’lum Talaba,+998971111111,2010-01-01,Mavjud emas guruh\n");
+            "Karimova Madina,+998901112233,2011-04-02,Math-Olimjon-3\n".
+            "Jo‘rayev Ulug‘bek,+998931234567,2009-09-15,Math-Olimjon-3\n".
+            "Noma’lum Talaba,+998971111111,2010-01-01,Mavjud-emas-9\n");
 
         $this->seedChirchiq($path);
         $this->seedChirchiq($path);
@@ -226,7 +263,7 @@ class ChirchiqSeederTest extends TestCase
         $this->assertMatchesRegularExpression('/^ulugbek\.jorayev\d{2}@brainup\.uz$/', $students[1]->email);
         $this->assertSame('+998901112233', $students[0]->phone);
 
-        $group = StudyGroup::withoutGlobalScopes()->where('name', 'Matematika 18:30 (Du-Ch-Ju)')->firstOrFail();
+        $group = StudyGroup::withoutGlobalScopes()->where('name', 'Math-Olimjon-3')->firstOrFail();
         $this->assertEqualsCanonicalizing($students->pluck('id')->all(), $group->students()->pluck('users.id')->all());
     }
 }

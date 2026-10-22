@@ -50,9 +50,9 @@ class ChirchiqSeeder extends Seeder
 
     /** @var array<string, array{name: string, label: string, ages: array{int, int}}> */
     private const COURSES = [
-        'english' => ['name' => 'Ingliz tili', 'label' => 'Ingliz tili', 'ages' => [12, 20]],
+        'english' => ['name' => 'Ingliz tili', 'label' => 'English', 'ages' => [12, 20]],
         'it' => ['name' => 'IT', 'label' => 'IT', 'ages' => [10, 18]],
-        'math' => ['name' => 'Matematika', 'label' => 'Matematika', 'ages' => [12, 20]],
+        'math' => ['name' => 'Matematika', 'label' => 'Math', 'ages' => [12, 20]],
     ];
 
     /** @var array<string, array{days: list<string>, label: string}> */
@@ -207,8 +207,8 @@ class ChirchiqSeeder extends Seeder
     private function createGroups(Branch $branch, array $teachers, array $courses): array
     {
         $groups = [];
-        $names = [];
         $slots = [];
+        $numbers = [];
 
         foreach (self::TIMETABLE as [$teacherKey, $courseSlug, $daySet, $times]) {
             foreach ($times as $time) {
@@ -220,13 +220,11 @@ class ChirchiqSeeder extends Seeder
 
                 $slots[$slot] = true;
 
-                $name = sprintf('%s %s (%s)', self::COURSES[$courseSlug]['label'], $time, self::DAY_SETS[$daySet]['label']);
+                // "<Course>-<Teacher>-<n>", numbered per teacher and course in timetable order: English-Utkirbek-1.
+                $number = $numbers["{$teacherKey}|{$courseSlug}"] = ($numbers["{$teacherKey}|{$courseSlug}"] ?? 0) + 1;
+                $name = sprintf('%s-%s-%d', self::COURSES[$courseSlug]['label'], $this->firstName(self::TEACHERS[$teacherKey]['name']), $number);
 
-                if (isset($names[$name])) {
-                    $name .= ' '.$this->firstName(self::TEACHERS[$teacherKey]['name']);
-                }
-
-                $names[$name] = true;
+                $this->renameLegacyGroup($branch, $teachers[$teacherKey], $courses[$courseSlug], $time, $name);
 
                 $group = StudyGroup::withoutGlobalScopes()->firstOrCreate(
                     ['branch_id' => $branch->id, 'name' => $name],
@@ -245,6 +243,26 @@ class ChirchiqSeeder extends Seeder
         }
 
         return $groups;
+    }
+
+    /**
+     * Groups seeded earlier were named "<Fan> <HH:MM> (<days>)"; give them the new name instead of creating duplicates.
+     * Names an admin has changed by hand are left alone.
+     */
+    private function renameLegacyGroup(Branch $branch, User $teacher, Course $course, string $time, string $name): void
+    {
+        if (StudyGroup::withoutGlobalScopes()->where('branch_id', $branch->id)->where('name', $name)->exists()) {
+            return;
+        }
+
+        StudyGroup::withoutGlobalScopes()
+            ->where('branch_id', $branch->id)
+            ->where('teacher_id', $teacher->id)
+            ->where('course_id', $course->id)
+            ->where('schedule->time', $time)
+            ->get()
+            ->first(fn (StudyGroup $group) => preg_match('/^(Ingliz tili|IT|Matematika) \d{2}:\d{2} \((Se-Pa-Sh|Du-Ch-Ju)\)( \w+)?$/u', $group->name) === 1)
+            ?->update(['name' => $name]);
     }
 
     /**
