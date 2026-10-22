@@ -5,15 +5,21 @@ namespace Tests\Feature;
 use App\Enums\AttendanceStatus;
 use App\Enums\Role;
 use App\Enums\XpReason;
+use App\Listeners\AwardAttendanceXp;
 use App\Models\Attendance;
 use App\Models\Branch;
 use App\Models\Level;
 use App\Models\Setting;
 use App\Models\StudyGroup;
 use App\Models\User;
+use App\Models\XpRule;
 use App\Models\XpTransaction;
+use App\Services\GamificationService;
 use Database\Seeders\GamificationSeeder;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Events\CallQueuedListener;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 
 class GamificationTest extends TestCase
@@ -67,6 +73,40 @@ class GamificationTest extends TestCase
         $this->assertSame(10, $student->fresh()->xp);
 
         $this->mark($teacher, $group, $student, 'absent');
+        $this->assertSame(0, $student->fresh()->xp);
+    }
+
+    public function test_editing_xp_rules_refreshes_the_cached_points(): void
+    {
+        [$teacher, $student, $group] = $this->makeGroup();
+
+        $this->mark($teacher, $group, $student, 'present', 1);
+        $this->assertSame(10, $student->fresh()->xp);
+
+        $rule = XpRule::where('code', 'attendance_present')->firstOrFail();
+        $admin = User::factory()->create(['role' => Role::SuperAdmin]);
+
+        $this->actingAs($admin)->put(route('admin.gamification.update'), [
+            'rules' => [$rule->id => ['points' => 25, 'is_active' => 1]],
+        ])->assertRedirect();
+
+        $this->assertSame(25, XpRule::pointsFor('attendance_present'));
+
+        $this->mark($teacher, $group, $student, 'present', 0);
+        $this->assertSame(10 + 25, $student->fresh()->xp);
+    }
+
+    public function test_attendance_xp_is_awarded_by_a_queued_listener_after_commit(): void
+    {
+        $this->assertContains(ShouldQueue::class, class_implements(AwardAttendanceXp::class));
+        $this->assertTrue((new AwardAttendanceXp(app(GamificationService::class)))->afterCommit);
+
+        Queue::fake();
+
+        [$teacher, $student, $group] = $this->makeGroup();
+        $this->mark($teacher, $group, $student, 'present');
+
+        Queue::assertPushed(CallQueuedListener::class, fn ($job) => $job->class === AwardAttendanceXp::class);
         $this->assertSame(0, $student->fresh()->xp);
     }
 
