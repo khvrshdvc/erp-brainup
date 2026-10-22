@@ -197,4 +197,17 @@ class DarkModeTest extends TestCase
             $this->assertStringNotContainsString('name="color-scheme"', file_get_contents(view($layout)->getPath()));
         }
     }
+
+    public function test_the_interface_uses_the_light_minimal_typeface_on_every_layout(): void
+    {
+        $this->assertStringContainsString("--font: 'Onest'", $this->css());
+        $this->assertDoesNotMatchRegularExpression('/font-weight:\s*(700|800|900)|font:\s*(700|800|900)\b/', $this->css(), 'Heavy bold weights make the minimal look noisy');
+
+        foreach (['layouts.app', 'layouts.guest'] as $layout) {
+            $source = file_get_contents(view($layout)->getPath());
+
+            $this->assertStringContainsString('family=Onest:wght@300;400;500;600', $source);
+            $this->assertStringNotContainsString('Manrope', $source);
+        }
+    }
 }
