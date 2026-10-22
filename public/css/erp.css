@@ -1,4 +1,5 @@
 :root {
+    color-scheme: light;
     --font: 'Manrope', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
     --ink: #111827;
     --ink2: #374151;
@@ -28,6 +29,7 @@
     --err-line: #F2C5C5;
     --switch-off: #D1D5DB;
     --day-out: #C0C6CF;
+    --nav-active: var(--navy);
 }
 
 /* Dark theme: switched by <html data-theme="dark"> (see layouts/partials/theme-init.blade.php). */
@@ -59,7 +61,8 @@
     --neutral: #A3ADBB;
     --neutral-bg: #232B38;
     --switch-off: #475569;
-    --day-out: #4B5563;
+    --day-out: #6B7686;
+    --nav-active: #E6EAF0;
 }
 
 .erp-body { margin: 0; background: var(--bg); }
@@ -102,7 +105,7 @@
     font-size: 14px; font-weight: 500; color: #D1D5DB; text-decoration: none;
 }
 .erp-nav a:hover { background: var(--navy2); color: #fff; }
-.erp-nav a.active { background: var(--accent-soft); color: var(--navy); }
+.erp-nav a.active { background: var(--accent-soft); color: var(--nav-active); }
 .erp-org {
     margin-top: auto; padding: 12px; border-radius: 8px; background: var(--navy2);
     color: #D1D5DB; font-size: 12px; line-height: 1.5;
@@ -219,7 +222,36 @@
 .field-error { font-size: 12px; color: var(--err); }
 .filters { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; padding: 16px 20px; }
 .filters .field { min-width: 220px; }
-.check { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink2); }
+.check { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--ink2); cursor: pointer; user-select: none; }
+
+/* Checkboxes: a rounded box with a drawn tick instead of the browser default */
+.check input[type="checkbox"] {
+    appearance: none; -webkit-appearance: none; flex: 0 0 auto; width: 20px; height: 20px; margin: 0;
+    display: inline-grid; place-content: center; cursor: pointer;
+    border: 1.5px solid var(--line-strong); border-radius: 6px; background: var(--surface);
+    transition: background-color .12s, border-color .12s, box-shadow .12s;
+}
+.check input[type="checkbox"]::after {
+    content: ''; width: 12px; height: 12px; transform: scale(0); transition: transform .12s ease-out;
+    background: center / contain no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='white' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 8.5l3.2 3.2L13 4.5'/%3E%3C/svg%3E");
+}
+.check input[type="checkbox"]:hover:not(:disabled) { border-color: var(--accent); }
+.check input[type="checkbox"]:checked { background-color: var(--accent); border-color: var(--accent); }
+.check input[type="checkbox"]:checked::after { transform: scale(1); }
+.check input[type="checkbox"]:indeterminate { background-color: var(--accent); border-color: var(--accent); }
+.check input[type="checkbox"]:indeterminate::after { transform: scale(1); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='white' stroke-width='2.6' stroke-linecap='round'%3E%3Cpath d='M4 8h8'/%3E%3C/svg%3E"); }
+.check input[type="checkbox"]:focus-visible { outline: 0; box-shadow: 0 0 0 3px var(--accent-soft), 0 0 0 1.5px var(--accent); }
+.check input[type="checkbox"]:disabled { opacity: .5; cursor: not-allowed; }
+.check:has(input:disabled) { cursor: not-allowed; color: var(--muted); }
+
+/* Choosing several of a few options (days, branches): each option becomes a tile that lights up when ticked */
+.check-row .check {
+    padding: 9px 14px 9px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface);
+    color: var(--ink); font-size: 14px; transition: background-color .12s, border-color .12s;
+}
+.check-row .check:hover { background: var(--hover); }
+.check-row .check:has(input:checked) { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-dark); font-weight: 500; }
+.check-row .check:has(input:focus-visible) { box-shadow: 0 0 0 3px var(--accent-soft); }
 
 .alert { padding: 12px 16px; border-radius: 8px; border: 1px solid; font-size: 14px; }
 .alert-ok { background: var(--ok-bg); color: var(--ok); border-color: var(--ok-line); }
@@ -307,7 +339,7 @@
 }
 .tab.on { background: var(--accent); border-color: var(--accent); color: #fff; }
 .t-row.me { background: var(--accent-soft); }
-.rank { font-weight: 600; color: var(--accent); }
+.rank { font-weight: 600; color: var(--link); }
 .input-sm { height: 36px; width: 96px; }
 
 .textarea {
@@ -536,7 +568,7 @@ html { -webkit-text-size-adjust: 100%; }
 }
 .file-input:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
 .file-input.drag { border-color: var(--accent); border-style: dashed; background: var(--accent-soft); }
-.file-input.picked .file-input-icon { color: var(--accent); }
+.file-input.picked .file-input-icon { color: var(--link); }
 .file-input.is-invalid { border-color: var(--err); }
 .file-input-icon { flex: 0 0 auto; color: var(--muted); }
 .file-input-text {
@@ -681,7 +713,7 @@ form[aria-busy="true"] button[type="submit"] { opacity: .6; cursor: progress; }
 .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; }
 .shop-card { display: flex; flex-direction: column; overflow: hidden; }
 .shop-media {
-    position: relative; aspect-ratio: 4 / 3; background: var(--accent-soft); color: var(--accent);
+    position: relative; aspect-ratio: 4 / 3; background: var(--accent-soft); color: var(--link);
     display: flex; align-items: center; justify-content: center;
 }
 .shop-media img { width: 100%; height: 100%; object-fit: cover; }
@@ -704,7 +736,7 @@ form[aria-busy="true"] button[type="submit"] { opacity: .6; cursor: progress; }
 .order-row:last-child { border-bottom: 0; }
 .order-thumb {
     flex: 0 0 auto; width: 44px; height: 44px; border-radius: 8px; overflow: hidden; background: var(--accent-soft);
-    color: var(--accent); display: flex; align-items: center; justify-content: center;
+    color: var(--link); display: flex; align-items: center; justify-content: center;
 }
 .order-thumb img { width: 100%; height: 100%; object-fit: cover; }
 .order-body { flex: 1 1 200px; min-width: 0; display: flex; flex-direction: column; }
@@ -773,7 +805,7 @@ form[aria-busy="true"] button[type="submit"] { opacity: .6; cursor: progress; }
 .datepicker-day.out { color: var(--day-out); }
 .datepicker-day.today { box-shadow: inset 0 0 0 1.5px var(--accent); }
 .datepicker-day.on { background: var(--accent); color: #fff; font-weight: 600; }
-.datepicker-day:disabled { color: var(--line-strong); cursor: not-allowed; text-decoration: line-through; }
+.datepicker-day:disabled { color: var(--day-out); cursor: not-allowed; text-decoration: line-through; }
 .datepicker-foot { display: flex; justify-content: space-between; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line2); }
 .datepicker-foot .link { border: 0; background: none; padding: 4px; cursor: pointer; font: 500 13px var(--font); }
 .datepicker-foot .link:disabled { opacity: .4; cursor: not-allowed; }
@@ -815,3 +847,21 @@ form[aria-busy="true"] button[type="submit"] { opacity: .6; cursor: progress; }
 .lang-menu button b { width: 24px; font-weight: 600; color: var(--muted); }
 .lang-menu button:hover { background: var(--hover); }
 .lang-menu button.on { background: var(--accent-soft); color: var(--accent-dark); }
+
+/* Pages without the app shell (login, password reset) keep readable text in both themes */
+.auth-wrap { color: var(--ink); }
+.auth-card label, .auth-card .field-hint { color: var(--ink2); }
+:root[data-theme="dark"] .auth-card input:-webkit-autofill { -webkit-text-fill-color: var(--ink); box-shadow: 0 0 0 1000px var(--surface) inset; }
+
+/* Branch filter: our own dropdown instead of a native <select>, whose open list the browser colours by itself
+   (it followed the device's theme, not the app's, and hid rows as white text on a white list). */
+.branch-switch { position: relative; }
+.branch-btn { max-width: 240px; padding: 0 12px; gap: 8px; font-weight: 500; color: var(--ink); }
+.branch-btn span { overflow: hidden; text-overflow: ellipsis; }
+.branch-btn svg:last-child { color: var(--muted); }
+.branch-menu { min-width: 220px; max-height: 320px; overflow-y: auto; right: auto; left: 0; }
+.branch-menu button { color: var(--ink); }
+.branch-menu button .check-mark { margin-left: auto; visibility: hidden; color: var(--link); }
+.branch-menu button.on .check-mark { visibility: visible; }
+.branch-menu button.on { color: var(--ink); }
+@media (max-width: 720px) { .branch-btn { max-width: 150px; } .branch-menu { min-width: 200px; } }

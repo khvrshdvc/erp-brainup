@@ -6,6 +6,7 @@ use App\Enums\Role;
 use App\Models\Branch;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\File;
 use Tests\TestCase;
 
 class DarkModeTest extends TestCase
@@ -90,5 +91,110 @@ class DarkModeTest extends TestCase
         $this->assertCount(1, $matches[0], 'Unexpected hard-coded white backgrounds: '.implode(' | ', $matches[0]));
         $this->assertStringContainsString('background: #fff; box-shadow: 0 1px 2px', $this->css());
         $this->assertStringNotContainsString('1px solid #D1D5DB', $this->css());
+    }
+
+    private function darkPalette(): array
+    {
+        preg_match('/:root \{(.*?)\n\}/s', $this->css(), $light);
+        preg_match('/:root\[data-theme="dark"\] \{(.*?)\n\}/s', $this->css(), $dark);
+
+        return [...$this->variables($light[1]), ...$this->variables($dark[1])];
+    }
+
+    private function contrast(string $foreground, string $background, array $palette): float
+    {
+        $rgb = function (string $name) use ($palette): array {
+            $value = $name;
+
+            while (preg_match('/^var\((--[\w-]+)\)$/', $value, $m)) {
+                $value = $palette[$m[1]];
+            }
+
+            $hex = ltrim($value, '#');
+
+            return array_map('hexdec', str_split(strlen($hex) === 3 ? preg_replace('/(.)/', '$1$1', $hex) : $hex, 2));
+        };
+
+        $luminance = function (array $channels): float {
+            [$r, $g, $b] = array_map(fn (int $c) => ($c /= 255) <= 0.03928 ? $c / 12.92 : (($c + 0.055) / 1.055) ** 2.4, $channels);
+
+            return 0.2126 * $r + 0.7152 * $g + 0.0722 * $b;
+        };
+
+        [$a, $b] = [$luminance($rgb($foreground)), $luminance($rgb($background))];
+
+        return (max($a, $b) + 0.05) / (min($a, $b) + 0.05);
+    }
+
+    public function test_dark_theme_text_is_readable_on_its_backgrounds(): void
+    {
+        $palette = $this->darkPalette();
+
+        $pairs = [
+            // [text, background, minimum contrast]
+            ['--ink', '--surface', 7], ['--ink', '--bg', 7], ['--ink2', '--surface', 7], ['--muted', '--surface', 4.5],
+            ['--muted', '--bg', 4.5], ['--link', '--surface', 4.5], ['--accent-dark', '--accent-soft', 4.5],
+            ['--ok', '--ok-bg', 4.5], ['--warn', '--warn-bg', 4.5], ['--err', '--err-bg', 4.5], ['--neutral', '--neutral-bg', 4.5],
+            ['--ok', '--surface', 4.5], ['--warn', '--surface', 4.5], ['--err', '--surface', 4.5],
+            // The active sidebar item and the calendar's faded days.
+            ['--nav-active', '--accent-soft', 7], ['--day-out', '--surface', 3],
+        ];
+
+        foreach ($pairs as [$text, $background, $minimum]) {
+            $ratio = $this->contrast("var({$text})", "var({$background})", $palette);
+
+            $this->assertGreaterThanOrEqual($minimum, $ratio, sprintf('%s on %s has contrast %.2f in the dark theme (needs %s)', $text, $background, $ratio, $minimum));
+        }
+    }
+
+    public function test_tailwind_dark_variants_follow_the_apps_theme_switch(): void
+    {
+        $config = file_get_contents(base_path('tailwind.config.js'));
+
+        $this->assertStringContainsString("darkMode: ['selector', '[data-theme=\"dark\"]']", $config);
+        $this->assertStringNotContainsString('color: var(--navy)', $this->css());
+    }
+
+    public function test_checkboxes_are_custom_drawn_and_visible_in_both_themes(): void
+    {
+        $css = $this->css();
+
+        $this->assertStringContainsString('.check input[type="checkbox"] {', $css);
+        $this->assertStringContainsString('appearance: none', $css);
+        $this->assertStringContainsString('.check input[type="checkbox"]:checked', $css);
+        $this->assertStringContainsString('.check input[type="checkbox"]:focus-visible', $css);
+        $this->assertStringContainsString('.check-row .check:has(input:checked)', $css);
+
+        // The empty box outline and the ticked box must stand out from the card in the dark theme.
+        $palette = $this->darkPalette();
+        $this->assertGreaterThanOrEqual(1.6, $this->contrast('var(--line-strong)', 'var(--surface)', $palette));
+        $this->assertGreaterThanOrEqual(3, $this->contrast('var(--accent)', 'var(--surface)', $palette));
+        $this->assertGreaterThanOrEqual(4.5, $this->contrast('var(--accent-dark)', 'var(--accent-soft)', $palette));
+    }
+
+    public function test_every_checkbox_in_the_views_sits_in_a_styled_label(): void
+    {
+        foreach (File::allFiles(resource_path('views')) as $file) {
+            if (preg_match_all('/<label class="check">\s*<input type="checkbox"/', $file->getContents(), $styled)
+                + preg_match_all('/<input type="checkbox"/', $file->getContents(), $all) === 0) {
+                continue;
+            }
+
+            $this->assertSame(count($all[0]), count($styled[0]), "{$file->getRelativePathname()} has a checkbox outside <label class=\"check\">");
+        }
+    }
+
+    public function test_form_controls_follow_the_apps_theme_not_the_devices(): void
+    {
+        $css = $this->css();
+
+        // Native controls (selects, scrollbars) are drawn in the colour scheme of <html>; it must come from our switch.
+        $this->assertMatchesRegularExpression('/:root \{\s*color-scheme: light;/', $css);
+        $this->assertMatchesRegularExpression('/:root\[data-theme="dark"\] \{\s*color-scheme: dark;/', $css);
+        $this->assertStringNotContainsString('select option', $css);
+
+        foreach (['layouts.app', 'layouts.guest'] as $layout) {
+            $this->assertStringNotContainsString('name="color-scheme"', file_get_contents(view($layout)->getPath()));
+        }
     }
 }
