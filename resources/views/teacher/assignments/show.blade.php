@@ -110,13 +110,13 @@
                 @endif
 
                 @php
-                    $editing = $selected->status === \App\Enums\SubmissionStatus::Submitted || request()->boolean('edit');
+                    $editing = $selected->isPending() || request()->boolean('edit');
                 @endphp
 
                 @if (! $editing)
                     <div class="stack">
                         <div class="split" style="gap: 32px">
-                            @if ($selected->status === \App\Enums\SubmissionStatus::Graded)
+                            @if ($selected->isGraded())
                                 <div>
                                     <div class="label-up">Baho</div>
                                     <div class="grade">
@@ -150,31 +150,43 @@
 
                         <div>
                             <a href="{{ route('teacher.assignments.show', [$assignment, 'student' => $selected->student_id, 'edit' => 1]) }}" class="btn">
-                                {{ $selected->status === \App\Enums\SubmissionStatus::Graded ? 'Bahoni o‘zgartirish' : 'Baholash' }}
+                                {{ $selected->isGraded() ? 'Bahoni o‘zgartirish' : 'Baholash' }}
                             </a>
                         </div>
                     </div>
                 @else
-                    <form method="POST" action="{{ route('teacher.submissions.update', $selected) }}" class="stack">
+                    <form method="POST" action="{{ route('teacher.submissions.update', $selected) }}" class="stack"
+                        x-data="{ ...oneSubmit(), feedback: @js(old('feedback', $selected->feedback ?? '')), needFeedback: false }"
+                        @submit="if ($event.submitter?.value === 'return' && ! feedback.trim()) { $event.preventDefault(); needFeedback = true; $refs.feedback.focus(); return; } guard($event)"
+                        :aria-busy="submitting">
                         @csrf
                         @method('PUT')
 
                         <div class="field" style="max-width: 200px">
                             <label for="score">Baho <span class="card-sub" style="font-weight: 400">(ixtiyoriy)</span></label>
                             <div style="display: flex; align-items: center; gap: 8px">
-                                <input id="score" class="input" type="number" name="score" min="0" max="{{ $assignment->max_score }}"
+                                <input id="score" type="number" name="score" min="0" max="{{ $assignment->max_score }}" inputmode="numeric"
+                                    @class(['input', 'is-invalid' => $errors->has('score')])
                                     value="{{ old('score', $selected->score) }}">
                                 <span class="card-sub">/ {{ $assignment->max_score }}</span>
                             </div>
+                            <x-field-error name="score" />
                         </div>
 
                         <div class="field">
                             <label for="feedback">Fikr-mulohaza <span class="card-sub" style="font-weight: 400">(qaytarishda majburiy)</span></label>
-                            <textarea id="feedback" name="feedback" class="textarea" maxlength="2000">{{ old('feedback', $selected->feedback) }}</textarea>
+                            <textarea id="feedback" name="feedback" maxlength="2000" x-ref="feedback" x-model="feedback"
+                                @class(['textarea', 'is-invalid' => $errors->has('feedback')])
+                                :class="{ 'is-invalid': needFeedback && ! feedback.trim() }"
+                                placeholder="Nimasi yaxshi chiqqan, nimani tuzatish kerak">{{ old('feedback', $selected->feedback) }}</textarea>
+                            <div class="field-error" x-show="needFeedback && ! feedback.trim()" x-cloak role="alert">
+                                Qayta topshirishga qaytarishda fikr-mulohaza yozish majburiy.
+                            </div>
+                            <x-field-error name="feedback" />
                         </div>
 
                         <div class="form-actions">
-                                @if ($selected->status !== \App\Enums\SubmissionStatus::Submitted)
+                                @if (! $selected->isPending())
                                     <a href="{{ route('teacher.assignments.show', [$assignment, 'student' => $selected->student_id]) }}" class="btn">Bekor qilish</a>
                                 @endif
                             <button type="submit" name="action" value="return" class="btn">Qayta topshirishga qaytarish</button>

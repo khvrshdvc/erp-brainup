@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\GamificationRulesRequest;
 use App\Models\Badge;
 use App\Models\Level;
 use App\Models\XpRule;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class GamificationController extends Controller
@@ -21,13 +21,9 @@ class GamificationController extends Controller
         ]);
     }
 
-    public function update(Request $request): RedirectResponse
+    public function update(GamificationRulesRequest $request): RedirectResponse
     {
-        $data = $request->validate([
-            'rules' => ['required', 'array'],
-            'rules.*.points' => ['required', 'integer', 'min:0', 'max:1000'],
-            'rules.*.is_active' => ['sometimes', 'boolean'],
-        ]);
+        $data = $request->validated();
 
         foreach (XpRule::all() as $rule) {
             $input = $data['rules'][$rule->id] ?? null;

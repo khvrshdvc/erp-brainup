@@ -29,4 +29,24 @@ class UzDate
     {
         return self::SHORT_DAYS[$date->dayOfWeek];
     }
+
+    /**
+     * Time left until the given moment, e.g. "2 kun 5 soat" or "40 daqiqa".
+     */
+    public static function remaining(CarbonInterface $until): string
+    {
+        $minutes = max(0, (int) floor(now()->diffInMinutes($until, false)));
+
+        $days = intdiv($minutes, 1440);
+        $hours = intdiv($minutes % 1440, 60);
+        $rest = $minutes % 60;
+
+        $parts = match (true) {
+            $days > 0 => [$days.' kun', $hours ? $hours.' soat' : null],
+            $hours > 0 => [$hours.' soat', $rest ? $rest.' daqiqa' : null],
+            default => [max(1, $rest).' daqiqa'],
+        };
+
+        return implode(' ', array_filter($parts));
+    }
 }

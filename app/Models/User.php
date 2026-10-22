@@ -60,6 +60,11 @@ class User extends Authenticatable
         return in_array($this->role, $roles, true);
     }
 
+    public function isActive(): bool
+    {
+        return $this->status === UserStatus::Active;
+    }
+
     public function isSuperAdmin(): bool
     {
         return $this->role === Role::SuperAdmin;

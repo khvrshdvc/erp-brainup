@@ -6,10 +6,11 @@ use App\Enums\Role;
 use App\Enums\UserStatus;
 use App\Http\Controllers\Admin\Concerns\ResolvesBranches;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\TeacherRequest;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 class TeacherController extends Controller
@@ -41,9 +42,9 @@ class TeacherController extends Controller
         return view('admin.teachers.create', $this->formData());
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(TeacherRequest $request): RedirectResponse
     {
-        $data = $request->validate($this->rules(), [], $this->attributes());
+        $data = $request->validated();
 
         $teacher = User::create([
             'name' => $data['name'],
@@ -61,7 +62,7 @@ class TeacherController extends Controller
 
     public function edit(User $teacher): View
     {
-        $this->authorizeTeacher($teacher);
+        Gate::authorize('manageTeacher', $teacher);
 
         return view('admin.teachers.edit', [
             'teacher' => $teacher->load('branches'),
@@ -69,11 +70,9 @@ class TeacherController extends Controller
         ]);
     }
 
-    public function update(Request $request, User $teacher): RedirectResponse
+    public function update(TeacherRequest $request, User $teacher): RedirectResponse
     {
-        $this->authorizeTeacher($teacher);
-
-        $data = $request->validate($this->rules($teacher), [], $this->attributes());
+        $data = $request->validated();
 
         $teacher->fill([
             'name' => $data['name'],
@@ -97,7 +96,7 @@ class TeacherController extends Controller
 
     public function toggleStatus(User $teacher): RedirectResponse
     {
-        $this->authorizeTeacher($teacher);
+        Gate::authorize('manageTeacher', $teacher);
 
         $teacher->update([
             'status' => $teacher->status === UserStatus::Active ? UserStatus::Inactive : UserStatus::Active,
@@ -106,44 +105,11 @@ class TeacherController extends Controller
         return back()->with('status', 'Holat o‘zgartirildi');
     }
 
-    private function authorizeTeacher(User $teacher): void
-    {
-        $branchIds = $teacher->branches()->pluck('branches.id')->all();
-
-        abort_unless(
-            $teacher->isTeacher() && array_intersect($branchIds, $this->availableBranchIds()) !== [],
-            404
-        );
-    }
-
     private function formData(): array
     {
         return [
             'branches' => $this->availableBranches(),
             'defaultBranchId' => $this->defaultBranchId(),
-        ];
-    }
-
-    private function rules(?User $teacher = null): array
-    {
-        return [
-            'name' => ['required', 'string', 'max:120'],
-            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($teacher)],
-            'phone' => ['nullable', 'string', 'max:20', Rule::unique('users', 'phone')->ignore($teacher)],
-            'password' => $teacher ? ['nullable', 'string', 'min:8'] : ['required', 'string', 'min:8'],
-            'branches' => ['required', 'array', 'min:1'],
-            'branches.*' => ['integer', Rule::in($this->availableBranchIds())],
-        ];
-    }
-
-    private function attributes(): array
-    {
-        return [
-            'name' => 'ism',
-            'email' => 'email',
-            'phone' => 'telefon',
-            'password' => 'parol',
-            'branches' => 'filiallar',
         ];
     }
 }

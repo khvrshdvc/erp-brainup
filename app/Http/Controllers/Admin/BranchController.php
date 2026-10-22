@@ -3,10 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\BranchRequest;
 use App\Models\Branch;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class BranchController extends Controller
@@ -26,9 +25,9 @@ class BranchController extends Controller
         return view('admin.branches.create');
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(BranchRequest $request): RedirectResponse
     {
-        Branch::create($this->validated($request));
+        Branch::create($request->payload());
 
         return redirect()->route('admin.branches.index')->with('status', 'Filial qo‘shildi');
     }
@@ -38,9 +37,9 @@ class BranchController extends Controller
         return view('admin.branches.edit', compact('branch'));
     }
 
-    public function update(Request $request, Branch $branch): RedirectResponse
+    public function update(BranchRequest $request, Branch $branch): RedirectResponse
     {
-        $branch->update($this->validated($request, $branch));
+        $branch->update($request->payload());
 
         return redirect()->route('admin.branches.index')->with('status', 'Filial yangilandi');
     }
@@ -50,22 +49,5 @@ class BranchController extends Controller
         $branch->update(['is_active' => ! $branch->is_active]);
 
         return back()->with('status', 'Holat o‘zgartirildi');
-    }
-
-    private function validated(Request $request, ?Branch $branch = null): array
-    {
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:120', Rule::unique('branches', 'name')->ignore($branch)],
-            'address' => ['nullable', 'string', 'max:255'],
-            'manager_name' => ['nullable', 'string', 'max:120'],
-        ], [], [
-            'name' => 'filial nomi',
-            'address' => 'manzil',
-            'manager_name' => 'menejer',
-        ]);
-
-        $data['is_active'] = $request->boolean('is_active');
-
-        return $data;
     }
 }

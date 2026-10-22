@@ -12,6 +12,7 @@ use App\Models\StudyGroup;
 use App\Services\AttachmentService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 class AssignmentController extends Controller
@@ -77,7 +78,7 @@ class AssignmentController extends Controller
 
     public function show(Request $request, Assignment $assignment): View
     {
-        $this->authorizeOwner($request, $assignment);
+        Gate::authorize('manage', $assignment);
 
         $assignment->load(['studyGroup', 'attachments']);
 
@@ -108,7 +109,7 @@ class AssignmentController extends Controller
 
     public function edit(Request $request, Assignment $assignment): View
     {
-        $this->authorizeOwner($request, $assignment);
+        Gate::authorize('manage', $assignment);
 
         return view('teacher.assignments.edit', [
             'assignment' => $assignment->load(['attachments', 'studyGroup']),
@@ -118,7 +119,7 @@ class AssignmentController extends Controller
 
     public function update(AssignmentRequest $request, Assignment $assignment, AttachmentService $attachments): RedirectResponse
     {
-        $this->authorizeOwner($request, $assignment);
+        Gate::authorize('manage', $assignment);
 
         $data = $request->validated();
         $publish = $data['action'] === 'publish' && $assignment->isDraft();
@@ -146,7 +147,7 @@ class AssignmentController extends Controller
 
     public function publish(Request $request, Assignment $assignment): RedirectResponse
     {
-        $this->authorizeOwner($request, $assignment);
+        Gate::authorize('manage', $assignment);
 
         abort_unless($assignment->isDraft(), 422);
 
@@ -159,7 +160,7 @@ class AssignmentController extends Controller
 
     public function close(Request $request, Assignment $assignment): RedirectResponse
     {
-        $this->authorizeOwner($request, $assignment);
+        Gate::authorize('manage', $assignment);
 
         abort_unless($assignment->status === AssignmentStatus::Published, 422);
 
@@ -170,7 +171,7 @@ class AssignmentController extends Controller
 
     public function reopen(Request $request, Assignment $assignment): RedirectResponse
     {
-        $this->authorizeOwner($request, $assignment);
+        Gate::authorize('manage', $assignment);
 
         abort_unless($assignment->isClosed(), 422);
 
@@ -182,10 +183,5 @@ class AssignmentController extends Controller
     private function groups(Request $request)
     {
         return $request->user()->teachingGroups()->active()->orderBy('name')->get(['id', 'name']);
-    }
-
-    private function authorizeOwner(Request $request, Assignment $assignment): void
-    {
-        abort_unless($assignment->teacher_id === $request->user()->id, 403);
     }
 }

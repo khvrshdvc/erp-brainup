@@ -5,32 +5,16 @@ namespace App\Http\Controllers\Teacher;
 use App\Enums\SubmissionStatus;
 use App\Events\SubmissionUpdated;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\GradeSubmissionRequest;
 use App\Models\Submission;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 class SubmissionController extends Controller
 {
-    public function update(Request $request, Submission $submission): RedirectResponse
+    public function update(GradeSubmissionRequest $request, Submission $submission): RedirectResponse
     {
+        $data = $request->validated();
         $assignment = $submission->assignment;
-
-        abort_unless($assignment && $assignment->teacher_id === $request->user()->id, 403);
-
-        $data = $request->validate([
-            'action' => ['required', Rule::in(['grade', 'return'])],
-            'score' => ['nullable', 'integer', 'min:0', 'max:'.$assignment->max_score],
-            'feedback' => [
-                'nullable',
-                'string',
-                'max:2000',
-                Rule::requiredIf($request->input('action') === 'return'),
-            ],
-        ], [], [
-            'score' => 'baho',
-            'feedback' => 'fikr-mulohaza',
-        ]);
 
         $grading = $data['action'] === 'grade';
 

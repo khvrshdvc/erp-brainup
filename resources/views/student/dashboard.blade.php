@@ -13,49 +13,77 @@
         <x-stat-card label="Davomat seriyasi" :value="$student->streak" icon="streak" note="Ketma-ket darslar" />
     </div>
 
-    <section class="card" style="overflow: hidden">
-        <div class="card-head">
-            <h2 class="card-title">Mening guruhlarim</h2>
-        </div>
-        <div class="t-scroll">
-            <div class="t-min" style="min-width: 520px">
-                <div class="t-head" style="--cols: 2fr 2fr">
-                    <div>Guruh</div>
-                    <div>O‘qituvchi</div>
-                </div>
-                @forelse ($groups as $group)
-                    <div class="t-row" style="--cols: 2fr 2fr">
-                        <div style="font-weight: 600">{{ $group->name }}</div>
-                        <div>{{ $group->teacher?->name ?? '—' }}</div>
-                    </div>
-                @empty
-                    <div class="t-empty">Guruhga biriktirilmagan</div>
-                @endforelse
+    <div class="dash-grid">
+        <section class="card">
+            <div class="card-head">
+                <h2 class="card-title">Mening guruhlarim</h2>
+                @if ($groups->isNotEmpty())
+                    <a class="link" href="{{ route('student.groups.index') }}">Batafsil</a>
+                @endif
             </div>
-        </div>
-    </section>
 
-    <section class="card" style="overflow: hidden">
-        <div class="card-head">
-            <h2 class="card-title">So‘nggi davomat</h2>
-        </div>
-        <div class="t-scroll">
-            <div class="t-min" style="min-width: 520px">
-                <div class="t-head" style="--cols: 1fr 2fr 1.4fr">
-                    <div>Sana</div>
-                    <div>Guruh</div>
-                    <div>Holat</div>
-                </div>
-                @forelse ($attendances as $attendance)
-                    <div class="t-row" style="--cols: 1fr 2fr 1.4fr">
-                        <div>{{ $attendance->lesson_date->format('d.m.Y') }}</div>
-                        <div style="font-weight: 600">{{ $attendance->studyGroup?->name }}</div>
-                        <div><x-badge :type="$attendance->status->badge()">{{ $attendance->status->label() }}</x-badge></div>
-                    </div>
-                @empty
-                    <div class="t-empty">Hali davomat belgilanmagan</div>
-                @endforelse
+            @forelse ($groups as $group)
+                @php
+                    $scheduleDays = collect($group->schedule['days'] ?? [])->map(fn ($day) => $days[$day] ?? $day)->implode(', ');
+                    $time = $group->schedule['time'] ?? null;
+                @endphp
+                <a class="group-tile" href="{{ route('student.groups.index') }}">
+                    <span class="group-tile-badge">{{ \Illuminate\Support\Str::of($group->name)->before('-')->limit(3, '') }}</span>
+                    <span class="group-tile-body">
+                        <b>{{ $group->name }}</b>
+                        <span class="card-sub">{{ $group->course?->name ?? 'Kurs belgilanmagan' }}</span>
+                        <span class="group-tile-meta">
+                            <span>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8"/></svg>
+                                {{ $group->teacher?->name ?? 'O‘qituvchi belgilanmagan' }}
+                            </span>
+                            @if ($scheduleDays !== '')
+                                <span>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7v5l3 2M12 21a9 9 0 100-18 9 9 0 000 18"/></svg>
+                                    {{ $scheduleDays }}{{ $time ? ' · '.$time : '' }}
+                                </span>
+                            @endif
+                        </span>
+                    </span>
+                    <svg class="group-tile-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+                </a>
+            @empty
+                <div class="t-empty">Guruhga biriktirilmagan</div>
+            @endforelse
+        </section>
+
+        <section class="card">
+            <div class="card-head">
+                <h2 class="card-title">So‘nggi davomat</h2>
+                @if ($rate !== null)
+                    <span class="card-sub" style="margin: 0"><b style="color: var(--ink)">{{ $rate }}%</b> · {{ $attended }} / {{ $attendances->count() }} dars</span>
+                @endif
             </div>
-        </div>
-    </section>
+
+            @if ($attendances->isNotEmpty())
+                <div class="att-strip" aria-label="So‘nggi {{ $attendances->count() }} dars">
+                    @foreach ($attendances->reverse() as $attendance)
+                        <span class="att-dot {{ $attendance->status->badge() }}"
+                            title="{{ \App\Support\UzDate::dayMonth($attendance->lesson_date) }} · {{ $attendance->status->label() }}"></span>
+                    @endforeach
+                </div>
+            @endif
+
+            @forelse ($attendances as $attendance)
+                <div class="att-item">
+                    <span class="att-date">
+                        <b>{{ $attendance->lesson_date->day }}</b>
+                        <small>{{ \App\Support\UzDate::shortDay($attendance->lesson_date) }}</small>
+                    </span>
+                    <span class="att-body">
+                        <b>{{ $attendance->studyGroup?->name ?? '—' }}</b>
+                        <span class="card-sub">{{ \App\Support\UzDate::dayMonth($attendance->lesson_date) }}</span>
+                    </span>
+                    <span class="att-status {{ $attendance->status->badge() }}">{{ $attendance->status->label() }}</span>
+                </div>
+            @empty
+                <div class="t-empty">Hali davomat belgilanmagan</div>
+            @endforelse
+        </section>
+    </div>
 </x-app-layout>

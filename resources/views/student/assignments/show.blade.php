@@ -1,6 +1,6 @@
 @php
     [$label, $type] = $assignment->studentState($submission);
-    $canSubmit = ! $assignment->isClosed() && $submission?->status !== \App\Enums\SubmissionStatus::Graded;
+    $canSubmit = ! $assignment->isClosed() && ! $submission?->isGraded();
 @endphp
 
 <x-app-layout crumb="Vazifalar / {{ $assignment->title }}" :title="$assignment->title"

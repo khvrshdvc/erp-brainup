@@ -37,7 +37,7 @@
                         <div>{{ $teacher->teaching_groups_count }}</div>
                         <div>
                             <x-status-switch :action="route('admin.teachers.status', $teacher)"
-                                :active="$teacher->status === \App\Enums\UserStatus::Active"
+                                :active="$teacher->isActive()"
                                 :label="$teacher->status->label()" />
                         </div>
                         <div class="t-right"><x-edit-button :href="route('admin.teachers.edit', $teacher)" /></div>

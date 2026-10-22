@@ -2,64 +2,36 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
+use App\Http\Requests\UpdatePasswordRequest;
+use App\Http\Requests\UpdateProfileRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
     public function edit(Request $request): View
     {
-        return view('profile.edit', [
-            'user' => $request->user()->load(['branch', 'branches', 'level']),
-        ]);
+        $user = $request->user()->load(['branch', 'branches', 'level']);
+
+        if ($user->isStudent()) {
+            $user->load(['studyGroups' => fn ($query) => $query->orderBy('name')]);
+        }
+
+        return view('profile.edit', ['user' => $user]);
     }
 
-    public function update(Request $request): RedirectResponse
+    public function update(UpdateProfileRequest $request): RedirectResponse
     {
-        $user = $request->user();
-
-        $this->ensureCanEdit($user);
-
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:120'],
-            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user)],
-            'phone' => ['nullable', 'string', 'max:20', Rule::unique('users', 'phone')->ignore($user)],
-        ], [], [
-            'name' => 'ism',
-            'email' => 'email',
-            'phone' => 'telefon',
-        ]);
-
-        $user->fill($data)->save();
+        $request->user()->update($request->validated());
 
         return back()->with('status', 'Profil yangilandi');
     }
 
-    public function updatePassword(Request $request): RedirectResponse
+    public function updatePassword(UpdatePasswordRequest $request): RedirectResponse
     {
-        $this->ensureCanEdit($request->user());
-
-        $data = $request->validate([
-            'current_password' => ['required', 'current_password'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-        ], [], [
-            'current_password' => 'joriy parol',
-            'password' => 'yangi parol',
-        ]);
-
-        $request->user()->update(['password' => $data['password']]);
+        $request->user()->update(['password' => $request->validated('password')]);
 
         return back()->with('status', 'Parol o‘zgartirildi');
-    }
-
-    /**
-     * Students' personal data and passwords are managed by admins only.
-     */
-    private function ensureCanEdit(User $user): void
-    {
-        abort_if($user->isStudent(), 403);
     }
 }

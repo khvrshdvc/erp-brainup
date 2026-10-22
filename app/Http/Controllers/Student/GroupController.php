@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Student;
 
 use App\Enums\AttendanceStatus;
+use App\Enums\WeekDay;
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
 use Illuminate\Http\Request;
@@ -10,16 +11,6 @@ use Illuminate\View\View;
 
 class GroupController extends Controller
 {
-    public const DAYS = [
-        'mon' => 'Dushanba',
-        'tue' => 'Seshanba',
-        'wed' => 'Chorshanba',
-        'thu' => 'Payshanba',
-        'fri' => 'Juma',
-        'sat' => 'Shanba',
-        'sun' => 'Yakshanba',
-    ];
-
     public function index(Request $request): View
     {
         $student = $request->user();
@@ -53,7 +44,7 @@ class GroupController extends Controller
             'counts' => $counts,
             'total' => $total,
             'percent' => $total ? (int) round($attended / $total * 100) : null,
-            'days' => self::DAYS,
+            'days' => WeekDay::labels(),
         ]);
     }
 }

@@ -21,11 +21,16 @@ class SubmissionListController extends Controller
                 fn ($assignment) => $assignment->where('teacher_id', $user->id)
             ));
 
+        $byStatus = (clone $base)
+            ->selectRaw('status, count(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
         $counts = [
-            'total' => (clone $base)->count(),
-            'pending' => (clone $base)->where('status', SubmissionStatus::Submitted->value)->count(),
-            'graded' => (clone $base)->where('status', SubmissionStatus::Graded->value)->count(),
-            'returned' => (clone $base)->where('status', SubmissionStatus::Returned->value)->count(),
+            'total' => (int) $byStatus->sum(),
+            'pending' => (int) $byStatus->get(SubmissionStatus::Submitted->value, 0),
+            'graded' => (int) $byStatus->get(SubmissionStatus::Graded->value, 0),
+            'returned' => (int) $byStatus->get(SubmissionStatus::Returned->value, 0),
         ];
 
         $submissions = (clone $base)

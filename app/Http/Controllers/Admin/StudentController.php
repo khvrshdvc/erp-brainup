@@ -6,12 +6,13 @@ use App\Enums\Role;
 use App\Enums\UserStatus;
 use App\Http\Controllers\Admin\Concerns\ResolvesBranches;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\StudentRequest;
 use App\Models\Attendance;
 use App\Models\StudyGroup;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 class StudentController extends Controller
@@ -59,9 +60,9 @@ class StudentController extends Controller
         return view('admin.students.create', $this->formData());
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StudentRequest $request): RedirectResponse
     {
-        $data = $request->validate($this->rules($request), [], $this->attributes());
+        $data = $request->validated();
 
         $student = User::create([
             'name' => $data['name'],
@@ -87,7 +88,7 @@ class StudentController extends Controller
 
     public function show(User $student): View
     {
-        $this->authorizeStudent($student);
+        Gate::authorize('manageStudent', $student);
 
         $student->load(['branch', 'level', 'studyGroups.teacher']);
 
@@ -110,16 +111,14 @@ class StudentController extends Controller
 
     public function edit(User $student): View
     {
-        $this->authorizeStudent($student);
+        Gate::authorize('manageStudent', $student);
 
         return view('admin.students.edit', ['student' => $student, ...$this->formData()]);
     }
 
-    public function update(Request $request, User $student): RedirectResponse
+    public function update(StudentRequest $request, User $student): RedirectResponse
     {
-        $this->authorizeStudent($student);
-
-        $data = $request->validate($this->rules($request, $student), [], $this->attributes());
+        $data = $request->validated();
 
         $student->fill([
             'name' => $data['name'],
@@ -139,7 +138,7 @@ class StudentController extends Controller
 
     public function toggleStatus(User $student): RedirectResponse
     {
-        $this->authorizeStudent($student);
+        Gate::authorize('manageStudent', $student);
 
         $student->update([
             'status' => $student->status === UserStatus::Active ? UserStatus::Inactive : UserStatus::Active,
@@ -148,53 +147,12 @@ class StudentController extends Controller
         return back()->with('status', 'Holat o‘zgartirildi');
     }
 
-    private function authorizeStudent(User $student): void
-    {
-        abort_unless(
-            $student->isStudent() && in_array($student->branch_id, $this->availableBranchIds(), true),
-            404
-        );
-    }
-
     private function formData(): array
     {
         return [
             'branches' => $this->availableBranches(),
             'defaultBranchId' => $this->defaultBranchId(),
             'groups' => StudyGroup::orderBy('name')->get(['id', 'name', 'branch_id']),
-        ];
-    }
-
-    private function rules(Request $request, ?User $student = null): array
-    {
-        $branchId = $student?->branch_id ?? (int) $request->input('branch_id');
-
-        $rules = [
-            'name' => ['required', 'string', 'max:120'],
-            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($student)],
-            'phone' => ['nullable', 'string', 'max:20', Rule::unique('users', 'phone')->ignore($student)],
-            'password' => $student ? ['nullable', 'string', 'min:8'] : ['required', 'string', 'min:8'],
-            'birth_date' => ['nullable', 'date', 'before:today'],
-        ];
-
-        if (! $student) {
-            $rules['branch_id'] = ['required', 'integer', Rule::in($this->availableBranchIds())];
-            $rules['group_id'] = ['nullable', 'integer', Rule::exists('study_groups', 'id')->where('branch_id', $branchId)];
-        }
-
-        return $rules;
-    }
-
-    private function attributes(): array
-    {
-        return [
-            'name' => 'ism',
-            'email' => 'email',
-            'phone' => 'telefon',
-            'password' => 'parol',
-            'birth_date' => 'tug‘ilgan sana',
-            'branch_id' => 'filial',
-            'group_id' => 'guruh',
         ];
     }
 }

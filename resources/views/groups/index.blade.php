@@ -25,7 +25,7 @@
                             @endif
                         </div>
                         <div>{{ $group->students_count }}</div>
-                        <div><x-status-indicator :active="$group->status === \App\Enums\GroupStatus::Active" :label="$group->status->label()" /></div>
+                        <div><x-status-indicator :active="$group->isActive()" :label="$group->status->label()" /></div>
                         <div class="t-right">
                             <a href="{{ route('attendance.create', $group) }}" class="btn btn-sm">Davomat</a>
                         </div>

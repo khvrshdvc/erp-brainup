@@ -3,7 +3,7 @@
 
     <x-slot name="actions">
         <x-status-switch :action="route('admin.students.status', $student)"
-            :active="$student->status === \App\Enums\UserStatus::Active"
+            :active="$student->isActive()"
             :label="$student->status->label()" />
         <x-edit-button :href="route('admin.students.edit', $student)" />
     </x-slot>

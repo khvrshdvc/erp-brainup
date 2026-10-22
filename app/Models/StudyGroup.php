@@ -38,6 +38,11 @@ class StudyGroup extends Model
         ];
     }
 
+    public function isActive(): bool
+    {
+        return $this->status === GroupStatus::Active;
+    }
+
     public function course(): BelongsTo
     {
         return $this->belongsTo(Course::class);

@@ -5,12 +5,13 @@ namespace App\Http\Controllers\Student;
 use App\Enums\SubmissionStatus;
 use App\Events\SubmissionUpdated;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreSubmissionRequest;
 use App\Models\Assignment;
 use App\Models\Submission;
-use App\Models\User;
 use App\Services\AttachmentService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 class AssignmentController extends Controller
@@ -66,7 +67,7 @@ class AssignmentController extends Controller
     {
         $student = $request->user();
 
-        $this->authorizeAssignment($student, $assignment);
+        Gate::authorize('view', $assignment);
 
         $assignment->load(['teacher', 'studyGroup', 'attachments']);
 
@@ -80,49 +81,28 @@ class AssignmentController extends Controller
 
     public function create(Request $request, Assignment $assignment): View
     {
-        $student = $request->user();
-
-        $this->authorizeAssignment($student, $assignment);
+        Gate::authorize('submit', $assignment);
 
         $submission = Submission::with('attachments')
             ->where('assignment_id', $assignment->id)
-            ->where('student_id', $student->id)
+            ->where('student_id', $request->user()->id)
             ->first();
-
-        abort_if($assignment->isClosed() || $submission?->status === SubmissionStatus::Graded, 403);
 
         $assignment->load(['teacher', 'studyGroup']);
 
         return view('student.assignments.submit', compact('assignment', 'submission'));
     }
 
-    public function store(Request $request, Assignment $assignment, AttachmentService $attachments): RedirectResponse
+    public function store(StoreSubmissionRequest $request, Assignment $assignment, AttachmentService $attachments): RedirectResponse
     {
         $student = $request->user();
-
-        $this->authorizeAssignment($student, $assignment);
-
-        $existing = Submission::where('assignment_id', $assignment->id)
-            ->where('student_id', $student->id)
-            ->first();
-
-        abort_if($assignment->isClosed() || $existing?->status === SubmissionStatus::Graded, 403);
-
-        $hasFile = $existing && $existing->attachments()->exists();
-
-        $data = $request->validate([
-            'file' => [$hasFile ? 'nullable' : 'required', 'file', 'mimes:pdf,doc,docx,jpg,jpeg,png', 'max:10240'],
-            'body' => ['nullable', 'string', 'max:500'],
-        ], [], [
-            'file' => 'fayl',
-            'body' => 'izoh',
-        ]);
+        $existing = $request->existingSubmission();
 
         $submission = Submission::updateOrCreate(
             ['assignment_id' => $assignment->id, 'student_id' => $student->id],
             [
                 'branch_id' => $assignment->branch_id,
-                'body' => $data['body'] ?? null,
+                'body' => $request->validated('body'),
                 'status' => SubmissionStatus::Submitted,
                 'is_late' => $existing?->is_late ?? $assignment->isOverdue(),
                 'submitted_at' => now(),
@@ -139,15 +119,5 @@ class AssignmentController extends Controller
         return redirect()
             ->route('student.assignments.show', $assignment)
             ->with('status', 'Vazifa yuborildi');
-    }
-
-    private function authorizeAssignment(User $student, Assignment $assignment): void
-    {
-        abort_if($assignment->isDraft(), 404);
-
-        abort_unless(
-            $student->studyGroups()->where('study_groups.id', $assignment->study_group_id)->exists(),
-            404
-        );
     }
 }

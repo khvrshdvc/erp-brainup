@@ -43,7 +43,7 @@
                         <div>{{ $group->teacher?->name ?? '—' }}</div>
                         <div>{{ $group->students_count }} / {{ $group->capacity }}</div>
                         <div><x-status-switch :action="route('admin.groups.status', $group)"
-                                :active="$group->status === \App\Enums\GroupStatus::Active"
+                                :active="$group->isActive()"
                                 :label="$group->status->label()" /></div>
                         <div class="t-right"><x-edit-button :href="route('admin.groups.edit', $group)" /></div>
                     </div>

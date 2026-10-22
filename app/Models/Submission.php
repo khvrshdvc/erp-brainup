@@ -58,6 +58,16 @@ class Submission extends Model
         return $this->status === SubmissionStatus::Graded;
     }
 
+    public function isPending(): bool
+    {
+        return $this->status === SubmissionStatus::Submitted;
+    }
+
+    public function isReturned(): bool
+    {
+        return $this->status === SubmissionStatus::Returned;
+    }
+
     public function scopePending(Builder $query): Builder
     {
         return $query->where('status', SubmissionStatus::Submitted->value);

@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\CenterSettingsRequest;
+use App\Http\Requests\UpdatePasswordRequest;
+use App\Http\Requests\UpdateProfileRequest;
 use App\Models\Setting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class SettingsController extends Controller
@@ -26,61 +28,25 @@ class SettingsController extends Controller
         ]);
     }
 
-    public function updateCenter(Request $request): RedirectResponse
+    public function updateCenter(CenterSettingsRequest $request): RedirectResponse
     {
-        abort_unless($request->user()->isSuperAdmin(), 403);
-
-        $data = $request->validate([
-            'center_name' => ['required', 'string', 'max:120'],
-            'center_phone' => ['nullable', 'string', 'max:30'],
-            'center_address' => ['nullable', 'string', 'max:255'],
-            'center_hours' => ['nullable', 'string', 'max:120'],
-            'academic_year' => ['nullable', 'string', 'max:20'],
-        ], [], [
-            'center_name' => 'markaz nomi',
-            'center_phone' => 'telefon',
-            'center_address' => 'manzil',
-            'center_hours' => 'ish vaqti',
-            'academic_year' => 'o‘quv yili',
-        ]);
-
-        foreach ($data as $key => $value) {
+        foreach ($request->validated() as $key => $value) {
             Setting::put($key, $value ?? '');
         }
 
         return back()->with('status', 'O‘zgarishlar saqlandi');
     }
 
-    public function updateProfile(Request $request): RedirectResponse
+    public function updateProfile(UpdateProfileRequest $request): RedirectResponse
     {
-        $user = $request->user();
-
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:120'],
-            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user)],
-            'phone' => ['nullable', 'string', 'max:20', Rule::unique('users', 'phone')->ignore($user)],
-        ], [], [
-            'name' => 'ism',
-            'email' => 'email',
-            'phone' => 'telefon',
-        ]);
-
-        $user->fill($data)->save();
+        $request->user()->update($request->validated());
 
         return back()->with('status', 'Profil yangilandi');
     }
 
-    public function updatePassword(Request $request): RedirectResponse
+    public function updatePassword(UpdatePasswordRequest $request): RedirectResponse
     {
-        $data = $request->validate([
-            'current_password' => ['required', 'current_password'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-        ], [], [
-            'current_password' => 'joriy parol',
-            'password' => 'yangi parol',
-        ]);
-
-        $request->user()->update(['password' => $data['password']]);
+        $request->user()->update(['password' => $request->validated('password')]);
 
         return back()->with('status', 'Parol o‘zgartirildi');
     }

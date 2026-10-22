@@ -7,6 +7,8 @@
         <title>{{ $attributes->get('title') ? $attributes->get('title').' · ' : '' }}{{ config('app.name') }}</title>
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+        {{-- erp.js must load before Alpine (in app.js) so its alpine:init listener is registered in time. --}}
+        <script src="{{ asset('js/erp.js') }}?v={{ filemtime(public_path('js/erp.js')) }}" defer></script>
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         <link rel="stylesheet" href="{{ asset('css/erp.css') }}?v={{ filemtime(public_path('css/erp.css')) }}">
     </head>
@@ -55,6 +57,5 @@
                 </main>
             </div>
         </div>
-        <script src="{{ asset('js/erp.js') }}?v={{ filemtime(public_path('js/erp.js')) }}" defer></script>
     </body>
 </html>
