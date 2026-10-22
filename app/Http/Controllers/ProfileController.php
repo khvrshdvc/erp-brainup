@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -20,6 +21,8 @@ class ProfileController extends Controller
     {
         $user = $request->user();
 
+        $this->ensureCanEdit($user);
+
         $data = $request->validate([
             'name' => ['required', 'string', 'max:120'],
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user)],
@@ -37,6 +40,8 @@ class ProfileController extends Controller
 
     public function updatePassword(Request $request): RedirectResponse
     {
+        $this->ensureCanEdit($request->user());
+
         $data = $request->validate([
             'current_password' => ['required', 'current_password'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
@@ -48,5 +53,13 @@ class ProfileController extends Controller
         $request->user()->update(['password' => $data['password']]);
 
         return back()->with('status', 'Parol o‘zgartirildi');
+    }
+
+    /**
+     * Students' personal data and passwords are managed by admins only.
+     */
+    private function ensureCanEdit(User $user): void
+    {
+        abort_if($user->isStudent(), 403);
     }
 }

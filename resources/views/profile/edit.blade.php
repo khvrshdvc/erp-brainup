@@ -21,60 +21,77 @@
         </div>
     </section>
 
-    <form method="POST" action="{{ route('profile.update') }}" class="card card-pad stack">
-        @csrf
-        @method('PATCH')
+    @if ($user->isStudent())
+        <section class="card card-pad stack">
+            <h2 class="card-title">Shaxsiy ma‘lumotlar</h2>
 
-        <h2 class="card-title">Shaxsiy ma‘lumotlar</h2>
-
-        <div class="form-grid">
-            <div class="field">
-                <label for="name">Ism va familiya *</label>
-                <input id="name" class="input" type="text" name="name" maxlength="120" required value="{{ old('name', $user->name) }}">
+            <div>
+                <div class="kv"><span>Ism va familiya</span><b>{{ $user->name }}</b></div>
+                <div class="kv"><span>Email</span><b>{{ $user->email }}</b></div>
+                <div class="kv"><span>Telefon</span><b>{{ $user->phone ?? '—' }}</b></div>
+                @if ($user->birth_date)
+                    <div class="kv"><span>Tug‘ilgan sana</span><b>{{ $user->birth_date->format('d.m.Y') }}</b></div>
+                @endif
             </div>
 
-            <div class="field">
-                <label for="email">Email *</label>
-                <input id="email" class="input" type="email" name="email" maxlength="255" required value="{{ old('email', $user->email) }}">
+            <div class="card-sub">Ma‘lumotlar yoki parolni o‘zgartirish uchun filial administratoriga murojaat qiling.</div>
+        </section>
+    @else
+        <form method="POST" action="{{ route('profile.update') }}" class="card card-pad stack">
+            @csrf
+            @method('PATCH')
+
+            <h2 class="card-title">Shaxsiy ma‘lumotlar</h2>
+
+            <div class="form-grid">
+                <div class="field">
+                    <label for="name">Ism va familiya *</label>
+                    <input id="name" class="input" type="text" name="name" maxlength="120" required value="{{ old('name', $user->name) }}">
+                </div>
+
+                <div class="field">
+                    <label for="email">Email *</label>
+                    <input id="email" class="input" type="email" name="email" maxlength="255" required value="{{ old('email', $user->email) }}">
+                </div>
+
+                <div class="field">
+                    <label for="phone">Telefon</label>
+                    <input id="phone" class="input" type="text" name="phone" maxlength="20" value="{{ old('phone', $user->phone) }}">
+                </div>
             </div>
 
-            <div class="field">
-                <label for="phone">Telefon</label>
-                <input id="phone" class="input" type="text" name="phone" maxlength="20" value="{{ old('phone', $user->phone) }}">
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Saqlash</button>
             </div>
-        </div>
+        </form>
 
-        <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Saqlash</button>
-        </div>
-    </form>
+        <form method="POST" action="{{ route('profile.password') }}" class="card card-pad stack">
+            @csrf
+            @method('PUT')
 
-    <form method="POST" action="{{ route('profile.password') }}" class="card card-pad stack">
-        @csrf
-        @method('PUT')
+            <h2 class="card-title">Parolni o‘zgartirish</h2>
 
-        <h2 class="card-title">Parolni o‘zgartirish</h2>
+            <div class="form-grid">
+                <div class="field">
+                    <label for="current_password">Joriy parol *</label>
+                    <input id="current_password" class="input" type="password" name="current_password" required autocomplete="current-password">
+                </div>
 
-        <div class="form-grid">
-            <div class="field">
-                <label for="current_password">Joriy parol *</label>
-                <input id="current_password" class="input" type="password" name="current_password" required autocomplete="current-password">
+                <div class="field">
+                    <label for="new_password">Yangi parol *</label>
+                    <input id="new_password" class="input" type="password" name="password" minlength="8" required autocomplete="new-password">
+                    <div class="field-hint">Kamida 8 ta belgi</div>
+                </div>
+
+                <div class="field">
+                    <label for="password_confirmation">Yangi parolni takrorlang *</label>
+                    <input id="password_confirmation" class="input" type="password" name="password_confirmation" minlength="8" required autocomplete="new-password">
+                </div>
             </div>
 
-            <div class="field">
-                <label for="new_password">Yangi parol *</label>
-                <input id="new_password" class="input" type="password" name="password" minlength="8" required autocomplete="new-password">
-                <div class="field-hint">Kamida 8 ta belgi</div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Parolni yangilash</button>
             </div>
-
-            <div class="field">
-                <label for="password_confirmation">Yangi parolni takrorlang *</label>
-                <input id="password_confirmation" class="input" type="password" name="password_confirmation" minlength="8" required autocomplete="new-password">
-            </div>
-        </div>
-
-        <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Parolni yangilash</button>
-        </div>
-    </form>
+        </form>
+    @endif
 </x-app-layout>

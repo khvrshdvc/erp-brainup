@@ -158,28 +158,28 @@ class NotificationTest extends TestCase
 
     public function test_profile_update_and_password_change(): void
     {
-        [, $student] = $this->setupGroup();
+        [$teacher] = $this->setupGroup();
 
-        $student->update(['password' => 'oldpassword1']);
+        $teacher->update(['password' => 'oldpassword1']);
 
-        $this->actingAs($student)->get(route('profile.edit'))->assertOk();
+        $this->actingAs($teacher)->get(route('profile.edit'))->assertOk();
 
-        $this->actingAs($student)->patch(route('profile.update'), [
+        $this->actingAs($teacher)->patch(route('profile.update'), [
             'name' => 'Yangi Ism',
-            'email' => $student->email,
+            'email' => $teacher->email,
             'phone' => '+998901234567',
         ])->assertRedirect();
 
-        $this->assertSame('Yangi Ism', $student->fresh()->name);
-        $this->assertSame('+998901234567', $student->fresh()->phone);
+        $this->assertSame('Yangi Ism', $teacher->fresh()->name);
+        $this->assertSame('+998901234567', $teacher->fresh()->phone);
 
-        $this->actingAs($student)->put(route('profile.password'), [
+        $this->actingAs($teacher)->put(route('profile.password'), [
             'current_password' => 'noto‘g‘ri',
             'password' => 'newpassword1',
             'password_confirmation' => 'newpassword1',
         ])->assertSessionHasErrors('current_password');
 
-        $this->actingAs($student)->put(route('profile.password'), [
+        $this->actingAs($teacher)->put(route('profile.password'), [
             'current_password' => 'oldpassword1',
             'password' => 'newpassword1',
             'password_confirmation' => 'newpassword1',
@@ -190,9 +190,36 @@ class NotificationTest extends TestCase
     {
         [$teacher, $student] = $this->setupGroup();
 
-        $this->actingAs($student)->patch(route('profile.update'), [
-            'name' => $student->name,
-            'email' => $teacher->email,
+        $this->actingAs($teacher)->patch(route('profile.update'), [
+            'name' => $teacher->name,
+            'email' => $student->email,
         ])->assertSessionHasErrors('email');
+    }
+
+    public function test_students_cannot_change_their_profile_or_password(): void
+    {
+        [, $student] = $this->setupGroup();
+
+        $student->update(['password' => 'oldpassword1']);
+
+        $this->actingAs($student)->get(route('profile.edit'))
+            ->assertOk()
+            ->assertSee('administratoriga murojaat qiling')
+            ->assertDontSee('name="current_password"', false)
+            ->assertDontSee('name="email"', false);
+
+        $this->actingAs($student)->patch(route('profile.update'), [
+            'name' => 'Boshqa Ism',
+            'email' => 'boshqa@example.com',
+        ])->assertForbidden();
+
+        $this->actingAs($student)->put(route('profile.password'), [
+            'current_password' => 'oldpassword1',
+            'password' => 'newpassword1',
+            'password_confirmation' => 'newpassword1',
+        ])->assertForbidden();
+
+        $this->assertNotSame('Boshqa Ism', $student->fresh()->name);
+        $this->assertTrue(\Illuminate\Support\Facades\Hash::check('oldpassword1', $student->fresh()->password));
     }
 }
