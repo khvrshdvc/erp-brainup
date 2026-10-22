@@ -12,7 +12,8 @@
 
 @php
     $id ??= $name;
-    $value = $value ? \Illuminate\Support\Carbon::parse($value)->format('Y-m-d') : null;
+    // Re-shown input after a failed validation may not be a date at all (a hand-made request): show it empty.
+    $value = $value ? rescue(fn () => \Illuminate\Support\Carbon::parse($value)->format('Y-m-d'), null, false) : null;
     $invalid ??= $errors->has($name);
 @endphp
 

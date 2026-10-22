@@ -46,15 +46,7 @@ class AttendanceController extends Controller
     ): View {
         $this->authorizeGroup($request, $studyGroup);
 
-        $request->validate([
-            'date' => [
-                'nullable',
-                'date',
-                'before_or_equal:today',
-            ],
-        ]);
-
-        $date = ($request->date('date') ?? today())->toDateString();
+        $date = $this->requestedDate($request);
 
         $user = $request->user();
 
@@ -168,5 +160,21 @@ class AttendanceController extends Controller
             );
 
         abort_unless($isAuthorized, 403);
+    }
+
+    /**
+     * The date in the address bar (?date=2026-10-20). Anything that is not a real past or present
+     * day falls back to today: this is a GET page, so there is no form to send an error back to.
+     */
+    private function requestedDate(Request $request): string
+    {
+        $value = $request->query('date');
+
+        $valid = is_string($value)
+            && preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $value, $parts) === 1
+            && checkdate((int) $parts[2], (int) $parts[3], (int) $parts[1])
+            && $value <= today()->toDateString();
+
+        return $valid ? $value : today()->toDateString();
     }
 }

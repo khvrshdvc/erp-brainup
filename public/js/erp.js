@@ -219,3 +219,49 @@ function datePicker({ id, value, min, max, autoSubmit }) {
 document.addEventListener('alpine:init', () => {
     window.Alpine.data('datePicker', datePicker);
 });
+
+// The browser's validation bubbles ("Please fill out this field") come in the browser's own language.
+// Replace their text with the interface language; the checks themselves stay native.
+(() => {
+    const messages = () => window.ERP_I18N?.validity ?? {};
+
+    document.addEventListener('invalid', (event) => {
+        const field = event.target;
+        const state = field?.validity;
+
+        if (!state) {
+            return;
+        }
+
+        const text = messages();
+        let message = '';
+
+        if (state.valueMissing) {
+            message = field.type === 'file' ? text.file
+                : field.tagName === 'SELECT' ? text.select
+                    : field.type === 'checkbox' ? text.checkbox
+                        : text.required;
+        } else if (state.typeMismatch && field.type === 'email') {
+            message = text.email;
+        } else if (state.tooShort) {
+            message = (text.tooShort ?? '').replace(':min', field.minLength);
+        } else if (state.rangeUnderflow) {
+            message = (text.min ?? '').replace(':min', field.min);
+        } else if (state.rangeOverflow) {
+            message = (text.max ?? '').replace(':max', field.max);
+        } else if (state.patternMismatch) {
+            message = text.pattern;
+        } else if (state.badInput || state.stepMismatch) {
+            message = text.number;
+        }
+
+        if (message) {
+            field.setCustomValidity(message);
+        }
+    }, true);
+
+    // A custom message would otherwise keep the field invalid after the user fixes it.
+    const clear = (event) => event.target?.setCustomValidity?.('');
+    document.addEventListener('input', clear, true);
+    document.addEventListener('change', clear, true);
+})();

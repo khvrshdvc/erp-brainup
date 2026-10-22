@@ -60,7 +60,7 @@
         </div>
 
         <label class="check">
-            <input type="checkbox" name="is_active" value="1" @checked(old('is_active', $item->is_active ?? true))>
+            <input type="checkbox" name="is_active" value="1" @checked(session()->hasOldInput() ? old('is_active') : ($item->is_active ?? true))>
             {{ __('Sotuvda (o‘quvchilarga ko‘rinadi)') }}
         </label>
     </section>

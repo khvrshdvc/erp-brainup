@@ -9,6 +9,19 @@
         'dayMonth' => trans('dates.day_month'),
         'fileTypes' => __('Faqat :types fayl yuklash mumkin.'),
         'fileSize' => __('Fayl hajmi :max MB dan oshmasligi kerak.'),
+        // Browser validation bubbles are shown in the interface language, not the browser's.
+        'validity' => [
+            'required' => __('Bu maydonni to‘ldiring'),
+            'select' => __('Variantni tanlang'),
+            'file' => __('Faylni tanlang'),
+            'checkbox' => __('Davom etish uchun belgilang'),
+            'email' => __('Haqiqiy email manzilini kiriting'),
+            'tooShort' => __('Kamida :min ta belgi kiriting'),
+            'min' => __('Qiymat :min dan kam bo‘lmasligi kerak'),
+            'max' => __('Qiymat :max dan oshmasligi kerak'),
+            'number' => __('To‘g‘ri qiymat kiriting'),
+            'pattern' => __('Format noto‘g‘ri'),
+        ],
     ];
 @endphp
 <script>
