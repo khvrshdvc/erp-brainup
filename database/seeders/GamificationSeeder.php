@@ -35,16 +35,16 @@ class GamificationSeeder extends Seeder
         }
 
         $badges = [
-            ['code' => 'first_step', 'title' => 'Birinchi qadam', 'icon' => '★'],
-            ['code' => 'streak_7', 'title' => '7 dars seriya', 'icon' => '🔥'],
-            ['code' => 'streak_30', 'title' => '30 dars seriya', 'icon' => '⚡'],
-            ['code' => 'first_assignment', 'title' => 'Birinchi vazifa', 'icon' => '📝'],
-            ['code' => 'excellent', 'title' => 'A‘lochi', 'icon' => '🎯'],
-            ['code' => 'ten_assignments', 'title' => '10 ta vazifa', 'icon' => '📚'],
+            ['code' => 'first_step', 'title' => 'Dars boshlandi', 'icon' => '🚀', 'description' => 'Birinchi darsga qatnashdingiz'],
+            ['code' => 'streak_7', 'title' => 'Olovli hafta', 'icon' => '🔥', 'description' => 'Ketma-ket 7 ta darsga qatnashdingiz'],
+            ['code' => 'streak_30', 'title' => 'Temir intizom', 'icon' => '⚡', 'description' => 'Ketma-ket 30 ta darsga qatnashdingiz'],
+            ['code' => 'first_assignment', 'title' => 'Birinchi topshiriq', 'icon' => '✏️', 'description' => 'Birinchi vazifangizni topshirdingiz'],
+            ['code' => 'excellent', 'title' => 'A‘lo natija', 'icon' => '🏆', 'description' => 'Vazifadan kamida 90% ball oldingiz'],
+            ['code' => 'ten_assignments', 'title' => 'Mehnatkash', 'icon' => '📚', 'description' => '10 ta vazifa topshirdingiz'],
         ];
 
         foreach ($badges as $badge) {
-            Badge::firstOrCreate(['code' => $badge['code']], $badge);
+            Badge::updateOrCreate(['code' => $badge['code']], $badge);
         }
     }
 }

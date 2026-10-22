@@ -33,6 +33,7 @@ class AchievementController extends Controller
         $badges = Badge::orderBy('id')->get()->map(fn (Badge $badge) => [
             'badge' => $badge,
             'earned' => $earned->has($badge->id),
+            'awarded_at' => $earned->get($badge->id)?->pivot?->awarded_at,
         ]);
 
         return view('student.achievements', [
