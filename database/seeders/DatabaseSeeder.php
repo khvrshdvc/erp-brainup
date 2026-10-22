@@ -13,5 +13,9 @@ class DatabaseSeeder extends Seeder
             BranchSeeder::class,
             CourseSeeder::class,
         ]);
+
+        if (! app()->isProduction()) {
+            $this->call(DemoSeeder::class);
+        }
     }
 }

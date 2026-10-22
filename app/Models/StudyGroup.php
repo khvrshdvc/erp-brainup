@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\GroupStatus;
 use App\Models\Concerns\BelongsToBranch;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class StudyGroup extends Model
 {
-    use BelongsToBranch;
+    use BelongsToBranch, HasFactory;
 
     protected $fillable = [
         'branch_id',
