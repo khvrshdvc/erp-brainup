@@ -1,4 +1,4 @@
-@props(['label', 'value', 'note' => null, 'icon' => 'students'])
+@props(['label', 'value', 'note' => null, 'icon' => 'students', 'countUp' => null])
 
 @php
     $paths = [
@@ -17,12 +17,16 @@
     <div class="kpi-top">
         <span class="kpi-label">{{ $label }}</span>
         <span class="kpi-icon">
+            @if ($icon === 'coin')
+                <x-coin-mark />
+            @else
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="{{ $paths[$icon] ?? $paths['students'] }}"/>
             </svg>
+            @endif
         </span>
     </div>
-    <div class="kpi-value">{{ $value }}</div>
+    <div class="kpi-value" @if ($countUp !== null) data-count-up="{{ (int) $countUp }}" @endif>{{ $value }}</div>
     @if ($note)
         <div class="kpi-note">{{ $note }}</div>
     @endif

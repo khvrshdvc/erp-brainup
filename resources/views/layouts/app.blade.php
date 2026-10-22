@@ -9,13 +9,14 @@
         @include('layouts.partials.i18n-js')
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Onest:wght@300;400;500;600&display=swap" rel="stylesheet">
         {{-- erp.js must load before Alpine (in app.js) so its alpine:init listener is registered in time. --}}
         <script src="{{ asset('js/erp.js') }}?v={{ filemtime(public_path('js/erp.js')) }}" defer></script>
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         <link rel="stylesheet" href="{{ asset('css/erp.css') }}?v={{ filemtime(public_path('css/erp.css')) }}">
     </head>
     <body class="erp-body">
+        @include('layouts.partials.svg-defs')
         <div class="erp" x-data="{ nav: false }" :class="{ 'nav-open': nav }" @keydown.escape.window="nav = false">
             @include('layouts.partials.sidebar')
 

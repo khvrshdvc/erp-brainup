@@ -265,3 +265,33 @@ document.addEventListener('alpine:init', () => {
     document.addEventListener('input', clear, true);
     document.addEventListener('change', clear, true);
 })();
+
+// Numbers marked data-count-up run up from 0 once the page is shown (the BrainCoin balance).
+(() => {
+    const calm = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    const format = (value) => String(Math.round(value)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+
+    document.querySelectorAll('[data-count-up]').forEach((element) => {
+        const target = parseInt(element.dataset.countUp, 10);
+
+        if (calm || !Number.isFinite(target) || target <= 0) {
+            return;
+        }
+
+        const duration = Math.min(1400, 500 + target * 2);
+        const started = performance.now();
+
+        element.textContent = '0';
+
+        const step = (now) => {
+            const progress = Math.min(1, (now - started) / duration);
+            element.textContent = format(target * (1 - Math.pow(1 - progress, 3)));
+
+            if (progress < 1) {
+                requestAnimationFrame(step);
+            }
+        };
+
+        requestAnimationFrame(step);
+    });
+})();

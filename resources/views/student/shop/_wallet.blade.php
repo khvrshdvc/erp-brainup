@@ -1,7 +1,7 @@
 <section class="card wallet">
     <div class="wallet-main">
         <span class="wallet-label">{{ __('Hamyonimdagi') }} <span class="brand-name">{{ __('BrainCoin') }}</span></span>
-        <x-coin :amount="$balance" size="xl" />
+        <x-coin :amount="$balance" size="xl" count-up />
     </div>
     <div class="wallet-stats">
         <div><b>{{ number_format($earned, 0, '', ' ') }}</b><span>{{ __('Jami topilgan') }}</span></div>
