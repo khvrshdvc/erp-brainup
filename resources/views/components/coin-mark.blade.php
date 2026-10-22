@@ -1,5 +1,5 @@
 <span {{ $attributes->class(['coin-mark']) }} aria-hidden="true">
-    <svg viewBox="0 0 32 32" focusable="false">
+    <svg viewBox="0 0 32 32" width="18" height="18" focusable="false">
         <circle cx="16" cy="16" r="15" fill="url(#bc-rim)"/>
         <circle cx="16" cy="16" r="12.4" fill="url(#bc-face)" stroke="#B45309" stroke-opacity=".35" stroke-width=".6"/>
         <circle cx="16" cy="16" r="10.7" fill="none" stroke="#FFF7D6" stroke-opacity=".6" stroke-width=".8" stroke-dasharray="1.1 1.7"/>

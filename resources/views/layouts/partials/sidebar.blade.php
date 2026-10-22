@@ -77,11 +77,7 @@
         </svg>
     </button>
 
-    <img
-        src="{{ asset('images/logo-brainup-white.png') }}"
-        alt="BrainUp Academy"
-        class="erp-brand-logo"
-    >
+    <x-brand-logo />
 
     <nav class="erp-nav">
         @foreach ($items as [$label, $icon, $href, $active])

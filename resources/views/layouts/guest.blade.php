@@ -11,7 +11,7 @@
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Onest:wght@300;400;500;600&display=swap" rel="stylesheet">
         @vite(['resources/css/app.css', 'resources/js/app.js'])
-        <link rel="stylesheet" href="{{ asset('css/erp.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/erp.css') }}?v={{ hash_file('xxh3', public_path('css/erp.css')) }}">
     </head>
     <body class="erp-body">
         <div class="auth-tools">
@@ -21,16 +21,8 @@
 
         <div class="auth-wrap">
             <div class="auth-brand">
-                <img
-                    src="{{ asset('images/logo-brainup-dark.png') }}"
-                    alt="BrainUp Academy"
-                    class="erp-brand-logo logo-on-light"
-                >
-                <img
-                    src="{{ asset('images/logo-brainup-white.png') }}"
-                    alt="BrainUp Academy"
-                    class="erp-brand-logo logo-on-dark"
-                >
+                <x-brand-logo variant="dark" class="logo-on-light" />
+                <x-brand-logo class="logo-on-dark" />
             </div>
             <div class="auth-card">
                 {{ $slot }}

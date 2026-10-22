@@ -59,8 +59,8 @@ class DarkModeTest extends TestCase
         $this->get(route('login'))
             ->assertOk()
             ->assertSee('data-theme-toggle', false)
-            ->assertSee('logo-brainup-dark.png', false)
-            ->assertSee('logo-brainup-white.png', false)
+            ->assertSee('class="erp-brand-logo logo-on-light"', false)
+            ->assertSee('class="erp-brand-logo logo-on-dark"', false)
             ->assertSee('logo-on-dark', false);
     }
 
