@@ -17,6 +17,7 @@ use App\Http\Controllers\GroupController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\SubmissionListController;
 use App\Http\Controllers\Student\AchievementController;
 use App\Http\Controllers\Student\AssignmentController as StudentAssignmentController;
 use App\Http\Controllers\Student\DashboardController as StudentDashboardController;
@@ -44,6 +45,7 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware('role:super_admin,branch_admin,teacher')->group(function () {
         Route::get('/search', SearchController::class)->name('search');
+        Route::get('/submissions', SubmissionListController::class)->name('submissions.index');
         Route::get('/groups', [GroupController::class, 'index'])->name('groups.index');
         Route::get('/groups/{studyGroup}/attendance', [AttendanceController::class, 'create'])->name('attendance.create');
         Route::post('/groups/{studyGroup}/attendance', [AttendanceController::class, 'store'])->name('attendance.store');

@@ -33,6 +33,7 @@
             ['O‘quvchilar', 'students', route('admin.students.index'), request()->routeIs('admin.students.*')],
             ['O‘qituvchilar', 'teachers', route('admin.teachers.index'), request()->routeIs('admin.teachers.*')],
             ['Vazifalar', 'tasks', route('admin.assignments.index'), request()->routeIs('admin.assignments.*')],
+            ['Topshirganlar', 'students', route('submissions.index'), request()->routeIs('submissions.*')],
             ['Davomat', 'calendar', route('groups.index'), request()->routeIs('groups.index', 'attendance.*')],
         ]);
 
@@ -50,6 +51,7 @@
             ['Guruhlar', 'groups', route('groups.index'), request()->routeIs('groups.*')],
             ['Davomat', 'calendar', route('groups.index'), request()->routeIs('attendance.*')],
             ['Vazifalar', 'tasks', route('teacher.assignments.index'), request()->routeIs('teacher.assignments.*', 'teacher.submissions.*')],
+            ['Topshirganlar', 'students', route('submissions.index'), request()->routeIs('submissions.*')],
             ['Profil', 'teachers', route('profile.edit'), request()->routeIs('profile.*')],
         ];
     } else {
