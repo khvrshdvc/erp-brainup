@@ -39,7 +39,7 @@ class RebuildXpCommand extends Command
             ->orderBy('id')
             ->chunkById(500, function ($rows) use ($gamification, &$attendances) {
                 foreach ($rows as $attendance) {
-                    $gamification->syncAttendance($attendance);
+                    $gamification->syncAttendance($attendance, cascade: false);
                     $attendances++;
                 }
             });

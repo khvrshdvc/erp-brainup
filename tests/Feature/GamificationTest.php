@@ -4,11 +4,13 @@ namespace Tests\Feature;
 
 use App\Enums\AttendanceStatus;
 use App\Enums\Role;
+use App\Enums\XpReason;
 use App\Models\Attendance;
 use App\Models\Branch;
 use App\Models\Level;
 use App\Models\StudyGroup;
 use App\Models\User;
+use App\Models\XpTransaction;
 use Database\Seeders\GamificationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -90,6 +92,75 @@ class GamificationTest extends TestCase
             ['first_step', 'streak_7'],
             $student->badges()->pluck('code')->all()
         );
+    }
+
+    public function test_editing_a_past_day_to_absent_removes_the_later_streak_bonus(): void
+    {
+        [$teacher, $student, $group] = $this->makeGroup();
+
+        foreach (range(6, 0) as $daysAgo) {
+            $this->mark($teacher, $group, $student, 'present', $daysAgo);
+        }
+
+        $this->assertSame(7 * 10 + 30, $student->fresh()->xp);
+
+        $this->mark($teacher, $group, $student, 'absent', 4);
+
+        $student = $student->fresh();
+
+        $this->assertSame(6 * 10, $student->xp);
+        $this->assertSame(4, $student->streak);
+
+        $this->mark($teacher, $group, $student, 'present', 4);
+
+        $this->assertSame(7 * 10 + 30, $student->fresh()->xp);
+    }
+
+    public function test_two_lessons_on_one_day_count_as_one_streak_day(): void
+    {
+        [$teacher, $student, $group] = $this->makeGroup();
+
+        $second = StudyGroup::create([
+            'branch_id' => $group->branch_id,
+            'teacher_id' => $teacher->id,
+            'name' => 'Ikkinchi guruh',
+        ]);
+        $second->students()->attach($student->id);
+
+        foreach (range(6, 1) as $daysAgo) {
+            $this->mark($teacher, $group, $student, 'present', $daysAgo);
+        }
+
+        $this->mark($teacher, $group, $student, 'present');
+        $this->mark($teacher, $second, $student, 'present');
+
+        $student = $student->fresh();
+
+        $this->assertSame(7, $student->streak);
+        $this->assertSame(8 * 10 + 30, $student->xp);
+        $this->assertSame(1, XpTransaction::where('user_id', $student->id)
+            ->where('reason', XpReason::StreakBonus->value)
+            ->where('points', '>', 0)
+            ->count());
+    }
+
+    public function test_a_day_with_one_absence_and_one_attended_lesson_keeps_the_streak(): void
+    {
+        [$teacher, $student, $group] = $this->makeGroup();
+
+        $second = StudyGroup::create([
+            'branch_id' => $group->branch_id,
+            'teacher_id' => $teacher->id,
+            'name' => 'Ikkinchi guruh',
+        ]);
+        $second->students()->attach($student->id);
+
+        $this->mark($teacher, $group, $student, 'present', 2);
+        $this->mark($teacher, $group, $student, 'absent', 1);
+        $this->mark($teacher, $second, $student, 'present', 1);
+        $this->mark($teacher, $group, $student, 'present');
+
+        $this->assertSame(3, $student->fresh()->streak);
     }
 
     public function test_absence_breaks_the_streak(): void

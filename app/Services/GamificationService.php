@@ -13,12 +13,17 @@ use App\Models\Submission;
 use App\Models\User;
 use App\Models\XpRule;
 use App\Models\XpTransaction;
-use Carbon\Carbon;
 use Carbon\CarbonInterface;
+use Illuminate\Support\Collection;
 
 class GamificationService
 {
-    public function syncAttendance(Attendance $attendance): void
+    /**
+     * $cascade re-syncs the streak bonuses of the student's later lessons too, since an edit
+     * here can create or break streaks that end after this date. Bulk rebuilds pass false:
+     * they visit every attendance themselves and each bonus is computed from the full history.
+     */
+    public function syncAttendance(Attendance $attendance, bool $cascade = true): void
     {
         $student = User::findOrFail($attendance->student_id);
 
@@ -30,13 +35,7 @@ class GamificationService
 
         $this->record($student->id, $attendance->branch_id, XpReason::Attendance, $attendance->id, $points);
 
-        $streakAtLesson = $this->streakUpTo($student->id, $attendance->lesson_date);
-
-        $bonus = $attendance->isAttended() && $streakAtLesson > 0 && $streakAtLesson % 7 === 0
-            ? XpRule::pointsFor('streak_7')
-            : 0;
-
-        $this->record($student->id, $attendance->branch_id, XpReason::StreakBonus, $attendance->id, $bonus);
+        $this->syncStreakBonuses($student->id, $attendance->lesson_date, $cascade);
 
         $this->refresh($student);
     }
@@ -83,26 +82,64 @@ class GamificationService
         );
     }
 
-    private function streakUpTo(int $studentId, CarbonInterface $date): int
+    /**
+     * Streak bonuses for the lessons on $from (and, when cascading, every later day).
+     *
+     * A lesson day counts once however many lessons the student had that day, so the bonus
+     * is stored on the day's first attended attendance and the others get 0.
+     */
+    private function syncStreakBonuses(int $studentId, CarbonInterface $from, bool $cascade): void
     {
-        $rows = Attendance::withoutGlobalScopes()
-            ->where('student_id', $studentId)
-            ->whereDate('lesson_date', '<=', $date)
-            ->orderByDesc('lesson_date')
-            ->limit(60)
-            ->get(['status']);
+        $days = $this->attendanceDays($studentId);
+        $streaks = $this->dayStreaks($days);
+        $fromDate = $from->toDateString();
+        $points = XpRule::pointsFor('streak_7');
 
-        $streak = 0;
-
-        foreach ($rows as $row) {
-            if (! $row->status->isAttended()) {
-                break;
+        foreach ($days as $date => $rows) {
+            if ($date < $fromDate || ($date > $fromDate && ! $cascade)) {
+                continue;
             }
 
-            $streak++;
+            $bonusRowId = $streaks[$date] > 0 && $streaks[$date] % 7 === 0
+                ? $rows->first(fn (Attendance $row) => $row->isAttended())?->id
+                : null;
+
+            foreach ($rows as $row) {
+                $this->record($studentId, $row->branch_id, XpReason::StreakBonus, $row->id, $row->id === $bonusRowId ? $points : 0);
+            }
+        }
+    }
+
+    /**
+     * The student's attendances grouped by lesson date (oldest day first).
+     */
+    private function attendanceDays(int $studentId): Collection
+    {
+        return Attendance::withoutGlobalScopes()
+            ->where('student_id', $studentId)
+            ->orderBy('lesson_date')
+            ->orderBy('id')
+            ->get(['id', 'branch_id', 'lesson_date', 'status'])
+            ->groupBy(fn (Attendance $row) => $row->lesson_date->toDateString());
+    }
+
+    /**
+     * Streak length on each lesson day: a day is attended if at least one lesson that day was,
+     * and a day with only absences resets the streak.
+     *
+     * @return array<string, int>
+     */
+    private function dayStreaks(Collection $days): array
+    {
+        $streak = 0;
+        $streaks = [];
+
+        foreach ($days as $date => $rows) {
+            $streak = $rows->contains(fn (Attendance $row) => $row->isAttended()) ? $streak + 1 : 0;
+            $streaks[$date] = $streak;
         }
 
-        return $streak;
+        return $streaks;
     }
 
     private function refresh(User $student): void
@@ -111,12 +148,7 @@ class GamificationService
 
         $level = Level::forXp($xp);
 
-        $latest = Attendance::withoutGlobalScopes()
-            ->where('student_id', $student->id)
-            ->orderByDesc('lesson_date')
-            ->value('lesson_date');
-
-        $streak = $latest ? $this->streakUpTo($student->id, Carbon::parse($latest)) : 0;
+        $streak = (int) (last($this->dayStreaks($this->attendanceDays($student->id))) ?: 0);
 
         $student->forceFill([
             'xp' => $xp,
