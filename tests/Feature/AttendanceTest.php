@@ -10,6 +10,7 @@ use App\Models\Setting;
 use App\Models\StudyGroup;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class AttendanceTest extends TestCase
@@ -170,5 +171,31 @@ class AttendanceTest extends TestCase
             ->assertRedirect();
 
         $this->assertDatabaseCount('attendances', 1);
+    }
+
+    public function test_lesson_date_lookups_do_not_wrap_the_indexed_column_in_a_function(): void
+    {
+        [$branch, $teacher, $student, $group] = $this->makeGroup();
+        $admin = User::factory()->create(['role' => Role::SuperAdmin]);
+
+        $this->actingAs($teacher)->post(route('attendance.store', $group), $this->payload($student, 'present'));
+
+        DB::enableQueryLog();
+
+        $this->actingAs($teacher)->get(route('attendance.create', [$group, 'date' => today()->toDateString()]))
+            ->assertOk()
+            ->assertSee('value="present"', false);
+        $this->actingAs($teacher)->get(route('teacher.dashboard'))->assertOk();
+        $this->actingAs($admin)->get(route('admin.dashboard'))->assertOk();
+
+        $lessonDateQueries = collect(DB::getQueryLog())
+            ->pluck('query')
+            ->filter(fn (string $sql) => str_contains($sql, 'lesson_date'));
+
+        $this->assertNotEmpty($lessonDateQueries);
+
+        foreach ($lessonDateQueries as $sql) {
+            $this->assertStringNotContainsString('date(`lesson_date`)', strtolower($sql));
+        }
     }
 }

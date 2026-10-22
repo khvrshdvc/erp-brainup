@@ -23,7 +23,7 @@ class DashboardController extends Controller
         $teachers = $branch ? $branch->teachers()->count() : User::teachers()->count();
         $activeGroups = StudyGroup::active()->count();
         $allGroups = StudyGroup::count();
-        $todayMarked = Attendance::whereDate('lesson_date', today())->count();
+        $todayMarked = Attendance::where('lesson_date', today()->toDateString())->count();
 
         $weekStart = now()->startOfWeek();
         $weekEnd = $weekStart->copy()->addDays(5);

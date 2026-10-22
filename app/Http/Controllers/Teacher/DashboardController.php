@@ -20,7 +20,7 @@ class DashboardController extends Controller
             ->whereHas('studyGroups', fn ($query) => $query->where('study_groups.teacher_id', $teacher->id))
             ->count();
 
-        $todayMarked = Attendance::where('marked_by', $teacher->id)->whereDate('lesson_date', today())->count();
+        $todayMarked = Attendance::where('marked_by', $teacher->id)->where('lesson_date', today()->toDateString())->count();
 
         return view('teacher.dashboard', compact('groups', 'students', 'todayMarked'));
     }

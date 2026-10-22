@@ -33,7 +33,7 @@ class AttendanceController extends Controller
 
         $existing = Attendance::query()
             ->where('study_group_id', $studyGroup->id)
-            ->whereDate('lesson_date', $date)
+            ->where('lesson_date', $date)
             ->pluck('status', 'student_id')
             ->map(fn ($status) => $status instanceof AttendanceStatus ? $status->value : $status)
             ->all();
