@@ -194,6 +194,46 @@ class AssignmentTest extends TestCase
         ])->assertForbidden();
     }
 
+    public function test_changing_group_teacher_moves_open_assignments_and_access(): void
+    {
+        [$branch, $oldTeacher, $student, $group] = $this->makeGroup();
+        $assignment = $this->createAssignment($oldTeacher, $group);
+        $closed = $this->createAssignment($oldTeacher, $group);
+        $closed->update(['status' => AssignmentStatus::Closed]);
+        $this->submit($student, $assignment);
+
+        $submission = Submission::withoutGlobalScopes()->where('assignment_id', $assignment->id)->firstOrFail();
+        $attachment = $submission->attachments()->firstOrFail();
+
+        $newTeacher = User::factory()->create(['role' => Role::Teacher]);
+        $newTeacher->branches()->attach($branch->id);
+        $admin = User::factory()->create(['role' => Role::SuperAdmin]);
+
+        $this->actingAs($admin)->put(route('admin.groups.update', $group), [
+            'name' => $group->name,
+            'capacity' => 20,
+            'status' => 'active',
+            'teacher_id' => $newTeacher->id,
+        ])->assertRedirect();
+
+        $this->assertSame($newTeacher->id, $assignment->fresh()->teacher_id);
+        $this->assertSame($oldTeacher->id, $closed->fresh()->teacher_id);
+
+        $this->actingAs($oldTeacher)->get(route('attachments.download', $attachment))->assertForbidden();
+        $this->actingAs($oldTeacher)->put(route('teacher.submissions.update', $submission), [
+            'action' => 'grade',
+            'score' => 50,
+        ])->assertForbidden();
+
+        $this->actingAs($newTeacher)->get(route('attachments.download', $attachment))->assertOk();
+        $this->actingAs($newTeacher)->put(route('teacher.submissions.update', $submission), [
+            'action' => 'grade',
+            'score' => 50,
+        ])->assertRedirect();
+
+        $this->assertSame(SubmissionStatus::Graded, $submission->fresh()->status);
+    }
+
     public function test_student_outside_group_cannot_open_assignment(): void
     {
         [$branch, $teacher, , $group] = $this->makeGroup();

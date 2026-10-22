@@ -8,10 +8,10 @@ use App\Models\User;
 class SubmissionPolicy
 {
     /**
-     * Only the teacher who owns the assignment grades its submissions.
+     * Only the current teacher of the assignment's group grades its submissions.
      */
     public function grade(User $user, Submission $submission): bool
     {
-        return $submission->assignment?->teacher_id === $user->id;
+        return $submission->assignment?->isTaughtBy($user) ?? false;
     }
 }

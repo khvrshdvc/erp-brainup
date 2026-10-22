@@ -52,6 +52,14 @@ class Assignment extends Model
         return $this->hasMany(Submission::class);
     }
 
+    /**
+     * Whether the user currently teaches the assignment's group (a removed teacher loses access).
+     */
+    public function isTaughtBy(User $user): bool
+    {
+        return $this->studyGroup?->teacher_id === $user->id;
+    }
+
     public function isDraft(): bool
     {
         return $this->status === AssignmentStatus::Draft;

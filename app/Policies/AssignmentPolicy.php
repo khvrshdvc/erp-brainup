@@ -10,11 +10,11 @@ use Illuminate\Auth\Access\Response;
 class AssignmentPolicy
 {
     /**
-     * Teachers may only view, edit, publish or close their own assignments.
+     * Teachers may only view, edit, publish or close assignments of groups they currently teach.
      */
     public function manage(User $user, Assignment $assignment): bool
     {
-        return $assignment->teacher_id === $user->id;
+        return $assignment->isTaughtBy($user);
     }
 
     /**

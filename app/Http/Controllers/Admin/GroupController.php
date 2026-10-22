@@ -2,17 +2,20 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\AssignmentStatus;
 use App\Enums\GroupStatus;
 use App\Enums\WeekDay;
 use App\Http\Controllers\Admin\Concerns\ResolvesBranches;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\AddGroupStudentRequest;
 use App\Http\Requests\Admin\GroupRequest;
+use App\Models\Assignment;
 use App\Models\Course;
 use App\Models\StudyGroup;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class GroupController extends Controller
@@ -74,7 +77,17 @@ class GroupController extends Controller
 
     public function update(GroupRequest $request, StudyGroup $studyGroup): RedirectResponse
     {
-        $studyGroup->update($request->payload());
+        DB::transaction(function () use ($request, $studyGroup) {
+            $studyGroup->update($request->payload());
+
+            // Open work follows the group's teacher; closed assignments keep their original author.
+            if ($studyGroup->wasChanged('teacher_id')) {
+                Assignment::withoutGlobalScopes()
+                    ->where('study_group_id', $studyGroup->id)
+                    ->where('status', '!=', AssignmentStatus::Closed->value)
+                    ->update(['teacher_id' => $studyGroup->teacher_id]);
+            }
+        });
 
         return redirect()->route('admin.groups.show', $studyGroup)->with('status', 'Guruh yangilandi');
     }

@@ -21,10 +21,10 @@ class AttachmentPolicy
 
         $allowed = match (true) {
             $user->hasRole(Role::SuperAdmin, Role::BranchAdmin) => true,
-            $owner instanceof Assignment => $owner->teacher_id === $user->id
+            $owner instanceof Assignment => $owner->isTaughtBy($user)
                 || ($user->isStudent() && $user->can('view', $owner)),
             $owner instanceof Submission => $owner->student_id === $user->id
-                || $owner->assignment?->teacher_id === $user->id,
+                || $owner->assignment?->isTaughtBy($user),
             default => false,
         };
 
