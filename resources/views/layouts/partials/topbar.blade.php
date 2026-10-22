@@ -4,12 +4,14 @@
 @endphp
 
 <header class="erp-topbar">
-    <div class="erp-search">
+    @if ($user->role->isStaff())
+    <form class="erp-search" method="GET" action="{{ route('search') }}" role="search">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" aria-hidden="true">
             <path d="M21 21l-4.3-4.3M11 18a7 7 0 100-14 7 7 0 000 14"/>
         </svg>
-        <input type="text" aria-label="Qidirish" placeholder="Qidirish: o‘quvchi, guruh, o‘qituvchi…">
-    </div>
+        <input type="text" name="q" value="{{ request()->routeIs('search') ? request('q') : '' }}" aria-label="Qidirish" placeholder="Qidirish: o‘quvchi, guruh, o‘qituvchi…">
+    </form>
+    @endif
 
     <div class="erp-spacer"></div>
 
