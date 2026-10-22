@@ -39,7 +39,7 @@ class ShopOrderController extends Controller
 
         $shop->deliver($shopOrder, $request->user());
 
-        return back()->with('status', 'Buyurtma topshirildi deb belgilandi');
+        return back()->with('status', __('Buyurtma topshirildi deb belgilandi'));
     }
 
     public function cancel(Request $request, ShopOrder $shopOrder, ShopService $shop): RedirectResponse
@@ -50,6 +50,6 @@ class ShopOrderController extends Controller
 
         $shop->cancel($shopOrder, $request->user(), $data['note'] ?? null);
 
-        return back()->with('status', 'Buyurtma bekor qilindi, BrainCoin o‘quvchiga qaytarildi');
+        return back()->with('status', __('Buyurtma bekor qilindi, BrainCoin o‘quvchiga qaytarildi'));
     }
 }

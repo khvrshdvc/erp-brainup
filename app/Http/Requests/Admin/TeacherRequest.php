@@ -39,19 +39,19 @@ class TeacherRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'email.prohibited' => 'Bu o‘qituvchi boshqa filiallarda ham ishlaydi, uning emailini o‘zgartira olmaysiz.',
-            'password.prohibited' => 'Bu o‘qituvchi boshqa filiallarda ham ishlaydi, uning parolini o‘zgartira olmaysiz.',
+            'email.prohibited' => __('Bu o‘qituvchi boshqa filiallarda ham ishlaydi, uning emailini o‘zgartira olmaysiz.'),
+            'password.prohibited' => __('Bu o‘qituvchi boshqa filiallarda ham ishlaydi, uning parolini o‘zgartira olmaysiz.'),
         ];
     }
 
     public function attributes(): array
     {
         return [
-            'name' => 'ism',
-            'email' => 'email',
-            'phone' => 'telefon',
-            'password' => 'parol',
-            'branches' => 'filiallar',
+            'name' => __('ism'),
+            'email' => __('email'),
+            'phone' => __('telefon'),
+            'password' => __('parol'),
+            'branches' => __('filiallar'),
         ];
     }
 

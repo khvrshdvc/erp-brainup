@@ -6,5 +6,5 @@
         <b>{{ $attachment->original_name }}</b>
         <span>{{ \Illuminate\Support\Number::fileSize($attachment->size, precision: 1) }}</span>
     </div>
-    <a class="btn btn-sm" href="{{ route('attachments.download', $attachment) }}">Yuklab olish</a>
+    <a class="btn btn-sm" href="{{ route('attachments.download', $attachment) }}">{{ __('Yuklab olish') }}</a>
 </div>

@@ -38,6 +38,6 @@ class GamificationController extends Controller
             ]);
         }
 
-        return back()->with('status', 'Qoidalar saqlandi');
+        return back()->with('status', __('Qoidalar saqlandi'));
     }
 }

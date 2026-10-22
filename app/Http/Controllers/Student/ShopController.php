@@ -36,7 +36,7 @@ class ShopController extends Controller
 
         return redirect()
             ->route('student.shop.orders')
-            ->with('status', '“'.$shopItem->name.'” buyurtma qilindi. Mahsulotni filial administratoridan olasiz.');
+            ->with('status', __('“:item” buyurtma qilindi. Mahsulotni filial administratoridan olasiz.', ['item' => $shopItem->name]));
     }
 
     public function cancel(Request $request, ShopOrder $shopOrder, ShopService $shop): RedirectResponse
@@ -45,7 +45,7 @@ class ShopController extends Controller
 
         $shop->cancel($shopOrder, $request->user());
 
-        return back()->with('status', 'Buyurtma bekor qilindi, BrainCoin hamyoningizga qaytarildi.');
+        return back()->with('status', __('Buyurtma bekor qilindi, BrainCoin hamyoningizga qaytarildi.'));
     }
 
     /**

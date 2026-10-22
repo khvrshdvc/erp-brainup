@@ -4,7 +4,7 @@
     $lessonDate = \Carbon\Carbon::parse($date);
 @endphp
 
-<x-app-layout crumb="Guruhlar" title="Davomat olish" subtitle="Dars davomatini belgilang">
+<x-app-layout :crumb="__('Guruhlar')" :title="__('Davomat olish')" :subtitle="__('Dars davomatini belgilang')">
     <div class="stack-lg"
         x-data="{
             state: @js($initial),
@@ -14,7 +14,7 @@
 
         <section class="card filters">
             <div class="field" style="min-width: 260px">
-                <label for="group">Guruh</label>
+                <label for="group">{{ __('Guruh') }}</label>
                 <select id="group" class="select" onchange="window.location = this.value">
                     @foreach ($groups as $item)
                         <option value="{{ route('attendance.create', ['studyGroup' => $item->id, 'date' => $date]) }}"
@@ -24,9 +24,8 @@
             </div>
 
             <form method="GET" action="{{ route('attendance.create', $studyGroup) }}" class="field">
-                <label for="date">Dars sanasi</label>
-                <input id="date" class="input" type="date" name="date" value="{{ $date }}"
-                    max="{{ today()->toDateString() }}" onchange="this.form.submit()">
+                <label for="date">{{ __('Dars sanasi') }}</label>
+                <x-date-input name="date" :value="$date" :max="today()->toDateString()" required auto-submit />
             </form>
 
             <div class="erp-spacer"></div>
@@ -35,8 +34,7 @@
                 <button type="button" class="btn" @click="setAll('present')">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M20 6L9 17l-5-5"/>
-                    </svg>
-                    Barchasini keldi deb belgilash
+                    </svg> {{ __('Barchasini keldi deb belgilash') }}
                 </button>
             @endif
         </section>
@@ -49,7 +47,7 @@
                 <div class="card-head">
                     <h2 class="card-title">{{ \App\Support\UzDate::long($lessonDate) }} · {{ $studyGroup->name }}</h2>
                     <div class="att-summary">
-                        Jami: <b>{{ $students->count() }}</b>
+                        {{ __('Jami:') }} <b>{{ $students->count() }}</b>
                         @foreach ($statuses as $status)
                             · {{ $status->label() }} <b x-text="count('{{ $status->value }}')">0</b>
                         @endforeach
@@ -59,8 +57,8 @@
                 <div class="t-scroll">
                     <div class="t-min" style="min-width: 640px">
                         <div class="t-head" style="--cols: 2.2fr 3.4fr">
-                            <div>O‘quvchi</div>
-                            <div>Holat</div>
+                            <div>{{ __('O‘quvchi') }}</div>
+                            <div>{{ __('Holat') }}</div>
                         </div>
 
                         @forelse ($students as $student)
@@ -70,7 +68,7 @@
                                     {{ $student->name }}
                                 </div>
 
-                                <div class="seg" role="group" aria-label="{{ $student->name }} davomati">
+                                <div class="seg" role="group" aria-label="{{ __(':name davomati', ['name' => $student->name]) }}">
                                     @foreach ($statuses as $status)
                                         <label class="pill {{ $status->badge() }}"
                                             :class="{ 'on': state[{{ $student->id }}] === '{{ $status->value }}' }">
@@ -82,7 +80,7 @@
                                 </div>
                             </div>
                         @empty
-                            <div class="t-empty">Guruhda o‘quvchi yo‘q</div>
+                            <div class="t-empty">{{ __('Guruhda o‘quvchi yo‘q') }}</div>
                         @endforelse
                     </div>
                 </div>
@@ -90,8 +88,8 @@
 
             @if ($students->isNotEmpty())
                 <div class="form-actions">
-                    <a href="{{ route('groups.index') }}" class="btn btn-lg">Bekor qilish</a>
-                    <button type="submit" class="btn btn-primary btn-lg" style="padding: 0 28px">Saqlash</button>
+                    <a href="{{ route('groups.index') }}" class="btn btn-lg">{{ __('Bekor qilish') }}</a>
+                    <button type="submit" class="btn btn-primary btn-lg" style="padding: 0 28px">{{ __('Saqlash') }}</button>
                 </div>
             @endif
         </form>

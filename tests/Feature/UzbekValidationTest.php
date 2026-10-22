@@ -79,4 +79,50 @@ class UzbekValidationTest extends TestCase
             'file' => UploadedFile::fake()->create('virus.exe', 10),
         ])->assertSessionHasErrors(['file' => 'Faqat PDF, DOC, DOCX, JPG yoki PNG fayl yuklash mumkin.']);
     }
+
+    public function test_deadline_is_sent_as_date_and_24_hour_time(): void
+    {
+        [$teacher, , $group] = $this->setupGroup();
+
+        $this->actingAs($teacher)->get(route('teacher.assignments.create'))
+            ->assertOk()
+            ->assertSee('<option value="23:45"', false)
+            ->assertDontSee('type="datetime-local"', false);
+
+        $date = now()->addDays(2)->format('Y-m-d');
+
+        $this->actingAs($teacher)->post(route('teacher.assignments.store'), [
+            'title' => 'Uy vazifasi',
+            'study_group_id' => $group->id,
+            'description' => 'Tavsif',
+            'max_score' => 100,
+            'due_date' => $date,
+            'due_time' => '21:30',
+            'action' => 'draft',
+        ])->assertSessionHasNoErrors();
+
+        $this->assertSame($date.' 21:30', Assignment::firstOrFail()->due_at->format('Y-m-d H:i'));
+    }
+
+    public function test_app_runs_on_tashkent_time(): void
+    {
+        $this->assertSame('Asia/Tashkent', config('app.timezone'));
+        $this->assertSame('+05:00', now()->format('P'));
+    }
+
+    public function test_date_fields_use_the_uzbek_calendar(): void
+    {
+        [$teacher, , $group] = $this->setupGroup();
+
+        $this->actingAs($teacher)->get(route('teacher.assignments.create'))
+            ->assertOk()
+            ->assertSee('class="datepicker"', false)
+            ->assertSee('name="due_date"', false)
+            ->assertDontSee('type="date"', false);
+
+        $this->actingAs($teacher)->get(route('attendance.create', [$group, 'date' => '2026-10-05']))
+            ->assertOk()
+            ->assertSee('05.10.2026')
+            ->assertSee('value="2026-10-05"', false);
+    }
 }

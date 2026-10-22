@@ -20,19 +20,19 @@ class ShopItemRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'image.max' => 'Rasm hajmi 2 MB dan oshmasligi kerak.',
-            'image.mimes' => 'Faqat JPG, PNG yoki WEBP rasm yuklash mumkin.',
+            'image.max' => __('Rasm hajmi 2 MB dan oshmasligi kerak.'),
+            'image.mimes' => __('Faqat JPG, PNG yoki WEBP rasm yuklash mumkin.'),
         ];
     }
 
     public function attributes(): array
     {
         return [
-            'name' => 'mahsulot nomi',
-            'description' => 'tavsif',
-            'price' => 'narx',
-            'stock' => 'soni',
-            'image' => 'rasm',
+            'name' => __('mahsulot nomi'),
+            'description' => __('tavsif'),
+            'price' => __('narx'),
+            'stock' => __('soni'),
+            'image' => __('rasm'),
         ];
     }
 

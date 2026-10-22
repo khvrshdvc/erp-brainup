@@ -22,8 +22,8 @@ class UpdatePasswordRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'current_password' => 'joriy parol',
-            'password' => 'yangi parol',
+            'current_password' => __('joriy parol'),
+            'password' => __('yangi parol'),
         ];
     }
 }

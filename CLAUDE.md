@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-BrainUp ERP is a multi-branch education-center management app (branches, study groups, attendance, assignments/submissions, gamification). It runs on Laravel 13 (PHP 8.3+) with Breeze-style Blade views, Tailwind and Alpine through Vite. It runs in Docker through **Laravel Sail** (`compose.yaml`: app on PHP 8.5, MySQL 8.4, Redis, Mailpit). All UI text, enum labels and some exception messages are in **Uzbek (Latin script)**, so keep new user-facing strings in Uzbek.
+BrainUp ERP is a multi-branch education-center management app (branches, study groups, attendance, assignments/submissions, gamification). It runs on Laravel 13 (PHP 8.3+) with Breeze-style Blade views, Tailwind and Alpine through Vite. It runs in Docker through **Laravel Sail** (`compose.yaml`: app on PHP 8.5, MySQL 8.4, Redis, Mailpit). The interface speaks three languages (Uzbek, English, Russian; see *Languages* below). **Uzbek (Latin script) is the source language**: write every new user-facing string in Uzbek and translate it.
 
 ## Commands
 
@@ -65,7 +65,14 @@ Controllers fire domain events, and listeners are auto-discovered from `app/List
 ### Other conventions
 - Enums in `app/Enums` use the `HasValues` concern and provide `label()` methods with Uzbek text. Use them for casts and validation.
 - File uploads go through `AttachmentService` and the polymorphic `Attachment` model (`HasAttachments` trait). They are downloaded through the authorized `attachments.download` route, never through public URLs.
-- Use `App\Support\UzDate` to format dates in Uzbek.
+- Use `App\Support\UzDate` to format dates and durations; it follows the interface language (`lang/{uz,en,ru}/dates.php`).
+
+### Languages (uz / en / ru)
+- The Uzbek text is the translation **key**: views and PHP code call `__('Uzbek text')` (placeholders as `:name`), and `lang/en.json` / `lang/ru.json` hold the translations. A missing key shows the Uzbek text. Only validation, auth, passwords, pagination and dates use PHP files (`lang/{uz,en,ru}/*.php`).
+- When you add or change a user-facing string (Blade text, `placeholder`/`title`/`aria-label`, flash messages, `messages()`/`attributes()` of form requests, enum `label()`s, notifications), wrap it in `__()` and add it to **both** `lang/en.json` and `lang/ru.json`. `TranslationCoverageTest` fails when a literal `__('…')` key lacks a translation, `LocalizedPagesTest` opens the pages of every role in English and Russian and fails on leftover Uzbek spelling, and `LocalizationTest` covers switching.
+- Do not build sentences from fragments (`__('Jami') . $n . __('ta')`): word order differs between languages. Use one key with placeholders (`__('Jami :count ta guruh', ['count' => $n])`). Russian/English texts avoid count-dependent nouns ("Groups: :count") instead of plural forms.
+- Text stored in the database that comes from seeders (level names, badge and XP rule titles, seeded course names) is translated when shown, by passing it through `__()`. Notifications store a key plus parameters (`body_key`, `body_params`) and are translated when read.
+- The language is chosen by `App\Http\Middleware\SetLocale`: the signed-in user's `users.locale`, else the `locale` cookie, else `app.locale` (`uz`). The language button posts to `locale.switch` and saves both. Supported locales live in `config/locales.php`. Scripts get their texts from `window.ERP_I18N` (`layouts/partials/i18n-js.blade.php`).
 - Notifications use the database channel (`notifications` table) and are shown at `/notifications`.
 - Shared Blade components live in `resources/views/components` (`stat-card`, `badge`, `pager`, `file-chip`, `branch-switcher`). The authenticated layout is `layouts/app.blade.php` with `partials/sidebar` and `partials/topbar`.
 

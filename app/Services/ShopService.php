@@ -2,12 +2,15 @@
 
 namespace App\Services;
 
+use App\Enums\Role;
 use App\Enums\ShopOrderStatus;
 use App\Models\ShopItem;
 use App\Models\ShopOrder;
 use App\Models\User;
+use App\Notifications\ShopOrderPlaced;
 use App\Notifications\ShopOrderUpdated;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
 
 class ShopService
@@ -18,15 +21,15 @@ class ShopService
      */
     public function purchase(User $student, ShopItem $item): ShopOrder
     {
-        return DB::transaction(function () use ($student, $item) {
+        $order = DB::transaction(function () use ($student, $item) {
             $student = User::whereKey($student->id)->lockForUpdate()->firstOrFail();
             $item = ShopItem::whereKey($item->id)->lockForUpdate()->firstOrFail();
 
             $error = match (true) {
-                ! $item->is_active => 'Bu mahsulot hozir sotuvda yo‘q.',
-                ! $item->inStock() => 'Bu mahsulot tugagan.',
-                ! $student->branch_id => 'Sizga filial biriktirilmagan. Administratorga murojaat qiling.',
-                $student->coinBalance() < $item->price => 'BrainCoin yetarli emas.',
+                ! $item->is_active => __('Bu mahsulot hozir sotuvda yo‘q.'),
+                ! $item->inStock() => __('Bu mahsulot tugagan.'),
+                ! $student->branch_id => __('Sizga filial biriktirilmagan. Administratorga murojaat qiling.'),
+                $student->coinBalance() < $item->price => __('BrainCoin yetarli emas.'),
                 default => null,
             };
 
@@ -46,6 +49,10 @@ class ShopService
                 'status' => ShopOrderStatus::Pending,
             ]);
         });
+
+        $this->notifyBranchAdmins($order);
+
+        return $order;
     }
 
     public function deliver(ShopOrder $order, User $admin): void
@@ -61,13 +68,27 @@ class ShopService
         $this->close($order, $by, ShopOrderStatus::Cancelled, $note);
     }
 
+    /**
+     * Branch admins hand the item over, so they hear about every new order in their branch.
+     */
+    private function notifyBranchAdmins(ShopOrder $order): void
+    {
+        $admins = User::query()
+            ->ofRole(Role::BranchAdmin)
+            ->active()
+            ->where('branch_id', $order->branch_id)
+            ->get();
+
+        Notification::send($admins, new ShopOrderPlaced($order));
+    }
+
     private function close(ShopOrder $order, User $by, ShopOrderStatus $status, ?string $note = null): void
     {
         DB::transaction(function () use ($order, $by, $status, $note) {
             $locked = ShopOrder::withoutGlobalScopes()->whereKey($order->id)->lockForUpdate()->firstOrFail();
 
             if (! $locked->isPending()) {
-                throw ValidationException::withMessages(['order' => 'Bu buyurtma allaqachon yopilgan.']);
+                throw ValidationException::withMessages(['order' => __('Bu buyurtma allaqachon yopilgan.')]);
             }
 
             $locked->update([

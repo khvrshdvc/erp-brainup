@@ -19,26 +19,26 @@ enum WeekDay: string
     public function label(): string
     {
         return match ($this) {
-            self::Monday => 'Dushanba',
-            self::Tuesday => 'Seshanba',
-            self::Wednesday => 'Chorshanba',
-            self::Thursday => 'Payshanba',
-            self::Friday => 'Juma',
-            self::Saturday => 'Shanba',
-            self::Sunday => 'Yakshanba',
+            self::Monday => __('Dushanba'),
+            self::Tuesday => __('Seshanba'),
+            self::Wednesday => __('Chorshanba'),
+            self::Thursday => __('Payshanba'),
+            self::Friday => __('Juma'),
+            self::Saturday => __('Shanba'),
+            self::Sunday => __('Yakshanba'),
         };
     }
 
     public function shortLabel(): string
     {
         return match ($this) {
-            self::Monday => 'Du',
-            self::Tuesday => 'Se',
-            self::Wednesday => 'Ch',
-            self::Thursday => 'Pa',
-            self::Friday => 'Ju',
-            self::Saturday => 'Sh',
-            self::Sunday => 'Ya',
+            self::Monday => __('Du'),
+            self::Tuesday => __('Se'),
+            self::Wednesday => __('Ch'),
+            self::Thursday => __('Pa'),
+            self::Friday => __('Ju'),
+            self::Saturday => __('Sh'),
+            self::Sunday => __('Ya'),
         };
     }
 

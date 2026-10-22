@@ -1,9 +1,9 @@
-<x-app-layout crumb="Bosh sahifa / Vazifalar" title="Vazifalar" subtitle="Barcha o‘qituvchilar bergan vazifalar va ularning topshirilish holati">
+<x-app-layout :crumb="__('Bosh sahifa') . ' / ' . __('Vazifalar')" :title="__('Vazifalar')" :subtitle="__('Barcha o‘qituvchilar bergan vazifalar va ularning topshirilish holati')">
     <form method="GET" action="{{ route('admin.assignments.index') }}" class="card filters">
         <div class="field">
-            <label for="group">Guruh</label>
+            <label for="group">{{ __('Guruh') }}</label>
             <select id="group" name="group" class="select">
-                <option value="">Barchasi</option>
+                <option value="">{{ __('Barchasi') }}</option>
                 @foreach ($groups as $group)
                     <option value="{{ $group->id }}" @selected((int) request('group') === $group->id)>{{ $group->name }}</option>
                 @endforeach
@@ -11,9 +11,9 @@
         </div>
 
         <div class="field">
-            <label for="teacher">O‘qituvchi</label>
+            <label for="teacher">{{ __('O‘qituvchi') }}</label>
             <select id="teacher" name="teacher" class="select">
-                <option value="">Barchasi</option>
+                <option value="">{{ __('Barchasi') }}</option>
                 @foreach ($teachers as $teacher)
                     <option value="{{ $teacher->id }}" @selected((int) request('teacher') === $teacher->id)>{{ $teacher->name }}</option>
                 @endforeach
@@ -21,29 +21,29 @@
         </div>
 
         <div class="field">
-            <label for="status">Holat</label>
+            <label for="status">{{ __('Holat') }}</label>
             <select id="status" name="status" class="select">
-                <option value="">Barchasi</option>
+                <option value="">{{ __('Barchasi') }}</option>
                 @foreach (\App\Enums\AssignmentStatus::cases() as $status)
                     <option value="{{ $status->value }}" @selected(request('status') === $status->value)>{{ $status->label() }}</option>
                 @endforeach
             </select>
         </div>
 
-        <button type="submit" class="btn">Filtrlash</button>
+        <button type="submit" class="btn">{{ __('Filtrlash') }}</button>
     </form>
 
     <section class="card" style="overflow: hidden">
         <div class="t-scroll">
             <div class="t-min" style="min-width: 980px">
                 <div class="t-head" style="--cols: 2.4fr 1.4fr 1.6fr 1.1fr 1.3fr 1.1fr 1.3fr">
-                    <div>Vazifa</div>
-                    <div>Guruh</div>
-                    <div>O‘qituvchi</div>
-                    <div>Yaratilgan</div>
-                    <div>Muddat</div>
-                    <div>Topshirilgan</div>
-                    <div>Holat</div>
+                    <div>{{ __('Vazifa') }}</div>
+                    <div>{{ __('Guruh') }}</div>
+                    <div>{{ __('O‘qituvchi') }}</div>
+                    <div>{{ __('Yaratilgan') }}</div>
+                    <div>{{ __('Muddat') }}</div>
+                    <div>{{ __('Topshirilgan') }}</div>
+                    <div>{{ __('Holat') }}</div>
                 </div>
 
                 @forelse ($assignments as $assignment)
@@ -58,7 +58,7 @@
                         <div><x-badge :type="$type">{{ $label }}</x-badge></div>
                     </div>
                 @empty
-                    <div class="t-empty">Vazifa topilmadi</div>
+                    <div class="t-empty">{{ __('Vazifa topilmadi') }}</div>
                 @endforelse
             </div>
         </div>

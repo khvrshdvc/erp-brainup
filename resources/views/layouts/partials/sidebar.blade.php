@@ -22,56 +22,56 @@
 
     if ($user->hasRole(Role::SuperAdmin, Role::BranchAdmin)) {
         $items = [
-            ['Bosh sahifa', 'home', route('admin.dashboard'), request()->routeIs('admin.dashboard')],
+            [__('Bosh sahifa'), 'home', route('admin.dashboard'), request()->routeIs('admin.dashboard')],
         ];
 
         if ($user->isSuperAdmin()) {
-            $items[] = ['Filiallar', 'branch', route('admin.branches.index'), request()->routeIs('admin.branches.*')];
+            $items[] = [__('Filiallar'), 'branch', route('admin.branches.index'), request()->routeIs('admin.branches.*')];
         }
 
         $items = array_merge($items, [
-            ['Guruhlar', 'groups', route('admin.groups.index'), request()->routeIs('admin.groups.*')],
-            ['O‘quvchilar', 'students', route('admin.students.index'), request()->routeIs('admin.students.*')],
-            ['O‘qituvchilar', 'teachers', route('admin.teachers.index'), request()->routeIs('admin.teachers.*')],
-            ['Vazifalar', 'tasks', route('admin.assignments.index'), request()->routeIs('admin.assignments.*')],
-            ['Topshirganlar', 'students', route('submissions.index'), request()->routeIs('submissions.*')],
-            ['Davomat', 'calendar', route('groups.index'), request()->routeIs('groups.index', 'attendance.*')],
+            [__('Guruhlar'), 'groups', route('admin.groups.index'), request()->routeIs('admin.groups.*')],
+            [__('O‘quvchilar'), 'students', route('admin.students.index'), request()->routeIs('admin.students.*')],
+            [__('O‘qituvchilar'), 'teachers', route('admin.teachers.index'), request()->routeIs('admin.teachers.*')],
+            [__('Vazifalar'), 'tasks', route('admin.assignments.index'), request()->routeIs('admin.assignments.*')],
+            [__('Topshirganlar'), 'students', route('submissions.index'), request()->routeIs('submissions.*')],
+            [__('Davomat'), 'calendar', route('attendance.index'), request()->routeIs('attendance.*')],
         ]);
 
         if ($user->isSuperAdmin()) {
-            $items[] = ['Gamifikatsiya', 'trophy', route('admin.gamification.index'), request()->routeIs('admin.gamification.*')];
+            $items[] = [__('Gamifikatsiya'), 'trophy', route('admin.gamification.index'), request()->routeIs('admin.gamification.*')];
         }
 
-        $items[] = ['Do‘kon', 'shop', route('admin.shop.orders.index'), request()->routeIs('admin.shop.*', 'admin.shop-items.*')];
+        $items[] = [__('Do‘kon'), 'shop', route('admin.shop.orders.index'), request()->routeIs('admin.shop.*', 'admin.shop-items.*')];
 
         $items = array_merge($items, [
-            ['Hisobotlar', 'reports', route('admin.reports.index'), request()->routeIs('admin.reports.*')],
-            ['Sozlamalar', 'settings', route('admin.settings.edit'), request()->routeIs('admin.settings.*')],
+            [__('Hisobotlar'), 'reports', route('admin.reports.index'), request()->routeIs('admin.reports.*')],
+            [__('Sozlamalar'), 'settings', route('admin.settings.edit'), request()->routeIs('admin.settings.*')],
         ]);
     } elseif ($user->isTeacher()) {
         $items = [
-            ['Bosh sahifa', 'home', route('teacher.dashboard'), request()->routeIs('teacher.dashboard')],
-            ['Guruhlar', 'groups', route('groups.index'), request()->routeIs('groups.*')],
-            ['Davomat', 'calendar', route('groups.index'), request()->routeIs('attendance.*')],
-            ['Vazifalar', 'tasks', route('teacher.assignments.index'), request()->routeIs('teacher.assignments.*', 'teacher.submissions.*')],
-            ['Topshirganlar', 'students', route('submissions.index'), request()->routeIs('submissions.*')],
-            ['Profil', 'teachers', route('profile.edit'), request()->routeIs('profile.*')],
+            [__('Bosh sahifa'), 'home', route('teacher.dashboard'), request()->routeIs('teacher.dashboard')],
+            [__('Guruhlar'), 'groups', route('groups.index'), request()->routeIs('groups.*')],
+            [__('Davomat'), 'calendar', route('attendance.index'), request()->routeIs('attendance.*')],
+            [__('Vazifalar'), 'tasks', route('teacher.assignments.index'), request()->routeIs('teacher.assignments.*', 'teacher.submissions.*')],
+            [__('Topshirganlar'), 'students', route('submissions.index'), request()->routeIs('submissions.*')],
+            [__('Profil'), 'teachers', route('profile.edit'), request()->routeIs('profile.*')],
         ];
     } else {
         $items = [
-            ['Bosh sahifa', 'home', route('student.dashboard'), request()->routeIs('student.dashboard')],
-            ['Guruhim', 'groups', route('student.groups.index'), request()->routeIs('student.groups.*')],
-            ['Vazifalar', 'tasks', route('student.assignments.index'), request()->routeIs('student.assignments.*')],
-            ['Topshirganlarim', 'students', route('student.submissions.index'), request()->routeIs('student.submissions.*')],
-            ['Yutuqlar', 'trophy', route('student.achievements'), request()->routeIs('student.achievements')],
-            ['Do‘kon', 'shop', route('student.shop.index'), request()->routeIs('student.shop.*')],
-            ['Profil', 'teachers', route('profile.edit'), request()->routeIs('profile.*')],
+            [__('Bosh sahifa'), 'home', route('student.dashboard'), request()->routeIs('student.dashboard')],
+            [__('Guruhim'), 'groups', route('student.groups.index'), request()->routeIs('student.groups.*')],
+            [__('Vazifalar'), 'tasks', route('student.assignments.index'), request()->routeIs('student.assignments.*')],
+            [__('Topshirganlarim'), 'students', route('student.submissions.index'), request()->routeIs('student.submissions.*')],
+            [__('Yutuqlar'), 'trophy', route('student.achievements'), request()->routeIs('student.achievements')],
+            [__('Do‘kon'), 'shop', route('student.shop.index'), request()->routeIs('student.shop.*')],
+            [__('Profil'), 'teachers', route('profile.edit'), request()->routeIs('profile.*')],
         ];
     }
 @endphp
 
 <aside class="erp-sidebar" id="erp-sidebar">
-    <button type="button" class="erp-sidebar-close" @click="nav = false" aria-label="Menyuni yopish">
+    <button type="button" class="erp-sidebar-close" @click="nav = false" aria-label="{{ __('Menyuni yopish') }}">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
             <path d="M6 6l12 12M18 6L6 18"/>
         </svg>
@@ -95,12 +95,12 @@
     </nav>
 
     <div class="erp-org">
-        <b>{{ \App\Models\Setting::get('center_name', 'O‘quv markazi') }}</b>
-        {{ $currentBranch?->name ?? 'Barcha filiallar' }}
+        <b>{{ \App\Models\Setting::get('center_name', __('O‘quv markazi')) }}</b>
+        {{ $currentBranch?->name ?? __('Barcha filiallar') }}
     </div>
 
     <form method="POST" action="{{ route('logout') }}" class="erp-logout-mobile">
         @csrf
-        <button type="submit" class="btn">Chiqish</button>
+        <button type="submit" class="btn">{{ __('Chiqish') }}</button>
     </form>
 </aside>

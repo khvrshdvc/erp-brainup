@@ -23,6 +23,8 @@ class SubmissionReceived extends Notification
         return [
             'title' => 'Yangi topshiriq',
             'body' => $this->submission->student?->name.' «'.$assignment->title.'» vazifasini topshirdi',
+            'body_key' => ':student «:title» vazifasini topshirdi',
+            'body_params' => ['student' => $this->submission->student?->name, 'title' => $assignment->title],
             'url' => route('teacher.assignments.show', [$assignment, 'student' => $this->submission->student_id], false),
         ];
     }

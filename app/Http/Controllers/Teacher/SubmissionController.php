@@ -30,6 +30,6 @@ class SubmissionController extends Controller
 
         return redirect()
             ->route('teacher.assignments.show', [$assignment, 'student' => $submission->student_id])
-            ->with('status', $grading ? 'Topshiriq tekshirildi' : 'Topshiriq qayta topshirishga qaytarildi');
+            ->with('status', $grading ? __('Topshiriq tekshirildi') : __('Topshiriq qayta topshirishga qaytarildi'));
     }
 }

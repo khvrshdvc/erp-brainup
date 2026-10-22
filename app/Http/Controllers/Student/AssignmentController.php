@@ -118,6 +118,6 @@ class AssignmentController extends Controller
 
         return redirect()
             ->route('student.assignments.show', $assignment)
-            ->with('status', 'Vazifa yuborildi');
+            ->with('status', __('Vazifa yuborildi'));
     }
 }

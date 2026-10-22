@@ -3,33 +3,33 @@
     $overdue = $assignment->isOverdue();
 @endphp
 
-<x-app-layout crumb="Vazifalar / {{ $assignment->title }} / Topshirish" title="Vazifani topshirish"
+<x-app-layout :crumb="__('Vazifalar') . ' / ' . $assignment->title . ' / ' . __('Topshirish')" :title="__('Vazifani topshirish')"
     :subtitle="$assignment->title.' · '.$assignment->studyGroup?->name">
 
     <section class="card card-pad">
         <div class="split" style="gap: 24px">
-            <div><div class="label-up">Muddat</div><b>{{ $assignment->due_at->format('d.m.Y, H:i') }}</b></div>
-            <div><div class="label-up">Maksimal ball</div><b>{{ $assignment->max_score }}</b></div>
+            <div><div class="label-up">{{ __('Muddat') }}</div><b>{{ $assignment->due_at->format('d.m.Y, H:i') }}</b></div>
+            <div><div class="label-up">{{ __('Maksimal ball') }}</div><b>{{ $assignment->max_score }}</b></div>
             <div>
-                <div class="label-up">Holat</div>
+                <div class="label-up">{{ __('Holat') }}</div>
                 @if ($overdue)
-                    <x-badge type="err">Muddat o‘tgan</x-badge>
+                    <x-badge type="err">{{ __('Muddat o‘tgan') }}</x-badge>
                 @else
-                    <x-badge type="ok">{{ \App\Support\UzDate::remaining($assignment->due_at) }} qoldi</x-badge>
+                    <x-badge type="ok">{{ __(':due_at qoldi', ['due_at' => \App\Support\UzDate::remaining($assignment->due_at)]) }}</x-badge>
                 @endif
             </div>
         </div>
     </section>
 
     @if ($overdue)
-        <div class="alert" style="background: var(--warn-bg); color: var(--warn); border-color: #F3D9A6">
-            Topshirish muddati o‘tgan. Vazifani hali yuborishingiz mumkin, lekin u “kechikkan” deb belgilanadi.
+        <div class="alert" style="background: var(--warn-bg); color: var(--warn); border-color: var(--warn-line)">
+            {{ __('Topshirish muddati o‘tgan. Vazifani hali yuborishingiz mumkin, lekin u “kechikkan” deb belgilanadi.') }}
         </div>
     @endif
 
     @if ($submission?->isReturned() && $submission->feedback)
         <section class="card card-pad stack" style="gap: 8px">
-            <div class="label-up">O‘qituvchi izohi · qayta topshirish so‘raldi</div>
+            <div class="label-up">{{ __('O‘qituvchi izohi · qayta topshirish so‘raldi') }}</div>
             <div class="quote">{{ $submission->feedback }}</div>
         </section>
     @endif
@@ -39,41 +39,41 @@
         @csrf
 
         <section class="card card-pad stack">
-            <h2 class="card-title">1. Faylni biriktiring {{ $hasFile ? '' : '*' }}</h2>
+            <h2 class="card-title">{{ __('1. Faylni biriktiring') }} {{ $hasFile ? '' : '*' }}</h2>
 
             @if ($hasFile)
                 @foreach ($submission->attachments as $attachment)
                     <x-file-chip :attachment="$attachment" />
                 @endforeach
-                <div class="field-hint">Avval yuborgan faylingiz saqlanadi. Yangi fayl tanlasangiz, u almashtiriladi.</div>
+                <div class="field-hint">{{ __('Avval yuborgan faylingiz saqlanadi. Yangi fayl tanlasangiz, u almashtiriladi.') }}</div>
             @endif
 
             <x-file-picker name="file" id="file" :required="! $hasFile" />
         </section>
 
         <section class="card card-pad stack">
-            <h2 class="card-title">2. Izoh <span class="card-sub" style="font-weight: 400">(ixtiyoriy)</span></h2>
+            <h2 class="card-title">{{ __('2. Izoh') }} <span class="card-sub" style="font-weight: 400">{{ __('(ixtiyoriy)') }}</span></h2>
 
             <div class="field" x-data="{ n: {{ mb_strlen(old('body', $submission->body ?? '')) }} }">
-                <label for="body" class="sr-only">Izoh</label>
+                <label for="body" class="sr-only">{{ __('Izoh') }}</label>
                 <textarea id="body" name="body" maxlength="500"
                     @class(['textarea', 'is-invalid' => $errors->has('body')])
-                    placeholder="O‘qituvchiga qisqacha izoh yozishingiz mumkin"
+                    placeholder="{{ __('O‘qituvchiga qisqacha izoh yozishingiz mumkin') }}"
                     @input="n = $event.target.value.length">{{ old('body', $submission->body ?? '') }}</textarea>
-                <div class="counter">O‘qituvchiga ko‘rsatiladi · <span x-text="n">0</span> / 500</div>
+                <div class="counter">{{ __('O‘qituvchiga ko‘rsatiladi') }} · <span x-text="n">0</span> / 500</div>
                 <x-field-error name="body" />
             </div>
         </section>
 
         <div class="form-actions" style="justify-content: space-between; align-items: center">
             <div class="field-hint" style="max-width: 420px">
-                O‘qituvchi tekshirguncha vazifani qayta yuborishingiz mumkin.
+                {{ __('O‘qituvchi tekshirguncha vazifani qayta yuborishingiz mumkin.') }}
             </div>
             <div class="page-actions">
-                <a href="{{ route('student.assignments.show', $assignment) }}" class="btn btn-lg">Bekor qilish</a>
+                <a href="{{ route('student.assignments.show', $assignment) }}" class="btn btn-lg">{{ __('Bekor qilish') }}</a>
                 <button type="submit" class="btn btn-primary btn-lg"
-                    x-text="submitting ? 'Yuborilmoqda…' : @js($submission ? 'Qayta yuborish' : 'Vazifani yuborish')">
-                    {{ $submission ? 'Qayta yuborish' : 'Vazifani yuborish' }}
+                    x-text="submitting ? @js(__('Yuborilmoqda…')) : @js($submission ? __('Qayta yuborish') : __('Vazifani yuborish'))">
+                    {{ $submission ? __('Qayta yuborish') : __('Vazifani yuborish') }}
                 </button>
             </div>
         </div>

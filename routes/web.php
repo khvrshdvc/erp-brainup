@@ -16,23 +16,26 @@ use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\BranchSwitchController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GroupController;
+use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\ShopImageController;
-use App\Http\Controllers\SubmissionListController;
 use App\Http\Controllers\Student\AchievementController;
 use App\Http\Controllers\Student\AssignmentController as StudentAssignmentController;
 use App\Http\Controllers\Student\DashboardController as StudentDashboardController;
 use App\Http\Controllers\Student\GroupController as StudentGroupController;
 use App\Http\Controllers\Student\ShopController as StudentShopController;
 use App\Http\Controllers\Student\SubmissionController as StudentSubmissionController;
+use App\Http\Controllers\SubmissionListController;
 use App\Http\Controllers\Teacher\AssignmentController as TeacherAssignmentController;
 use App\Http\Controllers\Teacher\DashboardController as TeacherDashboardController;
 use App\Http\Controllers\Teacher\SubmissionController as TeacherSubmissionController;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/dashboard');
+
+Route::post('/locale', LocaleController::class)->name('locale.switch');
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
@@ -52,6 +55,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/search', SearchController::class)->name('search');
         Route::get('/submissions', SubmissionListController::class)->name('submissions.index');
         Route::get('/groups', [GroupController::class, 'index'])->name('groups.index');
+        Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
         Route::get('/groups/{studyGroup}/attendance', [AttendanceController::class, 'create'])->name('attendance.create');
         Route::post('/groups/{studyGroup}/attendance', [AttendanceController::class, 'store'])->name('attendance.store');
     });
@@ -62,9 +66,9 @@ Route::middleware('auth')->group(function () {
         Route::resource('groups', AdminGroupController::class)
             ->except(['destroy'])
             ->parameters(['groups' => 'studyGroup']);
-        Route::post('/groups/{studyGroup}/students', [AdminGroupController::class, 'addStudent'])->name('groups.students.add');
         Route::get('/groups/{studyGroup}/candidates', [AdminGroupController::class, 'candidates'])->name('groups.candidates');
         Route::patch('/groups/{studyGroup}/status', [AdminGroupController::class, 'toggleStatus'])->name('groups.status');
+        Route::post('/groups/{studyGroup}/students', [AdminGroupController::class, 'addStudent'])->name('groups.students.add');
         Route::delete('/groups/{studyGroup}/students/{student}', [AdminGroupController::class, 'removeStudent'])->name('groups.students.remove');
 
         Route::resource('students', AdminStudentController::class)->except(['destroy']);
@@ -86,13 +90,14 @@ Route::middleware('auth')->group(function () {
         Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');
         Route::put('/settings/center', [SettingsController::class, 'updateCenter'])->name('settings.center');
         Route::put('/settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.profile');
+        Route::put('/settings/staff/{staff}', [SettingsController::class, 'updateStaff'])->name('settings.staff');
         Route::put('/settings/password', [SettingsController::class, 'updatePassword'])->name('settings.password');
     });
 
     Route::middleware('role:super_admin')->prefix('admin')->name('admin.')->group(function () {
         Route::resource('branches', BranchController::class)->except(['show', 'destroy']);
-
         Route::patch('/branches/{branch}/status', [BranchController::class, 'toggleStatus'])->name('branches.status');
+
         Route::resource('shop-items', ShopItemController::class)
             ->except(['show', 'destroy'])
             ->parameters(['shop-items' => 'shopItem']);

@@ -1,46 +1,42 @@
-<x-app-layout crumb="Bosh sahifa" title="Yutuqlarim" subtitle="BrainCoin, daraja, nishonlar va reyting">
+<x-app-layout :crumb="__('Bosh sahifa')" :title="__('Yutuqlarim')" :subtitle="__('BrainCoin, daraja, nishonlar va reyting')">
     <section class="card level-card">
         <div class="level-badge">{{ $levelNumber }}</div>
 
         <div class="level-body">
-            <div class="level-title">Daraja {{ $levelNumber }} · {{ $student->level?->name ?? 'Boshlovchi' }}</div>
+            <div class="level-title">{{ __('Daraja :level · :name', ['level' => $levelNumber, 'name' => __($student->level?->name ?? 'Boshlovchi')]) }}</div>
             <div class="page-sub" style="margin: 4px 0 12px">
                 @if ($next)
-                    Keyingi daraja: {{ $next->name }} — {{ $next->min_xp - $student->xp }} BrainCoin qoldi
+                    {{ __('Keyingi daraja: :name — :min_xp BrainCoin qoldi', ['name' => __($next->name), 'min_xp' => $next->min_xp - $student->xp]) }}
                 @else
-                    Siz eng yuqori darajadasiz
+                    {{ __('Siz eng yuqori darajadasiz') }}
                 @endif
             </div>
             <div class="progress"><i style="width: {{ $progress }}%"></i></div>
             <div class="level-meta">
-                <span>{{ $student->xp }} BrainCoin</span>
-                <span>{{ $next?->min_xp ?? $student->xp }} BrainCoin</span>
+                <span>{{ __(':xp BrainCoin', ['xp' => $student->xp]) }}</span>
+                <span>{{ $next?->min_xp ?? $student->xp }} {{ __('BrainCoin') }}</span>
             </div>
         </div>
 
         <div class="streak">
             <div class="n">{{ $student->streak }}</div>
-            <div class="kpi-note">darslik davomat seriyasi</div>
+            <div class="kpi-note">{{ __('darslik davomat seriyasi') }}</div>
         </div>
     </section>
 
     <section class="card card-pad stack">
-        <h2 class="card-title">Nishonlar</h2>
+        <h2 class="card-title">{{ __('Nishonlar') }}</h2>
         <div class="achv-grid">
             @foreach ($badges as $item)
-                <div class="achv {{ $item['earned'] ? '' : 'locked' }}">
-                    <div class="ico">{{ $item['badge']->icon }}</div>
-                    <b>{{ $item['badge']->title }}</b>
-                    <small>{{ $item['earned'] ? 'Olingan' : 'Qulflangan' }}</small>
-                </div>
+                <x-achievement :badge="$item['badge']" :earned="$item['earned']" :awarded-at="$item['awarded_at']" />
             @endforeach
         </div>
     </section>
 
     <div class="tabs">
-        <a class="tab {{ $scope === 'group' ? 'on' : '' }}" href="{{ route('student.achievements', ['scope' => 'group']) }}">Guruh</a>
-        <a class="tab {{ $scope === 'branch' ? 'on' : '' }}" href="{{ route('student.achievements', ['scope' => 'branch']) }}">Filial</a>
-        <a class="tab {{ $scope === 'all' ? 'on' : '' }}" href="{{ route('student.achievements', ['scope' => 'all']) }}">Barcha filiallar</a>
+        <a class="tab {{ $scope === 'group' ? 'on' : '' }}" href="{{ route('student.achievements', ['scope' => 'group']) }}">{{ __('Guruh') }}</a>
+        <a class="tab {{ $scope === 'branch' ? 'on' : '' }}" href="{{ route('student.achievements', ['scope' => 'branch']) }}">{{ __('Filial') }}</a>
+        <a class="tab {{ $scope === 'all' ? 'on' : '' }}" href="{{ route('student.achievements', ['scope' => 'all']) }}">{{ __('Barcha filiallar') }}</a>
     </div>
 
     <section class="card" style="overflow: hidden">
@@ -48,10 +44,10 @@
             <div class="t-min" style="min-width: 640px">
                 <div class="t-head" style="--cols: 56px 2.4fr 1.6fr 1.2fr 1fr">
                     <div>№</div>
-                    <div>O‘quvchi</div>
-                    <div>Filial</div>
-                    <div>Daraja</div>
-                    <div class="t-right">BrainCoin</div>
+                    <div>{{ __('O‘quvchi') }}</div>
+                    <div>{{ __('Filial') }}</div>
+                    <div>{{ __('Daraja') }}</div>
+                    <div class="t-right"><span class="brand-name">{{ __('BrainCoin') }}</span></div>
                 </div>
 
                 @forelse ($leaderboard['rows'] as $row)
@@ -62,11 +58,11 @@
                             {{ $row['name'] }}{{ $row['me'] ? ' (siz)' : '' }}
                         </div>
                         <div>{{ $row['branch'] ?? '—' }}</div>
-                        <div>{{ $row['level'] }}</div>
-                        <div class="t-right" style="font-weight: 700">{{ $row['xp'] }} BrainCoin</div>
+                        <div>{{ __($row['level']) }}</div>
+                        <div class="t-right" style="font-weight: 600">{{ $row['xp'] }} {{ __('BrainCoin') }}</div>
                     </div>
                 @empty
-                    <div class="t-empty">Reyting hali bo‘sh</div>
+                    <div class="t-empty">{{ __('Reyting hali bo‘sh') }}</div>
                 @endforelse
 
                 @unless ($leaderboard['included'])
@@ -74,11 +70,11 @@
                         <div class="rank">{{ $leaderboard['myRank'] }}</div>
                         <div class="t-name">
                             <span class="avatar avatar-sm">{{ $student->initials }}</span>
-                            {{ $student->name }} (siz)
+                            {{ __(':name (siz)', ['name' => $student->name]) }}
                         </div>
                         <div>{{ $student->branch?->name ?? '—' }}</div>
-                        <div>{{ $student->level?->name ?? 'Boshlovchi' }}</div>
-                        <div class="t-right" style="font-weight: 700">{{ $student->xp }} BrainCoin</div>
+                        <div>{{ __($student->level?->name ?? 'Boshlovchi') }}</div>
+                        <div class="t-right" style="font-weight: 600">{{ __(':xp BrainCoin', ['xp' => $student->xp]) }}</div>
                     </div>
                 @endunless
             </div>

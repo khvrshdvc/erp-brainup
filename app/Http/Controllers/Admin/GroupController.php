@@ -48,7 +48,7 @@ class GroupController extends Controller
     {
         $group = StudyGroup::create(['branch_id' => $request->validated('branch_id'), ...$request->payload()]);
 
-        return redirect()->route('admin.groups.show', $group)->with('status', 'Guruh yaratildi');
+        return redirect()->route('admin.groups.show', $group)->with('status', __('Guruh yaratildi'));
     }
 
     public function show(StudyGroup $studyGroup): View
@@ -105,7 +105,7 @@ class GroupController extends Controller
             }
         });
 
-        return redirect()->route('admin.groups.show', $studyGroup)->with('status', 'Guruh yangilandi');
+        return redirect()->route('admin.groups.show', $studyGroup)->with('status', __('Guruh yangilandi'));
     }
 
     public function toggleStatus(StudyGroup $studyGroup): RedirectResponse
@@ -114,7 +114,7 @@ class GroupController extends Controller
             'status' => $studyGroup->status === GroupStatus::Active ? GroupStatus::Archived : GroupStatus::Active,
         ]);
 
-        return back()->with('status', 'Holat o‘zgartirildi');
+        return back()->with('status', __('Holat o‘zgartirildi'));
     }
 
     public function addStudent(AddGroupStudentRequest $request, StudyGroup $studyGroup): RedirectResponse
@@ -135,17 +135,17 @@ class GroupController extends Controller
         });
 
         if (! $added) {
-            return back()->withErrors(['student_id' => 'Guruhda bo‘sh joy qolmagan']);
+            return back()->withErrors(['student_id' => __('Guruhda bo‘sh joy qolmagan')]);
         }
 
-        return back()->with('status', 'O‘quvchi guruhga qo‘shildi');
+        return back()->with('status', __('O‘quvchi guruhga qo‘shildi'));
     }
 
     public function removeStudent(StudyGroup $studyGroup, User $student): RedirectResponse
     {
         $studyGroup->students()->detach($student->id);
 
-        return back()->with('status', 'O‘quvchi guruhdan chiqarildi');
+        return back()->with('status', __('O‘quvchi guruhdan chiqarildi'));
     }
 
     private function formData(): array

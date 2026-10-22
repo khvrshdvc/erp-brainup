@@ -75,7 +75,7 @@ class AssignmentController extends Controller
 
         return redirect()
             ->route('teacher.assignments.show', $assignment)
-            ->with('status', $publish ? 'Vazifa e‘lon qilindi' : 'Qoralama saqlandi');
+            ->with('status', $publish ? __('Vazifa e‘lon qilindi') : __('Qoralama saqlandi'));
     }
 
     public function show(Request $request, Assignment $assignment): View
@@ -144,7 +144,7 @@ class AssignmentController extends Controller
 
         return redirect()
             ->route('teacher.assignments.show', $assignment)
-            ->with('status', $publish ? 'Vazifa e‘lon qilindi' : 'Vazifa saqlandi');
+            ->with('status', $publish ? __('Vazifa e‘lon qilindi') : __('Vazifa saqlandi'));
     }
 
     public function publish(Request $request, Assignment $assignment): RedirectResponse
@@ -157,7 +157,7 @@ class AssignmentController extends Controller
 
         event(new AssignmentPublished($assignment));
 
-        return back()->with('status', 'Vazifa e‘lon qilindi');
+        return back()->with('status', __('Vazifa e‘lon qilindi'));
     }
 
     public function close(Request $request, Assignment $assignment): RedirectResponse
@@ -168,7 +168,7 @@ class AssignmentController extends Controller
 
         $assignment->update(['status' => AssignmentStatus::Closed]);
 
-        return back()->with('status', 'Vazifa yopildi, yangi topshiriq qabul qilinmaydi');
+        return back()->with('status', __('Vazifa yopildi, yangi topshiriq qabul qilinmaydi'));
     }
 
     public function reopen(Request $request, Assignment $assignment): RedirectResponse
@@ -179,7 +179,7 @@ class AssignmentController extends Controller
 
         $assignment->update(['status' => AssignmentStatus::Published]);
 
-        return back()->with('status', 'Vazifa qayta ochildi');
+        return back()->with('status', __('Vazifa qayta ochildi'));
     }
 
     private function groups(Request $request)

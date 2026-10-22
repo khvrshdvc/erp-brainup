@@ -20,7 +20,7 @@ class EnsureUserIsActive
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
-            return redirect()->route('login')->withErrors(['email' => 'Hisobingiz faol emas. Administratorga murojaat qiling.']);
+            return redirect()->route('login')->withErrors(['email' => __('Hisobingiz faol emas. Administratorga murojaat qiling.')]);
         }
 
         return $next($request);

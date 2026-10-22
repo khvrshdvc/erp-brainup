@@ -47,23 +47,23 @@ class GroupRequest extends FormRequest
 
         return [
             'capacity.min' => $enrolled > 1
-                ? "Sig‘im guruhdagi o‘quvchilar sonidan ({$enrolled}) kam bo‘lishi mumkin emas."
-                : 'Sig‘im kamida 1 bo‘lishi kerak.',
+                ? __('Sig‘im guruhdagi o‘quvchilar sonidan (:count) kam bo‘lishi mumkin emas.', ['count' => $enrolled])
+                : __('Sig‘im kamida 1 bo‘lishi kerak.'),
         ];
     }
 
     public function attributes(): array
     {
         return [
-            'name' => 'guruh nomi',
-            'branch_id' => 'filial',
-            'course_id' => 'kurs',
-            'teacher_id' => 'o‘qituvchi',
-            'starts_on' => 'boshlanish sanasi',
-            'ends_on' => 'tugash sanasi',
-            'capacity' => 'sig‘im',
-            'status' => 'holat',
-            'schedule_time' => 'dars vaqti',
+            'name' => __('guruh nomi'),
+            'branch_id' => __('filial'),
+            'course_id' => __('kurs'),
+            'teacher_id' => __('o‘qituvchi'),
+            'starts_on' => __('boshlanish sanasi'),
+            'ends_on' => __('tugash sanasi'),
+            'capacity' => __('sig‘im'),
+            'status' => __('holat'),
+            'schedule_time' => __('dars vaqti'),
         ];
     }
 

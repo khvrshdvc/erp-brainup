@@ -37,7 +37,7 @@ class ShopItemController extends Controller
 
         $this->storeImage($request, $item);
 
-        return redirect()->route('admin.shop-items.index')->with('status', 'Mahsulot qo‘shildi');
+        return redirect()->route('admin.shop-items.index')->with('status', __('Mahsulot qo‘shildi'));
     }
 
     public function edit(ShopItem $shopItem): View
@@ -51,14 +51,14 @@ class ShopItemController extends Controller
 
         $this->storeImage($request, $shopItem);
 
-        return redirect()->route('admin.shop-items.index')->with('status', 'Mahsulot yangilandi');
+        return redirect()->route('admin.shop-items.index')->with('status', __('Mahsulot yangilandi'));
     }
 
     public function toggleStatus(ShopItem $shopItem): RedirectResponse
     {
         $shopItem->update(['is_active' => ! $shopItem->is_active]);
 
-        return back()->with('status', 'Holat o‘zgartirildi');
+        return back()->with('status', __('Holat o‘zgartirildi'));
     }
 
     private function storeImage(ShopItemRequest $request, ShopItem $item): void

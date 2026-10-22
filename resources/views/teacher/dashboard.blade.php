@@ -1,28 +1,28 @@
 <x-app-layout
-    crumb="Bosh sahifa"
-    :title="'Xush kelibsiz, '.\Illuminate\Support\Str::before(auth()->user()->name, ' ').'!'"
+    :crumb="__('Bosh sahifa')"
+    :title="__('Xush kelibsiz, :name!', ['name' => \Illuminate\Support\Str::before(auth()->user()->name, ' ')])"
     :subtitle="\App\Support\UzDate::long(now())">
 
     <x-slot name="actions">
-        <a href="{{ route('groups.index') }}" class="btn btn-primary">Davomat olish</a>
+        <a href="{{ route('groups.index') }}" class="btn btn-primary">{{ __('Davomat olish') }}</a>
     </x-slot>
 
     <div class="kpi-grid">
-        <x-stat-card label="Mening guruhlarim" :value="$groups->count()" icon="groups" note="Faol va rejalashtirilgan" />
-        <x-stat-card label="Jami o‘quvchilar" :value="$students" icon="students" note="Barcha guruhlar bo‘yicha" />
-        <x-stat-card label="Bugungi davomat" :value="$todayMarked" icon="calendar" note="Siz belgilagan yozuvlar" />
+        <x-stat-card :label="__('Mening guruhlarim')" :value="$groups->count()" icon="groups" :note="__('Faol va rejalashtirilgan')" />
+        <x-stat-card :label="__('Jami o‘quvchilar')" :value="$students" icon="students" :note="__('Barcha guruhlar bo‘yicha')" />
+        <x-stat-card :label="__('Bugungi davomat')" :value="$todayMarked" icon="calendar" :note="__('Siz belgilagan yozuvlar')" />
     </div>
 
     <section class="card" style="overflow: hidden">
         <div class="card-head">
-            <h2 class="card-title">Mening guruhlarim</h2>
+            <h2 class="card-title">{{ __('Mening guruhlarim') }}</h2>
         </div>
         <div class="t-scroll">
             <div class="t-min">
                 <div class="t-head" style="--cols: 2.4fr 1fr 1.2fr 1fr">
-                    <div>Guruh</div>
-                    <div>O‘quvchilar</div>
-                    <div>Holat</div>
+                    <div>{{ __('Guruh') }}</div>
+                    <div>{{ __('O‘quvchilar') }}</div>
+                    <div>{{ __('Holat') }}</div>
                     <div></div>
                 </div>
                 @forelse ($groups as $group)
@@ -31,11 +31,11 @@
                         <div>{{ $group->students_count }}</div>
                         <div><x-status-indicator :active="$group->isActive()" :label="$group->status->label()" /></div>
                         <div class="t-right">
-                            <a href="{{ route('attendance.create', $group) }}" class="btn btn-sm">Davomat</a>
+                            <a href="{{ route('attendance.create', $group) }}" class="btn btn-sm">{{ __('Davomat') }}</a>
                         </div>
                     </div>
                 @empty
-                    <div class="t-empty">Sizga guruh biriktirilmagan</div>
+                    <div class="t-empty">{{ __('Sizga guruh biriktirilmagan') }}</div>
                 @endforelse
             </div>
         </div>

@@ -22,7 +22,7 @@ trait BelongsToBranch
             $branchId = app(CurrentBranch::class)->id();
 
             if (! $branchId) {
-                throw new RuntimeException('Filial tanlanmagan');
+                throw new RuntimeException(__('Filial tanlanmagan'));
             }
 
             $model->branch_id = $branchId;

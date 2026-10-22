@@ -21,8 +21,6 @@ class ReportController extends Controller
 {
     use ResolvesBranches;
 
-    private const MONTHS = ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyn', 'Iyl', 'Avg', 'Sen', 'Okt', 'Noy', 'Dek'];
-
     public function index(Request $request): View
     {
         [$period, $from, $to] = $this->period($request);
@@ -46,7 +44,7 @@ class ReportController extends Controller
             'period' => $period,
             'kpis' => [
                 'attendance' => $attPct,
-                'attendanceNote' => $attTotal.' ta yozuv',
+                'attendanceNote' => __(':count ta yozuv', ['count' => $attTotal]),
                 'newStudents' => $this->studentsQuery()->whereBetween('users.created_at', [$from, $to])->count(),
                 'grade' => $avgGrade === null ? null : (int) round($avgGrade),
                 'onTime' => $submittedTotal ? (int) round($onTime / $submittedTotal * 100) : null,
@@ -81,7 +79,7 @@ class ReportController extends Controller
             $out = fopen('php://output', 'w');
 
             fwrite($out, "\xEF\xBB\xBF");
-            fputcsv($out, ['O‘quvchi', 'Filial', 'Keldi', 'Kechikdi', 'Kelmadi', 'Sababli', 'Jami', 'Davomat %'], ',', '"', '');
+            fputcsv($out, array_map('__', ['O‘quvchi', 'Filial', 'Keldi', 'Kechikdi', 'Kelmadi', 'Sababli', 'Jami', 'Davomat %']), ',', '"', '');
 
             foreach ($students as $student) {
                 $counts = $rows->get($student->id)->mapWithKeys(fn ($row) => [$row->status->value => (int) $row->total]);
@@ -161,7 +159,7 @@ class ReportController extends Controller
             $month = $start->copy()->addMonths($i);
 
             return [
-                'label' => self::MONTHS[$month->month - 1],
+                'label' => trans('dates.months_short')[$month->month - 1],
                 'count' => $created->filter(fn ($user) => $user->created_at->isSameMonth($month))->count(),
             ];
         });
@@ -204,7 +202,7 @@ class ReportController extends Controller
         $groups = StudyGroup::query()->with('course')->withCount('students')->get();
 
         $rows = $groups
-            ->groupBy(fn ($group) => $group->course?->name ?? 'Kurs tanlanmagan')
+            ->groupBy(fn ($group) => __($group->course?->name ?? 'Kurs tanlanmagan'))
             ->map(fn ($items, $name) => [
                 'name' => $name,
                 'groups' => $items->count(),
@@ -242,10 +240,10 @@ class ReportController extends Controller
         return [
             'expected' => $expected,
             'rows' => [
-                ['label' => 'Tekshirildi', 'badge' => 'ok', 'count' => $graded, 'pct' => $pct($graded)],
-                ['label' => 'Tekshirilmoqda', 'badge' => 'warn', 'count' => $pending, 'pct' => $pct($pending)],
-                ['label' => 'Qayta topshirish kerak', 'badge' => 'err', 'count' => $returned, 'pct' => $pct($returned)],
-                ['label' => 'Topshirilmagan', 'badge' => 'neutral', 'count' => $missing, 'pct' => $pct($missing)],
+                ['label' => __('Tekshirildi'), 'badge' => 'ok', 'count' => $graded, 'pct' => $pct($graded)],
+                ['label' => __('Tekshirilmoqda'), 'badge' => 'warn', 'count' => $pending, 'pct' => $pct($pending)],
+                ['label' => __('Qayta topshirish kerak'), 'badge' => 'err', 'count' => $returned, 'pct' => $pct($returned)],
+                ['label' => __('Topshirilmagan'), 'badge' => 'neutral', 'count' => $missing, 'pct' => $pct($missing)],
             ],
         ];
     }

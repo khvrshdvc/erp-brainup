@@ -15,6 +15,16 @@ class AssignmentRequest extends FormRequest
         return $assignment === null || $this->user()->can('manage', $assignment);
     }
 
+    /**
+     * The form sends the deadline as a date plus a 24-hour time; validation works on one due_at.
+     */
+    protected function prepareForValidation(): void
+    {
+        if ($this->filled('due_date')) {
+            $this->merge(['due_at' => trim($this->input('due_date').' '.$this->input('due_time', '23:59'))]);
+        }
+    }
+
     public function rules(): array
     {
         $creating = $this->isMethod('post');
@@ -38,24 +48,24 @@ class AssignmentRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'study_group_id.required' => 'Guruhni tanlang.',
-            'study_group_id.exists' => 'Faqat o‘zingizga biriktirilgan guruhni tanlashingiz mumkin.',
-            'due_at.after' => 'Topshirish muddati hozirgi vaqtdan keyin bo‘lishi kerak.',
-            'max_score.min' => 'Maksimal ball kamida 1 bo‘lishi kerak.',
-            'max_score.max' => 'Maksimal ball 1000 dan oshmasligi kerak.',
-            'action.*' => 'Vazifani saqlash yoki e‘lon qilish tugmasini bosing.',
+            'study_group_id.required' => __('Guruhni tanlang.'),
+            'study_group_id.exists' => __('Faqat o‘zingizga biriktirilgan guruhni tanlashingiz mumkin.'),
+            'due_at.after' => __('Topshirish muddati hozirgi vaqtdan keyin bo‘lishi kerak.'),
+            'max_score.min' => __('Maksimal ball kamida 1 bo‘lishi kerak.'),
+            'max_score.max' => __('Maksimal ball 1000 dan oshmasligi kerak.'),
+            'action.*' => __('Vazifani saqlash yoki e‘lon qilish tugmasini bosing.'),
         ];
     }
 
     public function attributes(): array
     {
         return [
-            'title' => 'vazifa nomi',
-            'study_group_id' => 'guruh',
-            'description' => 'vazifa tavsifi',
-            'max_score' => 'maksimal ball',
-            'due_at' => 'topshirish muddati',
-            'material' => 'fayl',
+            'title' => __('vazifa nomi'),
+            'study_group_id' => __('guruh'),
+            'description' => __('vazifa tavsifi'),
+            'max_score' => __('maksimal ball'),
+            'due_at' => __('topshirish muddati'),
+            'material' => __('fayl'),
         ];
     }
 }

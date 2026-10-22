@@ -16,10 +16,10 @@ enum Role: string
     public function label(): string
     {
         return match ($this) {
-            self::SuperAdmin => 'Super admin',
-            self::BranchAdmin => 'Filial admini',
-            self::Teacher => 'O‘qituvchi',
-            self::Student => 'O‘quvchi',
+            self::SuperAdmin => __('Super admin'),
+            self::BranchAdmin => __('Filial admini'),
+            self::Teacher => __('O‘qituvchi'),
+            self::Student => __('O‘quvchi'),
         };
     }
 

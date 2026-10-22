@@ -1,10 +1,10 @@
 @php
-    $tabs = ['30d' => 'So‘nggi 30 kun', '6m' => 'So‘nggi 6 oy', 'year' => 'Joriy o‘quv yili'];
+    $tabs = ['30d' => __('So‘nggi 30 kun'), '6m' => __('So‘nggi 6 oy'), 'year' => __('Joriy o‘quv yili')];
 @endphp
 
-<x-app-layout crumb="Bosh sahifa / Hisobotlar" title="Hisobotlar" subtitle="Markazning umumiy ko‘rsatkichlari">
+<x-app-layout :crumb="__('Bosh sahifa') . ' / ' . __('Hisobotlar')" :title="__('Hisobotlar')" :subtitle="__('Markazning umumiy ko‘rsatkichlari')">
     <x-slot name="actions">
-        <a href="{{ route('admin.reports.export', ['period' => $period]) }}" class="btn">Eksport (CSV)</a>
+        <a href="{{ route('admin.reports.export', ['period' => $period]) }}" class="btn">{{ __('Eksport (CSV)') }}</a>
     </x-slot>
 
     <div class="tabs">
@@ -14,17 +14,17 @@
     </div>
 
     <div class="kpi-grid">
-        <x-stat-card label="O‘rtacha davomat" :value="$kpis['attendance'] === null ? '—' : $kpis['attendance'].'%'" icon="calendar" :note="$kpis['attendanceNote']" />
-        <x-stat-card label="Yangi o‘quvchilar" :value="$kpis['newStudents']" icon="students" note="Tanlangan davrda" />
-        <x-stat-card label="O‘rtacha baho" :value="$kpis['grade'] === null ? '—' : $kpis['grade'].' / 100'" icon="level" note="Tekshirilgan vazifalar bo‘yicha" />
-        <x-stat-card label="Vaqtida topshirish" :value="$kpis['onTime'] === null ? '—' : $kpis['onTime'].'%'" icon="xp" :note="$kpis['submitted'].' ta topshiriq'" />
+        <x-stat-card :label="__('O‘rtacha davomat')" :value="$kpis['attendance'] === null ? '—' : $kpis['attendance'].'%'" icon="calendar" :note="$kpis['attendanceNote']" />
+        <x-stat-card :label="__('Yangi o‘quvchilar')" :value="$kpis['newStudents']" icon="students" :note="__('Tanlangan davrda')" />
+        <x-stat-card :label="__('O‘rtacha baho')" :value="$kpis['grade'] === null ? '—' : $kpis['grade'].' / 100'" icon="level" :note="__('Tekshirilgan vazifalar bo‘yicha')" />
+        <x-stat-card :label="__('Vaqtida topshirish')" :value="$kpis['onTime'] === null ? '—' : $kpis['onTime'].'%'" icon="xp" :note="__(':count ta topshiriq', ['count' => $kpis['submitted']])" />
     </div>
 
     <div class="split" style="align-items: stretch">
         <section class="card card-pad stack" style="flex: 1 1 360px">
             <div>
-                <h2 class="card-title">Yangi o‘quvchilar</h2>
-                <div class="card-sub">Oxirgi 6 oy, oylar bo‘yicha ro‘yxatdan o‘tganlar</div>
+                <h2 class="card-title">{{ __('Yangi o‘quvchilar') }}</h2>
+                <div class="card-sub">{{ __('Oxirgi 6 oy, oylar bo‘yicha ro‘yxatdan o‘tganlar') }}</div>
             </div>
             <div class="chart wide">
                 @foreach ($months as $month)
@@ -43,8 +43,8 @@
 
         <section class="card card-pad stack" style="flex: 1 1 360px">
             <div>
-                <h2 class="card-title">Davomat dinamikasi</h2>
-                <div class="card-sub">Haftalik o‘rtacha davomat, % (oxirgi 8 hafta)</div>
+                <h2 class="card-title">{{ __('Davomat dinamikasi') }}</h2>
+                <div class="card-sub">{{ __('Haftalik o‘rtacha davomat, % (oxirgi 8 hafta)') }}</div>
             </div>
             <div class="chart wide">
                 @foreach ($weeks as $week)
@@ -65,25 +65,25 @@
     <div class="split" style="align-items: stretch">
         <section class="card card-pad stack" style="flex: 1 1 360px">
             <div>
-                <h2 class="card-title">Yo‘nalishlar bo‘yicha guruhlar</h2>
-                <div class="card-sub">Guruhlar va o‘quvchilar soni</div>
+                <h2 class="card-title">{{ __('Yo‘nalishlar bo‘yicha guruhlar') }}</h2>
+                <div class="card-sub">{{ __('Guruhlar va o‘quvchilar soni') }}</div>
             </div>
 
             @forelse ($courses as $course)
                 <div class="bar-row">
-                    <span class="name">{{ $course['name'] }}</span>
+                    <span class="name">{{ __($course['name']) }}</span>
                     <div class="progress"><i style="width: {{ $course['pct'] }}%"></i></div>
-                    <span class="val">{{ $course['groups'] }} guruh · {{ $course['students'] }}</span>
+                    <span class="val">{{ __(':groups guruh · :students', ['groups' => $course['groups'], 'students' => $course['students']]) }}</span>
                 </div>
             @empty
-                <div class="t-empty">Guruh yo‘q</div>
+                <div class="t-empty">{{ __('Guruh yo‘q') }}</div>
             @endforelse
         </section>
 
         <section class="card card-pad stack" style="flex: 1 1 360px">
             <div>
-                <h2 class="card-title">Vazifalarni bajarish</h2>
-                <div class="card-sub">Tanlangan davrda berilgan vazifalar bo‘yicha ({{ $statusRows['expected'] }} ta kutilgan topshiriq)</div>
+                <h2 class="card-title">{{ __('Vazifalarni bajarish') }}</h2>
+                <div class="card-sub">{{ __('Tanlangan davrda berilgan vazifalar bo‘yicha (:expected ta kutilgan topshiriq)', ['expected' => $statusRows['expected']]) }}</div>
             </div>
 
             @foreach ($statusRows['rows'] as $row)
@@ -100,16 +100,16 @@
         <section class="card" style="overflow: hidden">
             <div class="card-head">
                 <div>
-                    <h2 class="card-title">Filiallar bo‘yicha</h2>
-                    <div class="card-sub">Tanlangan davrdagi davomat</div>
+                    <h2 class="card-title">{{ __('Filiallar bo‘yicha') }}</h2>
+                    <div class="card-sub">{{ __('Tanlangan davrdagi davomat') }}</div>
                 </div>
             </div>
             <div class="t-scroll">
                 <div class="t-min" style="min-width: 520px">
                     <div class="t-head" style="--cols: 2.4fr 1fr 1.4fr">
-                        <div>Filial</div>
-                        <div>O‘quvchilar</div>
-                        <div>O‘rtacha davomat</div>
+                        <div>{{ __('Filial') }}</div>
+                        <div>{{ __('O‘quvchilar') }}</div>
+                        <div>{{ __('O‘rtacha davomat') }}</div>
                     </div>
                     @foreach ($branches as $branch)
                         <div class="t-row" style="--cols: 2.4fr 1fr 1.4fr">

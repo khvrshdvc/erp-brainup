@@ -1,6 +1,6 @@
-<x-app-layout crumb="Bosh sahifa / Vazifalar" title="Vazifalar" subtitle="Guruhingiz uchun berilgan barcha vazifalar">
+<x-app-layout :crumb="__('Bosh sahifa') . ' / ' . __('Vazifalar')" :title="__('Vazifalar')" :subtitle="__('Guruhingiz uchun berilgan barcha vazifalar')">
     @php
-        $tabs = ['all' => 'Barchasi', 'todo' => 'Topshirilmagan', 'review' => 'Tekshirilmoqda', 'done' => 'Tekshirildi'];
+        $tabs = ['all' => __('Barchasi'), 'todo' => __('Topshirilmagan'), 'review' => __('Tekshirilmoqda'), 'done' => __('Tekshirildi')];
     @endphp
 
     <div class="tabs">
@@ -26,19 +26,19 @@
                     </div>
                     <p>{{ \Illuminate\Support\Str::limit($assignment->description, 140) }}</p>
                     <div class="card-sub">
-                        {{ $assignment->teacher?->name }} · berildi {{ $assignment->published_at?->format('d.m.Y') ?? $assignment->created_at->format('d.m.Y') }}
+                        {{ __(':name · berildi', ['name' => $assignment->teacher?->name]) }} {{ $assignment->published_at?->format('d.m.Y') ?? $assignment->created_at->format('d.m.Y') }}
                     </div>
                 </div>
 
                 <div class="due">
-                    <small>MUDDAT</small>
+                    <small>{{ __('MUDDAT') }}</small>
                     <b>{{ $assignment->due_at->format('d.m.Y, H:i') }}</b>
                 </div>
 
-                <a href="{{ route('student.assignments.show', $assignment) }}" class="btn btn-primary">Vazifani ochish</a>
+                <a href="{{ route('student.assignments.show', $assignment) }}" class="btn btn-primary">{{ __('Vazifani ochish') }}</a>
             </section>
         @empty
-            <section class="card"><div class="t-empty">Bu bo‘limda vazifa yo‘q</div></section>
+            <section class="card"><div class="t-empty">{{ __('Bu bo‘limda vazifa yo‘q') }}</div></section>
         @endforelse
     </div>
 </x-app-layout>

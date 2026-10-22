@@ -28,13 +28,13 @@ class CenterSettingsRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'center_name' => 'markaz nomi',
-            'center_phone' => 'telefon',
-            'center_address' => 'manzil',
-            'center_hours' => 'ish vaqti',
-            'academic_year' => 'o‘quv yili',
-            'attendance_edit_days' => 'davomatni tahrirlash muddati',
-            'submission_file_retention_days' => 'fayllarni saqlash muddati',
+            'center_name' => __('markaz nomi'),
+            'center_phone' => __('telefon'),
+            'center_address' => __('manzil'),
+            'center_hours' => __('ish vaqti'),
+            'academic_year' => __('o‘quv yili'),
+            'attendance_edit_days' => __('davomatni tahrirlash muddati'),
+            'submission_file_retention_days' => __('fayllarni saqlash muddati'),
         ];
     }
 }

@@ -4,6 +4,6 @@
     @csrf
     @method('PATCH')
     <button type="submit" @class(['switch', 'on' => $active]) role="switch" aria-checked="{{ $active ? 'true' : 'false' }}"
-        title="{{ $active ? 'Faolsizlantirish' : 'Faollashtirish' }}"></button>
+        title="{{ $active ? __('Faolsizlantirish') : __('Faollashtirish') }}"></button>
     <span @class(['status-label', 'on' => $active])>{{ $label }}</span>
 </form>

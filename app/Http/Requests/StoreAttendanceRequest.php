@@ -29,16 +29,16 @@ class StoreAttendanceRequest extends FormRequest
 
         return [
             'lesson_date.after_or_equal' => $days > 0
-                ? "Davomatni faqat oxirgi {$days} kun ichida belgilash yoki o‘zgartirish mumkin."
-                : 'Davomatni faqat bugungi sana uchun belgilash mumkin.',
+                ? __('Davomatni faqat oxirgi :days kun ichida belgilash yoki o‘zgartirish mumkin.', ['days' => $days])
+                : __('Davomatni faqat bugungi sana uchun belgilash mumkin.'),
         ];
     }
 
     public function attributes(): array
     {
         return [
-            'lesson_date' => 'dars sanasi',
-            'records' => 'davomat',
+            'lesson_date' => __('dars sanasi'),
+            'records' => __('davomat'),
         ];
     }
 

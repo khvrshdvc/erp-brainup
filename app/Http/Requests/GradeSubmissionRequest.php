@@ -27,16 +27,16 @@ class GradeSubmissionRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'score.min' => 'Baho manfiy bo‘lishi mumkin emas.',
-            'feedback.required' => 'Qayta topshirishga qaytarishda fikr-mulohaza yozish majburiy.',
+            'score.min' => __('Baho manfiy bo‘lishi mumkin emas.'),
+            'feedback.required' => __('Qayta topshirishga qaytarishda fikr-mulohaza yozish majburiy.'),
         ];
     }
 
     public function attributes(): array
     {
         return [
-            'score' => 'baho',
-            'feedback' => 'fikr-mulohaza',
+            'score' => __('baho'),
+            'feedback' => __('fikr-mulohaza'),
         ];
     }
 

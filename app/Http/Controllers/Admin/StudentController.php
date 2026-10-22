@@ -87,10 +87,10 @@ class StudentController extends Controller
             }
         }
 
-        $redirect = redirect()->route('admin.students.show', $student)->with('status', 'O‘quvchi qo‘shildi');
+        $redirect = redirect()->route('admin.students.show', $student)->with('status', __('O‘quvchi qo‘shildi'));
 
         return $groupFull
-            ? $redirect->with('warning', "“{$groupFull->name}” guruhida bo‘sh joy qolmagan, o‘quvchi guruhga biriktirilmadi.")
+            ? $redirect->with('warning', __('“:group” guruhida bo‘sh joy qolmagan, o‘quvchi guruhga biriktirilmadi.', ['group' => $groupFull->name]))
             : $redirect;
     }
 
@@ -141,7 +141,7 @@ class StudentController extends Controller
 
         $student->save();
 
-        return redirect()->route('admin.students.show', $student)->with('status', 'O‘quvchi yangilandi');
+        return redirect()->route('admin.students.show', $student)->with('status', __('O‘quvchi yangilandi'));
     }
 
     public function toggleStatus(User $student): RedirectResponse
@@ -152,7 +152,7 @@ class StudentController extends Controller
             'status' => $student->status === UserStatus::Active ? UserStatus::Inactive : UserStatus::Active,
         ]);
 
-        return back()->with('status', 'Holat o‘zgartirildi');
+        return back()->with('status', __('Holat o‘zgartirildi'));
     }
 
     private function formData(): array

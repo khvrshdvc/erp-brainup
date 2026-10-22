@@ -1,3 +1,3 @@
-<x-app-layout crumb="O‘qituvchilar / Tahrirlash" title="O‘qituvchini tahrirlash" :subtitle="$teacher->name">
+<x-app-layout :crumb="__('O‘qituvchilar') . ' / ' . __('Tahrirlash')" :title="__('O‘qituvchini tahrirlash')" :subtitle="$teacher->name">
     @include('admin.teachers._form')
 </x-app-layout>

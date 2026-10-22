@@ -24,9 +24,9 @@ class UpdateProfileRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'name' => 'ism',
-            'email' => 'email',
-            'phone' => 'telefon',
+            'name' => __('ism'),
+            'email' => __('email'),
+            'phone' => __('telefon'),
         ];
     }
 }

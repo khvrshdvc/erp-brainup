@@ -29,7 +29,7 @@ class BranchController extends Controller
     {
         Branch::create($request->payload());
 
-        return redirect()->route('admin.branches.index')->with('status', 'Filial qo‘shildi');
+        return redirect()->route('admin.branches.index')->with('status', __('Filial qo‘shildi'));
     }
 
     public function edit(Branch $branch): View
@@ -41,13 +41,13 @@ class BranchController extends Controller
     {
         $branch->update($request->payload());
 
-        return redirect()->route('admin.branches.index')->with('status', 'Filial yangilandi');
+        return redirect()->route('admin.branches.index')->with('status', __('Filial yangilandi'));
     }
 
     public function toggleStatus(Branch $branch): RedirectResponse
     {
         $branch->update(['is_active' => ! $branch->is_active]);
 
-        return back()->with('status', 'Holat o‘zgartirildi');
+        return back()->with('status', __('Holat o‘zgartirildi'));
     }
 }

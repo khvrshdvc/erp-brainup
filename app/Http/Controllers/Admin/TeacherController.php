@@ -57,7 +57,7 @@ class TeacherController extends Controller
 
         $teacher->branches()->sync($data['branches']);
 
-        return redirect()->route('admin.teachers.index')->with('status', 'O‘qituvchi qo‘shildi');
+        return redirect()->route('admin.teachers.index')->with('status', __('O‘qituvchi qo‘shildi'));
     }
 
     public function edit(User $teacher): View
@@ -92,7 +92,7 @@ class TeacherController extends Controller
 
         $teacher->branches()->sync($untouched->merge($data['branches'])->unique()->values()->all());
 
-        return redirect()->route('admin.teachers.index')->with('status', 'O‘qituvchi yangilandi');
+        return redirect()->route('admin.teachers.index')->with('status', __('O‘qituvchi yangilandi'));
     }
 
     public function toggleStatus(User $teacher): RedirectResponse
@@ -103,7 +103,7 @@ class TeacherController extends Controller
             'status' => $teacher->status === UserStatus::Active ? UserStatus::Inactive : UserStatus::Active,
         ]);
 
-        return back()->with('status', 'Holat o‘zgartirildi');
+        return back()->with('status', __('Holat o‘zgartirildi'));
     }
 
     private function formData(): array

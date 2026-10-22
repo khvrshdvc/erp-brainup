@@ -81,16 +81,16 @@ class Assignment extends Model
             return [$submission->status->label(), $submission->status->badge()];
         }
 
-        return $this->isOverdue() ? ['Muddat o‘tgan', 'err'] : ['Topshirilmagan', 'neutral'];
+        return $this->isOverdue() ? [__('Muddat o‘tgan'), 'err'] : [__('Topshirilmagan'), 'neutral'];
     }
 
     public function teacherState(int $pending): array
     {
         return match (true) {
-            $this->isDraft() => ['Qoralama', 'neutral'],
-            $this->isClosed() => ['Yopilgan', 'neutral'],
-            $pending > 0 => ['Tekshirilmoqda', 'warn'],
-            default => ['E‘lon qilingan', 'info'],
+            $this->isDraft() => [__('Qoralama'), 'neutral'],
+            $this->isClosed() => [__('Yopilgan'), 'neutral'],
+            $pending > 0 => [__('Tekshirilmoqda'), 'warn'],
+            default => [__('E‘lon qilingan'), 'info'],
         };
     }
 

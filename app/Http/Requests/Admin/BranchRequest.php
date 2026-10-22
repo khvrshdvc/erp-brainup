@@ -19,9 +19,9 @@ class BranchRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'name' => 'filial nomi',
-            'address' => 'manzil',
-            'manager_name' => 'menejer',
+            'name' => __('filial nomi'),
+            'address' => __('manzil'),
+            'manager_name' => __('menejer'),
         ];
     }
 

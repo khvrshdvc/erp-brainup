@@ -25,13 +25,13 @@ class ProfileController extends Controller
     {
         $request->user()->update($request->validated());
 
-        return back()->with('status', 'Profil yangilandi');
+        return back()->with('status', __('Profil yangilandi'));
     }
 
     public function updatePassword(UpdatePasswordRequest $request): RedirectResponse
     {
         $request->user()->update(['password' => $request->validated('password')]);
 
-        return back()->with('status', 'Parol o‘zgartirildi');
+        return back()->with('status', __('Parol o‘zgartirildi'));
     }
 }

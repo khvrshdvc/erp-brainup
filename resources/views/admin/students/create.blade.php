@@ -1,3 +1,3 @@
-<x-app-layout crumb="O‘quvchilar / Yangi o‘quvchi" title="O‘quvchi qo‘shish" subtitle="O‘quvchi akkaunti va guruhini belgilang">
+<x-app-layout :crumb="__('O‘quvchilar') . ' / ' . __('Yangi o‘quvchi')" :title="__('O‘quvchi qo‘shish')" :subtitle="__('O‘quvchi akkaunti va guruhini belgilang')">
     @include('admin.students._form')
 </x-app-layout>

@@ -24,11 +24,11 @@ class AddGroupStudentRequest extends FormRequest
 
     public function messages(): array
     {
-        return ['student_id.exists' => 'Faol o‘quvchini tanlang (bu filialdagi nofaol o‘quvchini guruhga qo‘shib bo‘lmaydi).'];
+        return ['student_id.exists' => __('Faol o‘quvchini tanlang (bu filialdagi nofaol o‘quvchini guruhga qo‘shib bo‘lmaydi).')];
     }
 
     public function attributes(): array
     {
-        return ['student_id' => 'o‘quvchi'];
+        return ['student_id' => __('o‘quvchi')];
     }
 }

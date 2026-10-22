@@ -21,6 +21,9 @@ class NewAssignment extends Notification
         return [
             'title' => 'Yangi vazifa',
             'body' => $this->assignment->title.' · muddat: '.$this->assignment->due_at->format('d.m.Y, H:i'),
+            // Translated when shown, so the text follows the reader's language.
+            'body_key' => ':title · muddat: :due',
+            'body_params' => ['title' => $this->assignment->title, 'due' => $this->assignment->due_at->format('d.m.Y, H:i')],
             'url' => route('student.assignments.show', $this->assignment, false),
         ];
     }

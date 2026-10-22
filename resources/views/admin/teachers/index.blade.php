@@ -1,25 +1,25 @@
-<x-app-layout crumb="Bosh sahifa / O‘qituvchilar" title="O‘qituvchilar" subtitle="O‘qituvchilarni qo‘shish va filiallarga biriktirish">
+<x-app-layout :crumb="__('Bosh sahifa') . ' / ' . __('O‘qituvchilar')" :title="__('O‘qituvchilar')" :subtitle="__('O‘qituvchilarni qo‘shish va filiallarga biriktirish')">
     <x-slot name="actions">
-        <a href="{{ route('admin.teachers.create') }}" class="btn btn-primary">+ O‘qituvchi qo‘shish</a>
+        <a href="{{ route('admin.teachers.create') }}" class="btn btn-primary">{{ __('+ O‘qituvchi qo‘shish') }}</a>
     </x-slot>
 
     <form method="GET" action="{{ route('admin.teachers.index') }}" class="card filters">
         <div class="field">
-            <label for="q">Qidirish</label>
-            <input id="q" class="input" type="text" name="q" value="{{ request('q') }}" placeholder="Ism, email yoki telefon">
+            <label for="q">{{ __('Qidirish') }}</label>
+            <input id="q" class="input" type="text" name="q" value="{{ request('q') }}" placeholder="{{ __('Ism, email yoki telefon') }}">
         </div>
-        <button type="submit" class="btn">Qidirish</button>
+        <button type="submit" class="btn">{{ __('Qidirish') }}</button>
     </form>
 
     <section class="card" style="overflow: hidden">
         <div class="t-scroll">
             <div class="t-min" style="min-width: 900px">
                 <div class="t-head" style="--cols: 2.6fr 1.4fr 2.2fr .9fr 1.4fr .5fr">
-                    <div>O‘qituvchi</div>
-                    <div>Telefon</div>
-                    <div>Filiallar</div>
-                    <div>Guruhlar</div>
-                    <div>Holat</div>
+                    <div>{{ __('O‘qituvchi') }}</div>
+                    <div>{{ __('Telefon') }}</div>
+                    <div>{{ __('Filiallar') }}</div>
+                    <div>{{ __('Guruhlar') }}</div>
+                    <div>{{ __('Holat') }}</div>
                     <div></div>
                 </div>
 
@@ -43,7 +43,7 @@
                         <div class="t-right"><x-edit-button :href="route('admin.teachers.edit', $teacher)" /></div>
                     </div>
                 @empty
-                    <div class="t-empty">O‘qituvchi topilmadi</div>
+                    <div class="t-empty">{{ __('O‘qituvchi topilmadi') }}</div>
                 @endforelse
             </div>
         </div>

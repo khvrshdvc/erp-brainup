@@ -1,13 +1,13 @@
-<x-app-layout crumb="Bosh sahifa" title="Guruhlar" subtitle="Davomat olish uchun guruhni tanlang">
+<x-app-layout :crumb="__('Bosh sahifa')" :title="__('Guruhlar')" :subtitle="__('Davomat olish uchun guruhni tanlang')">
     <section class="card" style="overflow: hidden">
         <div class="t-scroll">
             <div class="t-min">
                 <div class="t-head" style="--cols: 2.2fr 1.6fr 1.8fr 1fr 1.2fr 1fr">
-                    <div>Guruh</div>
-                    <div>Filial</div>
-                    <div>O‘qituvchi</div>
-                    <div>O‘quvchilar</div>
-                    <div>Holat</div>
+                    <div>{{ __('Guruh') }}</div>
+                    <div>{{ __('Filial') }}</div>
+                    <div>{{ __('O‘qituvchi') }}</div>
+                    <div>{{ __('O‘quvchilar') }}</div>
+                    <div>{{ __('Holat') }}</div>
                     <div></div>
                 </div>
                 @forelse ($groups as $group)
@@ -27,11 +27,11 @@
                         <div>{{ $group->students_count }}</div>
                         <div><x-status-indicator :active="$group->isActive()" :label="$group->status->label()" /></div>
                         <div class="t-right">
-                            <a href="{{ route('attendance.create', $group) }}" class="btn btn-sm">Davomat</a>
+                            <a href="{{ route('attendance.create', $group) }}" class="btn btn-sm">{{ __('Davomat') }}</a>
                         </div>
                     </div>
                 @empty
-                    <div class="t-empty">Guruh yo‘q</div>
+                    <div class="t-empty">{{ __('Guruh yo‘q') }}</div>
                 @endforelse
             </div>
         </div>

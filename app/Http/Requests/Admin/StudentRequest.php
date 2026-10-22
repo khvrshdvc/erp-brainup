@@ -43,13 +43,13 @@ class StudentRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'name' => 'ism',
-            'email' => 'email',
-            'phone' => 'telefon',
-            'password' => 'parol',
-            'birth_date' => 'tug‘ilgan sana',
-            'branch_id' => 'filial',
-            'group_id' => 'guruh',
+            'name' => __('ism'),
+            'email' => __('email'),
+            'phone' => __('telefon'),
+            'password' => __('parol'),
+            'birth_date' => __('tug‘ilgan sana'),
+            'branch_id' => __('filial'),
+            'group_id' => __('guruh'),
         ];
     }
 

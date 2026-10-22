@@ -16,10 +16,10 @@ enum GroupStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::Planned => 'Yangi',
-            self::Active => 'Faol',
-            self::Finished => 'Yakunlangan',
-            self::Archived => 'Arxivlangan',
+            self::Planned => __('Yangi'),
+            self::Active => __('Faol'),
+            self::Finished => __('Yakunlangan'),
+            self::Archived => __('Arxivlangan'),
         };
     }
 

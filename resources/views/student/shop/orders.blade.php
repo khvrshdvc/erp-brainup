@@ -1,5 +1,5 @@
-<x-app-layout crumb="Do‘kon / Buyurtmalarim" title="Buyurtmalarim"
-    subtitle="Buyurtmani filial administratoridan olasiz. Kutilayotgan buyurtmani bekor qilsangiz, BrainCoin qaytariladi.">
+<x-app-layout :crumb="__('Do‘kon') . ' / ' . __('Buyurtmalarim')" :title="__('Buyurtmalarim')"
+    :subtitle="__('Buyurtmani filial administratoridan olasiz. Kutilayotgan buyurtmani bekor qilsangiz, BrainCoin qaytariladi.')">
 
     @include('student.shop._wallet')
 
@@ -15,7 +15,7 @@
                 </span>
 
                 <span class="order-body">
-                    <b>{{ $order->item?->name ?? 'O‘chirilgan mahsulot' }}</b>
+                    <b>{{ $order->item?->name ?? __('O‘chirilgan mahsulot') }}</b>
                     <span class="card-sub">
                         {{ \App\Support\UzDate::dayMonth($order->created_at) }}, {{ $order->created_at->format('H:i') }}
                         @if ($order->note)
@@ -31,14 +31,14 @@
                     <form method="POST" action="{{ route('student.shop.orders.cancel', $order) }}" x-data="{ ask: false }" class="order-cancel">
                         @csrf
                         @method('DELETE')
-                        <button type="button" class="btn btn-sm" x-show="! ask" @click="ask = true">Bekor qilish</button>
-                        <button type="submit" class="btn btn-sm" x-show="ask" x-cloak style="color: var(--err); border-color: var(--err)">Ha, bekor qilish</button>
+                        <button type="button" class="btn btn-sm" x-show="! ask" @click="ask = true">{{ __('Bekor qilish') }}</button>
+                        <button type="submit" class="btn btn-sm" x-show="ask" x-cloak style="color: var(--err); border-color: var(--err)">{{ __('Ha, bekor qilish') }}</button>
                     </form>
                 @endcan
             </div>
         @empty
             <div class="t-empty">
-                Hali buyurtma yo‘q. <a class="link" href="{{ route('student.shop.index') }}">Do‘konga o‘tish</a>
+                {{ __('Hali buyurtma yo‘q.') }} <a class="link" href="{{ route('student.shop.index') }}">{{ __('Do‘konga o‘tish') }}</a>
             </div>
         @endforelse
     </section>

@@ -15,9 +15,9 @@ enum SubmissionStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::Submitted => 'Tekshirilmoqda',
-            self::Graded => 'Tekshirildi',
-            self::Returned => 'Qayta topshirish kerak',
+            self::Submitted => __('Tekshirilmoqda'),
+            self::Graded => __('Tekshirildi'),
+            self::Returned => __('Qayta topshirish kerak'),
         };
     }
 

@@ -5,8 +5,12 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <title>{{ $attributes->get('title') ? $attributes->get('title').' · ' : '' }}{{ config('app.name') }}</title>
+        <meta name="color-scheme" content="light dark">
+        @include('layouts.partials.theme-init')
+        @include('layouts.partials.i18n-js')
         <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
         {{-- erp.js must load before Alpine (in app.js) so its alpine:init listener is registered in time. --}}
         <script src="{{ asset('js/erp.js') }}?v={{ filemtime(public_path('js/erp.js')) }}" defer></script>
         @vite(['resources/css/app.css', 'resources/js/app.js'])

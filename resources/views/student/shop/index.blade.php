@@ -1,5 +1,5 @@
-<x-app-layout crumb="Bosh sahifa / Do‘kon" title="Do‘kon"
-    subtitle="Darsga kelib, vazifalarni bajarib BrainCoin to‘plang va sovg‘alarga almashtiring">
+<x-app-layout :crumb="__('Bosh sahifa') . ' / ' . __('Do‘kon')" :title="__('Do‘kon')"
+    :subtitle="__('Darsga kelib, vazifalarni bajarib BrainCoin to‘plang va sovg‘alarga almashtiring')">
 
     @include('student.shop._wallet')
 
@@ -8,7 +8,7 @@
     @enderror
 
     @if ($items->isEmpty())
-        <section class="card"><div class="t-empty">Hozircha do‘konda mahsulot yo‘q</div></section>
+        <section class="card"><div class="t-empty">{{ __('Hozircha do‘konda mahsulot yo‘q') }}</div></section>
     @else
         <div class="shop-grid">
             @foreach ($items as $item)
@@ -27,7 +27,7 @@
 
                         @if (! $item->hasUnlimitedStock())
                             <span @class(['shop-stock', 'out' => ! $item->inStock()])>
-                                {{ $item->inStock() ? $item->stock.' ta qoldi' : 'Tugagan' }}
+                                {{ $item->inStock() ? __(':count ta qoldi', ['count' => $item->stock]) : __('Tugagan') }}
                             </span>
                         @endif
                     </div>
@@ -43,17 +43,17 @@
                         <x-coin :amount="$item->price" size="lg" />
 
                         @if (! $item->inStock())
-                            <button type="button" class="btn btn-sm" disabled>Tugagan</button>
+                            <button type="button" class="btn btn-sm" disabled>{{ __('Tugagan') }}</button>
                         @elseif ($missing > 0)
-                            <span class="shop-missing">Yana {{ number_format($missing, 0, '', ' ') }} kerak</span>
+                            <span class="shop-missing">{{ __('Yana :missing kerak', ['missing' => number_format($missing, 0, '', ' ')]) }}</span>
                         @else
-                            <button type="button" class="btn btn-primary btn-sm" x-show="! ask" @click="ask = true">Sotib olish</button>
+                            <button type="button" class="btn btn-primary btn-sm" x-show="! ask" @click="ask = true">{{ __('Sotib olish') }}</button>
 
                             <form method="POST" action="{{ route('student.shop.buy', $item) }}" class="shop-confirm"
                                 x-show="ask" x-cloak x-data="oneSubmit" @submit="guard($event)" :aria-busy="submitting">
                                 @csrf
-                                <button type="button" class="btn btn-sm" @click="ask = false">Yo‘q</button>
-                                <button type="submit" class="btn btn-primary btn-sm">Tasdiqlash</button>
+                                <button type="button" class="btn btn-sm" @click="ask = false">{{ __('Yo‘q') }}</button>
+                                <button type="submit" class="btn btn-primary btn-sm">{{ __('Tasdiqlash') }}</button>
                             </form>
                         @endif
                     </div>

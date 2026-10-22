@@ -18,8 +18,8 @@ class GamificationRulesRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'rules' => 'qoidalar',
-            'rules.*.points' => 'ball',
+            'rules' => __('qoidalar'),
+            'rules.*.points' => __('ball'),
         ];
     }
 }

@@ -15,9 +15,9 @@ enum ShopOrderStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::Pending => 'Kutilmoqda',
-            self::Delivered => 'Topshirildi',
-            self::Cancelled => 'Bekor qilindi',
+            self::Pending => __('Kutilmoqda'),
+            self::Delivered => __('Topshirildi'),
+            self::Cancelled => __('Bekor qilindi'),
         };
     }
 

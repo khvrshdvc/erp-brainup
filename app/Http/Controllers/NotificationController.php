@@ -32,6 +32,6 @@ class NotificationController extends Controller
     {
         $request->user()->unreadNotifications->markAsRead();
 
-        return back()->with('status', 'Hammasi o‘qilgan deb belgilandi');
+        return back()->with('status', __('Hammasi o‘qilgan deb belgilandi'));
     }
 }

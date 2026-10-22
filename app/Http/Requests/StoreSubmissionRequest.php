@@ -34,15 +34,15 @@ class StoreSubmissionRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'file.required' => 'Vazifa faylini biriktiring.',
+            'file.required' => __('Vazifa faylini biriktiring.'),
         ];
     }
 
     public function attributes(): array
     {
         return [
-            'file' => 'fayl',
-            'body' => 'izoh',
+            'file' => __('fayl'),
+            'body' => __('izoh'),
         ];
     }
 

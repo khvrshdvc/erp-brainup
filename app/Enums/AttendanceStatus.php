@@ -31,10 +31,10 @@ enum AttendanceStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::Present => 'Keldi',
-            self::Late => 'Kechikdi',
-            self::Absent => 'Kelmadi',
-            self::Excused => 'Sababli',
+            self::Present => __('Keldi'),
+            self::Late => __('Kechikdi'),
+            self::Absent => __('Kelmadi'),
+            self::Excused => __('Sababli'),
         };
     }
 

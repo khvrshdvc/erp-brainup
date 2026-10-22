@@ -15,9 +15,9 @@ enum AssignmentStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::Draft => 'Qoralama',
-            self::Published => 'E‘lon qilingan',
-            self::Closed => 'Yopilgan',
+            self::Draft => __('Qoralama'),
+            self::Published => __('E‘lon qilingan'),
+            self::Closed => __('Yopilgan'),
         };
     }
 }

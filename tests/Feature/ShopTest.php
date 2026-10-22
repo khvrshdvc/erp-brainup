@@ -139,4 +139,28 @@ class ShopTest extends TestCase
 
         $this->actingAs($super)->get(route('shop.items.image', $item))->assertOk();
     }
+
+    public function test_branch_admins_of_that_branch_are_notified_about_a_new_order(): void
+    {
+        $student = $this->student(500);
+        $admin = User::factory()->branchAdmin()->inBranch($this->branch)->create();
+        $otherAdmin = User::factory()->branchAdmin()->inBranch(Branch::create(['name' => 'B']))->create();
+        $item = ShopItem::factory()->create(['name' => 'Daftar', 'price' => 100]);
+
+        $this->actingAs($student)->post(route('student.shop.buy', $item));
+
+        $this->assertSame(1, $admin->notifications()->count());
+        $this->assertSame('Do‘kondan yangi buyurtma', $admin->notifications()->first()->data['title']);
+        $this->assertStringContainsString('Daftar', $admin->notifications()->first()->data['body']);
+        $this->assertSame(0, $otherAdmin->notifications()->count());
+    }
+
+    public function test_braincoin_keeps_its_spelling_in_uppercase_labels(): void
+    {
+        $student = $this->student(100);
+
+        $this->actingAs($student)->get(route('student.shop.index'))
+            ->assertOk()
+            ->assertSee('<span class="brand-name">BrainCoin</span>', false);
+    }
 }
