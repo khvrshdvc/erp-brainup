@@ -52,4 +52,6 @@
             <section class="card"><div class="t-empty">Hali vazifa topshirmagansiz</div></section>
         @endforelse
     </div>
+
+    <x-pager :paginator="$submissions" />
 </x-app-layout>

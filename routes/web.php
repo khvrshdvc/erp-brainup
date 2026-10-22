@@ -63,6 +63,7 @@ Route::middleware('auth')->group(function () {
             ->except(['destroy'])
             ->parameters(['groups' => 'studyGroup']);
         Route::post('/groups/{studyGroup}/students', [AdminGroupController::class, 'addStudent'])->name('groups.students.add');
+        Route::get('/groups/{studyGroup}/candidates', [AdminGroupController::class, 'candidates'])->name('groups.candidates');
         Route::patch('/groups/{studyGroup}/status', [AdminGroupController::class, 'toggleStatus'])->name('groups.status');
         Route::delete('/groups/{studyGroup}/students/{student}', [AdminGroupController::class, 'removeStudent'])->name('groups.students.remove');
 

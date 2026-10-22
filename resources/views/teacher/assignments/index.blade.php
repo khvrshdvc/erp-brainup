@@ -64,4 +64,6 @@
             </div>
         </div>
     </section>
+
+    <x-pager :paginator="$assignments" />
 </x-app-layout>

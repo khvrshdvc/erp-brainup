@@ -13,6 +13,7 @@ use App\Models\Assignment;
 use App\Models\Course;
 use App\Models\StudyGroup;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -56,18 +57,33 @@ class GroupController extends Controller
 
         $students = $studyGroup->students()->with('level')->orderBy('users.name')->get();
 
-        $candidates = User::students()
-            ->inBranch($studyGroup->branch_id)
-            ->whereNotIn('users.id', $students->pluck('id'))
-            ->orderBy('users.name')
-            ->get();
-
         return view('admin.groups.show', [
             'group' => $studyGroup,
             'students' => $students,
-            'candidates' => $candidates,
             'days' => WeekDay::shortLabels(),
         ]);
+    }
+
+    /**
+     * Search for students that can still be added to the group: active, same branch, not enrolled yet.
+     */
+    public function candidates(Request $request, StudyGroup $studyGroup): JsonResponse
+    {
+        $term = trim((string) $request->query('q'));
+
+        $candidates = User::students()
+            ->active()
+            ->inBranch($studyGroup->branch_id)
+            ->whereNotIn('users.id', $studyGroup->students()->select('users.id'))
+            ->when($term !== '', fn ($query) => $query->where(fn ($where) => $where
+                ->where('users.name', 'like', "%{$term}%")
+                ->orWhere('users.email', 'like', "%{$term}%")
+                ->orWhere('users.phone', 'like', "%{$term}%")))
+            ->orderBy('users.name')
+            ->limit(20)
+            ->get(['users.id', 'users.name', 'users.email']);
+
+        return response()->json($candidates);
     }
 
     public function edit(StudyGroup $studyGroup): View

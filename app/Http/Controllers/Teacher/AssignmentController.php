@@ -32,7 +32,8 @@ class AssignmentController extends Controller
             ->when($request->filled('group'), fn ($query) => $query->where('study_group_id', (int) $request->query('group')))
             ->when(in_array($status, AssignmentStatus::values(), true), fn ($query) => $query->where('status', $status))
             ->latest()
-            ->get();
+            ->paginate(20)
+            ->withQueryString();
 
         return view('teacher.assignments.index', [
             'assignments' => $assignments,

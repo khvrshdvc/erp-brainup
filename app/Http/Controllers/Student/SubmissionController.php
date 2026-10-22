@@ -6,32 +6,44 @@ use App\Enums\SubmissionStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Submission;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class SubmissionController extends Controller
 {
     public function index(Request $request): View
     {
+        $studentId = $request->user()->id;
+
         $submissions = Submission::query()
-            ->where('student_id', $request->user()->id)
+            ->where('student_id', $studentId)
             ->with(['assignment', 'attachments'])
             ->latest('submitted_at')
-            ->get();
+            ->paginate(20)
+            ->withQueryString();
 
-        $graded = $submissions->where('status', SubmissionStatus::Graded);
+        // The summary cards cover every submission, not just the current page.
+        $counts = Submission::query()
+            ->where('student_id', $studentId)
+            ->selectRaw('status, count(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status');
 
-        $scored = $graded->filter(fn ($s) => $s->score !== null && $s->assignment && $s->assignment->max_score > 0);
-
-        $average = $scored->isEmpty()
-            ? null
-            : (int) round($scored->avg(fn ($s) => $s->score / $s->assignment->max_score * 100));
+        $average = Submission::query()
+            ->join('assignments', 'assignments.id', '=', 'submissions.assignment_id')
+            ->where('submissions.student_id', $studentId)
+            ->where('submissions.status', SubmissionStatus::Graded->value)
+            ->whereNotNull('submissions.score')
+            ->whereNull('assignments.deleted_at')
+            ->where('assignments.max_score', '>', 0)
+            ->avg(DB::raw('submissions.score * 100.0 / assignments.max_score'));
 
         return view('student.submissions.index', [
             'submissions' => $submissions,
-            'total' => $submissions->count(),
-            'gradedCount' => $graded->count(),
-            'pendingCount' => $submissions->where('status', SubmissionStatus::Submitted)->count(),
-            'average' => $average,
+            'total' => (int) $counts->sum(),
+            'gradedCount' => (int) $counts->get(SubmissionStatus::Graded->value, 0),
+            'pendingCount' => (int) $counts->get(SubmissionStatus::Submitted->value, 0),
+            'average' => $average === null ? null : (int) round($average),
         ]);
     }
 }
