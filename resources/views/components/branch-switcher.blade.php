@@ -1,7 +1,7 @@
 @php
     $user = auth()->user();
     $branches = \App\Models\Branch::whereIn('id', $user->availableBranchIds())->orderBy('name')->get();
-    $current = (int) session('branch_id');
+    $current = (int) app(\App\Services\CurrentBranch::class)->id();
 @endphp
 
 @if ($user->isSuperAdmin() || $branches->count() > 1)

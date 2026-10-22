@@ -45,6 +45,13 @@ class BranchController extends Controller
         return redirect()->route('admin.branches.index')->with('status', 'Filial yangilandi');
     }
 
+    public function toggleStatus(Branch $branch): RedirectResponse
+    {
+        $branch->update(['is_active' => ! $branch->is_active]);
+
+        return back()->with('status', 'Holat o‘zgartirildi');
+    }
+
     private function validated(Request $request, ?Branch $branch = null): array
     {
         $data = $request->validate([

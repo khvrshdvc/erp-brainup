@@ -15,7 +15,7 @@ class BranchSwitchController extends Controller
 
         if ($value === 'all') {
             abort_unless($user->isSuperAdmin(), 403);
-            session()->forget('branch_id');
+            session(['branch_id' => 0]);
         } else {
             $branchId = (int) $value;
             abort_unless(in_array($branchId, $user->availableBranchIds(), true), 403);

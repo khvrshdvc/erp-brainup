@@ -13,7 +13,7 @@
     <section class="card" style="overflow: hidden">
         <div class="t-scroll">
             <div class="t-min" style="min-width: 900px">
-                <div class="t-head" style="--cols: 2fr 2fr 1.6fr .9fr 1fr 1fr 1fr .9fr">
+                <div class="t-head" style="--cols: 2fr 2fr 1.6fr .9fr 1fr 1fr 1.4fr .5fr">
                     <div>Filial</div>
                     <div>Manzil</div>
                     <div>Menejer</div>
@@ -25,7 +25,7 @@
                 </div>
 
                 @forelse ($branches as $branch)
-                    <div class="t-row" style="--cols: 2fr 2fr 1.6fr .9fr 1fr 1fr 1fr .9fr">
+                    <div class="t-row" style="--cols: 2fr 2fr 1.6fr .9fr 1fr 1fr 1.4fr .5fr">
                         <div style="font-weight: 600">{{ $branch->name }}</div>
                         <div>{{ $branch->address ?? '—' }}</div>
                         <div>{{ $branch->manager_name ?? '—' }}</div>
@@ -33,10 +33,12 @@
                         <div>{{ $branch->students_count }}</div>
                         <div>{{ $branch->teachers_count }}</div>
                         <div>
-                            <x-badge :type="$branch->is_active ? 'ok' : 'neutral'">{{ $branch->is_active ? 'Faol' : 'Nofaol' }}</x-badge>
+                            <x-status-switch :action="route('admin.branches.status', $branch)"
+                                :active="$branch->is_active"
+                                :label="$branch->is_active ? 'Faol' : 'Nofaol'" />
                         </div>
                         <div class="t-right">
-                            <a class="btn btn-sm" href="{{ route('admin.branches.edit', $branch) }}">Tahrirlash</a>
+                            <x-edit-button :href="route('admin.branches.edit', $branch)" />
                         </div>
                     </div>
                 @empty

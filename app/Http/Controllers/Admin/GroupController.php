@@ -83,6 +83,15 @@ class GroupController extends Controller
         return redirect()->route('admin.groups.show', $studyGroup)->with('status', 'Guruh yangilandi');
     }
 
+    public function toggleStatus(StudyGroup $studyGroup): RedirectResponse
+    {
+        $studyGroup->update([
+            'status' => $studyGroup->status === GroupStatus::Active ? GroupStatus::Archived : GroupStatus::Active,
+        ]);
+
+        return back()->with('status', 'Holat o‘zgartirildi');
+    }
+
     public function addStudent(Request $request, StudyGroup $studyGroup): RedirectResponse
     {
         $data = $request->validate([

@@ -14,7 +14,7 @@
     <section class="card" style="overflow: hidden">
         <div class="t-scroll">
             <div class="t-min" style="min-width: 900px">
-                <div class="t-head" style="--cols: 2.6fr 1.4fr 2.2fr .9fr 1fr 1.6fr">
+                <div class="t-head" style="--cols: 2.6fr 1.4fr 2.2fr .9fr 1.4fr .5fr">
                     <div>O‘qituvchi</div>
                     <div>Telefon</div>
                     <div>Filiallar</div>
@@ -24,7 +24,7 @@
                 </div>
 
                 @forelse ($teachers as $teacher)
-                    <div class="t-row" style="--cols: 2.6fr 1.4fr 2.2fr .9fr 1fr 1.6fr">
+                    <div class="t-row" style="--cols: 2.6fr 1.4fr 2.2fr .9fr 1.4fr .5fr">
                         <div class="t-name">
                             <span class="avatar avatar-sm">{{ $teacher->initials }}</span>
                             <div>
@@ -35,17 +35,12 @@
                         <div>{{ $teacher->phone ?? '—' }}</div>
                         <div>{{ $teacher->branches->pluck('name')->implode(', ') }}</div>
                         <div>{{ $teacher->teaching_groups_count }}</div>
-                        <div><x-badge :type="$teacher->status->badge()">{{ $teacher->status->label() }}</x-badge></div>
-                        <div class="t-right page-actions" style="justify-content: flex-end">
-                            <form method="POST" action="{{ route('admin.teachers.status', $teacher) }}">
-                                @csrf
-                                @method('PATCH')
-                                <button type="submit" class="btn btn-sm">
-                                    {{ $teacher->status === \App\Enums\UserStatus::Active ? 'Faolsizlantirish' : 'Faollashtirish' }}
-                                </button>
-                            </form>
-                            <a class="btn btn-sm" href="{{ route('admin.teachers.edit', $teacher) }}">Tahrirlash</a>
+                        <div>
+                            <x-status-switch :action="route('admin.teachers.status', $teacher)"
+                                :active="$teacher->status === \App\Enums\UserStatus::Active"
+                                :label="$teacher->status->label()" />
                         </div>
+                        <div class="t-right"><x-edit-button :href="route('admin.teachers.edit', $teacher)" /></div>
                     </div>
                 @empty
                     <div class="t-empty">O‘qituvchi topilmadi</div>

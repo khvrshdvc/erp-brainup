@@ -35,7 +35,7 @@
     <section class="card" style="overflow: hidden">
         <div class="t-scroll">
             <div class="t-min" style="min-width: 940px">
-                <div class="t-head" style="--cols: 2.6fr 1.4fr 1.6fr .9fr 1.4fr 1fr .9fr">
+                <div class="t-head" style="--cols: 2.6fr 1.4fr 1.6fr .9fr 1.4fr 1.4fr .5fr">
                     <div>O‘quvchi</div>
                     <div>Telefon</div>
                     <div>Filial</div>
@@ -46,7 +46,7 @@
                 </div>
 
                 @forelse ($students as $student)
-                    <div class="t-row" style="--cols: 2.6fr 1.4fr 1.6fr .9fr 1.4fr 1fr .9fr">
+                    <div class="t-row" style="--cols: 2.6fr 1.4fr 1.6fr .9fr 1.4fr 1.4fr .5fr">
                         <div class="t-name">
                             <span class="avatar avatar-sm">{{ $student->initials }}</span>
                             <div>
@@ -58,8 +58,12 @@
                         <div>{{ $student->branch?->name }}</div>
                         <div>{{ $student->study_groups_count }}</div>
                         <div>{{ $student->level?->name ?? 'Boshlovchi' }} · {{ $student->xp }}</div>
-                        <div><x-badge :type="$student->status->badge()">{{ $student->status->label() }}</x-badge></div>
-                        <div class="t-right"><a class="btn btn-sm" href="{{ route('admin.students.edit', $student) }}">Tahrirlash</a></div>
+                        <div>
+                            <x-status-switch :action="route('admin.students.status', $student)"
+                                :active="$student->status === \App\Enums\UserStatus::Active"
+                                :label="$student->status->label()" />
+                        </div>
+                        <div class="t-right"><x-edit-button :href="route('admin.students.edit', $student)" /></div>
                     </div>
                 @empty
                     <div class="t-empty">O‘quvchi topilmadi</div>

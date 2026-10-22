@@ -22,7 +22,12 @@ class CurrentBranch
         $selected = (int) session('branch_id');
 
         if ($user->isSuperAdmin()) {
-            $result = in_array($selected, $available, true) ? $selected : null;
+            // 0 is an explicit "all branches" choice; with nothing chosen yet, default to the first branch.
+            $result = match (true) {
+                session()->has('branch_id') && $selected === 0 => null,
+                in_array($selected, $available, true) => $selected,
+                default => $available ? min($available) : null,
+            };
         } elseif (in_array($selected, $available, true)) {
             $result = $selected;
         } else {

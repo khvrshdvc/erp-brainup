@@ -56,6 +56,7 @@ Route::middleware('auth')->group(function () {
             ->except(['destroy'])
             ->parameters(['groups' => 'studyGroup']);
         Route::post('/groups/{studyGroup}/students', [AdminGroupController::class, 'addStudent'])->name('groups.students.add');
+        Route::patch('/groups/{studyGroup}/status', [AdminGroupController::class, 'toggleStatus'])->name('groups.status');
         Route::delete('/groups/{studyGroup}/students/{student}', [AdminGroupController::class, 'removeStudent'])->name('groups.students.remove');
 
         Route::resource('students', AdminStudentController::class)->except(['destroy']);
@@ -79,6 +80,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:super_admin')->prefix('admin')->name('admin.')->group(function () {
         Route::resource('branches', BranchController::class)->except(['show', 'destroy']);
 
+        Route::patch('/branches/{branch}/status', [BranchController::class, 'toggleStatus'])->name('branches.status');
         Route::get('/gamification', [GamificationController::class, 'index'])->name('gamification.index');
         Route::put('/gamification', [GamificationController::class, 'update'])->name('gamification.update');
     });

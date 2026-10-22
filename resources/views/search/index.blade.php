@@ -11,7 +11,7 @@
                     <div><a class="link" href="{{ route('admin.students.show', $student) }}">{{ $student->name }}</a>
                         <div class="card-sub" style="font-weight: 400">{{ $student->email }}</div></div>
                     <div>{{ $student->phone ?? '—' }}</div>
-                    <div class="t-right"><a class="btn btn-sm" href="{{ route('admin.students.edit', $student) }}">Tahrirlash</a></div>
+                    <div class="t-right"><x-edit-button :href="route('admin.students.edit', $student)" /></div>
                 </div>
             @endforeach
             <div style="padding: 8px 16px 16px"><a class="link" href="{{ route('admin.students.index', ['q' => $term]) }}">Barchasini ko‘rish</a></div>
@@ -25,7 +25,7 @@
                 <div class="t-row" style="--cols: 2fr 1.4fr .8fr">
                     <div>{{ $teacher->name }}<div class="card-sub" style="font-weight: 400">{{ $teacher->email }}</div></div>
                     <div>{{ $teacher->phone ?? '—' }}</div>
-                    <div class="t-right"><a class="btn btn-sm" href="{{ route('admin.teachers.edit', $teacher) }}">Tahrirlash</a></div>
+                    <div class="t-right"><x-edit-button :href="route('admin.teachers.edit', $teacher)" /></div>
                 </div>
             @endforeach
             <div style="padding: 8px 16px 16px"><a class="link" href="{{ route('admin.teachers.index', ['q' => $term]) }}">Barchasini ko‘rish</a></div>

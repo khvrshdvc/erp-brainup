@@ -2,14 +2,10 @@
     :subtitle="$student->email.' · '.$student->branch?->name">
 
     <x-slot name="actions">
-        <form method="POST" action="{{ route('admin.students.status', $student) }}">
-            @csrf
-            @method('PATCH')
-            <button type="submit" class="btn">
-                {{ $student->status === \App\Enums\UserStatus::Active ? 'Faolsizlantirish' : 'Faollashtirish' }}
-            </button>
-        </form>
-        <a href="{{ route('admin.students.edit', $student) }}" class="btn btn-primary">Tahrirlash</a>
+        <x-status-switch :action="route('admin.students.status', $student)"
+            :active="$student->status === \App\Enums\UserStatus::Active"
+            :label="$student->status->label()" />
+        <x-edit-button :href="route('admin.students.edit', $student)" />
     </x-slot>
 
     <div class="kpi-grid">

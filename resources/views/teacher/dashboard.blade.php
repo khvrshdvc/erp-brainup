@@ -29,7 +29,7 @@
                     <div class="t-row" style="--cols: 2.4fr 1fr 1.2fr 1fr">
                         <div style="font-weight: 600">{{ $group->name }}</div>
                         <div>{{ $group->students_count }}</div>
-                        <div><x-badge :type="$group->status->badge()">{{ $group->status->label() }}</x-badge></div>
+                        <div><x-status-indicator :active="$group->status === \App\Enums\GroupStatus::Active" :label="$group->status->label()" /></div>
                         <div class="t-right">
                             <a href="{{ route('attendance.create', $group) }}" class="btn btn-sm">Davomat</a>
                         </div>

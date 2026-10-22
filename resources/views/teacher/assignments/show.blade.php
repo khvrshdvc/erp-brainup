@@ -2,7 +2,7 @@
     :subtitle="$assignment->studyGroup?->name.' · muddat: '.$assignment->due_at->format('d.m.Y, H:i')">
 
     <x-slot name="actions">
-        <a href="{{ route('teacher.assignments.edit', $assignment) }}" class="btn">Tahrirlash</a>
+        <x-edit-button :href="route('teacher.assignments.edit', $assignment)" />
 
         @if ($assignment->isDraft())
             <form method="POST" action="{{ route('teacher.assignments.publish', $assignment) }}">

@@ -3,7 +3,10 @@
 
     <x-slot name="actions">
         <a href="{{ route('attendance.create', $group) }}" class="btn">Davomat</a>
-        <a href="{{ route('admin.groups.edit', $group) }}" class="btn btn-primary">Tahrirlash</a>
+        <x-status-switch :action="route('admin.groups.status', $group)"
+            :active="$group->status === \App\Enums\GroupStatus::Active"
+            :label="$group->status->label()" />
+        <x-edit-button :href="route('admin.groups.edit', $group)" />
     </x-slot>
 
     <section class="card card-pad">
