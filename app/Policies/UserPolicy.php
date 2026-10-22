@@ -28,6 +28,14 @@ class UserPolicy
     }
 
     /**
+     * Only the super admin edits a branch admin's details.
+     */
+    public function manageBranchAdmin(User $actor, User $admin): Response
+    {
+        return $actor->isSuperAdmin() && $admin->isBranchAdmin() ? Response::allow() : Response::denyAsNotFound();
+    }
+
+    /**
      * Email and password give full control of an account, so a branch admin may only change them
      * when every branch the teacher works in is one of theirs.
      */
