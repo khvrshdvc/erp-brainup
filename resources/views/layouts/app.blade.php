@@ -5,7 +5,6 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <title>{{ $attributes->get('title') ? $attributes->get('title').' · ' : '' }}{{ config('app.name') }}</title>
-        <meta name="color-scheme" content="light dark">
         @include('layouts.partials.theme-init')
         @include('layouts.partials.i18n-js')
         <link rel="preconnect" href="https://fonts.googleapis.com">
