@@ -10,6 +10,7 @@ use App\Models\Submission;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -136,6 +137,26 @@ class NotificationTest extends TestCase
         $this->assertSame(0, $student->fresh()->unreadNotifications()->count());
     }
 
+    public function test_cached_unread_counter_follows_new_and_read_notifications(): void
+    {
+        [$teacher, $student, , $group] = $this->setupGroup();
+
+        $this->assertSame(0, $student->unreadNotificationsCount());
+
+        $this->actingAs($teacher)->post(route('teacher.assignments.store'), $this->assignmentPayload($group, 'publish'));
+        $this->assertSame(1, $student->unreadNotificationsCount());
+
+        $notification = $student->notifications()->firstOrFail();
+        $this->actingAs($student)->post(route('notifications.read', $notification->id));
+        $this->assertSame(0, $student->unreadNotificationsCount());
+
+        $this->actingAs($teacher)->post(route('teacher.assignments.store'), $this->assignmentPayload($group, 'publish'));
+        $this->assertSame(1, $student->unreadNotificationsCount());
+
+        $this->actingAs($student)->post(route('notifications.read-all'));
+        $this->assertSame(0, $student->unreadNotificationsCount());
+    }
+
     public function test_user_cannot_read_someone_elses_notification(): void
     {
         [$teacher, $student, $outsider, $group] = $this->setupGroup();
@@ -220,6 +241,6 @@ class NotificationTest extends TestCase
         ])->assertForbidden();
 
         $this->assertNotSame('Boshqa Ism', $student->fresh()->name);
-        $this->assertTrue(\Illuminate\Support\Facades\Hash::check('oldpassword1', $student->fresh()->password));
+        $this->assertTrue(Hash::check('oldpassword1', $student->fresh()->password));
     }
 }

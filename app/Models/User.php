@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Cache;
 
 class User extends Authenticatable
 {
@@ -31,6 +32,8 @@ class User extends Authenticatable
     ];
 
     protected $hidden = ['password', 'remember_token'];
+
+    private ?array $availableBranchIds = null;
 
     protected function casts(): array
     {
@@ -86,7 +89,21 @@ class User extends Authenticatable
         return $this->role === Role::Student;
     }
 
+    /**
+     * Memoized: controllers, policies, form requests and the layout all ask for it within one request.
+     * Call forgetAvailableBranchIds() after changing the user's branches inside that request.
+     */
     public function availableBranchIds(): array
+    {
+        return $this->availableBranchIds ??= $this->resolveAvailableBranchIds();
+    }
+
+    public function forgetAvailableBranchIds(): void
+    {
+        $this->availableBranchIds = null;
+    }
+
+    private function resolveAvailableBranchIds(): array
     {
         if ($this->isSuperAdmin()) {
             return Branch::query()->pluck('id')->all();
@@ -97,6 +114,25 @@ class User extends Authenticatable
         }
 
         return $this->branch_id ? [(int) $this->branch_id] : [];
+    }
+
+    /**
+     * The topbar shows this on every page, so it is cached briefly and dropped whenever
+     * a notification is sent or read (see ForgetUnreadNotificationCount).
+     */
+    public function unreadNotificationsCount(): int
+    {
+        return Cache::remember(static::unreadCountCacheKey($this->id), 300, fn () => $this->unreadNotifications()->count());
+    }
+
+    public static function forgetUnreadNotificationsCount(int|string $userId): void
+    {
+        Cache::forget(static::unreadCountCacheKey($userId));
+    }
+
+    private static function unreadCountCacheKey(int|string $userId): string
+    {
+        return 'unread-notifications:'.$userId;
     }
 
     public function branch(): BelongsTo

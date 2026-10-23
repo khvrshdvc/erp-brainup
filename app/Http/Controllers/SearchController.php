@@ -12,6 +12,8 @@ class SearchController extends Controller
 {
     private const LIMIT = 10;
 
+    private const MIN_TERM_LENGTH = 2;
+
     public function __invoke(Request $request): View
     {
         $user = $request->user();
@@ -22,17 +24,20 @@ class SearchController extends Controller
 
         $students = $teachers = $groups = collect();
 
-        if ($term !== '') {
+        if (mb_strlen($term) >= self::MIN_TERM_LENGTH) {
+            // "%" and "_" typed by the user must match themselves, not every row.
+            $pattern = '%'.addcslashes($term, '\\%_').'%';
+
             $like = fn ($query) => $query->where(fn ($where) => $where
-                ->where('users.name', 'like', "%{$term}%")
-                ->orWhere('users.email', 'like', "%{$term}%")
-                ->orWhere('users.phone', 'like', "%{$term}%"));
+                ->where('users.name', 'like', $pattern)
+                ->orWhere('users.email', 'like', $pattern)
+                ->orWhere('users.phone', 'like', $pattern));
 
             $groups = StudyGroup::query()
                 ->with(['course', 'teacher'])
                 ->withCount('students')
                 ->when($user->isTeacher(), fn ($query) => $query->where('teacher_id', $user->id))
-                ->where('name', 'like', "%{$term}%")
+                ->where('name', 'like', $pattern)
                 ->orderBy('name')
                 ->limit(self::LIMIT)
                 ->get();

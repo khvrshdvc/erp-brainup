@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Enums\Role;
 use App\Models\Branch;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -25,6 +24,17 @@ class SearchTest extends TestCase
             ->assertOk()
             ->assertSee('Aziz Karimov')
             ->assertDontSee('Aziz Boshqa');
+    }
+
+    public function test_search_treats_wildcards_literally_and_needs_two_characters(): void
+    {
+        $branch = Branch::create(['name' => 'A']);
+        $admin = User::factory()->branchAdmin()->inBranch($branch)->create();
+        User::factory()->student()->inBranch($branch)->create(['name' => 'Aziz Karimov']);
+
+        $this->actingAs($admin)->get(route('search', ['q' => '%']))->assertOk()->assertDontSee('Aziz Karimov');
+        $this->actingAs($admin)->get(route('search', ['q' => 'A']))->assertOk()->assertDontSee('Aziz Karimov');
+        $this->actingAs($admin)->get(route('search', ['q' => 'Az']))->assertOk()->assertSee('Aziz Karimov');
     }
 
     public function test_students_cannot_search(): void

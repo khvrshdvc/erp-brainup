@@ -1,6 +1,6 @@
 @php
     $user = auth()->user();
-    $unread = $user->unreadNotifications()->count();
+    $unread = $user->unreadNotificationsCount();
 @endphp
 
 <header class="erp-topbar">

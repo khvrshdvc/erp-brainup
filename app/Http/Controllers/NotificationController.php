@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -20,6 +21,7 @@ class NotificationController extends Controller
         $notification = $request->user()->notifications()->findOrFail($id);
 
         $notification->markAsRead();
+        User::forgetUnreadNotificationsCount($request->user()->id);
 
         $url = $notification->data['url'] ?? null;
 
@@ -31,6 +33,7 @@ class NotificationController extends Controller
     public function readAll(Request $request): RedirectResponse
     {
         $request->user()->unreadNotifications->markAsRead();
+        User::forgetUnreadNotificationsCount($request->user()->id);
 
         return back()->with('status', __('Hammasi o‘qilgan deb belgilandi'));
     }

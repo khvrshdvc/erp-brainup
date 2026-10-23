@@ -53,6 +53,39 @@ class Setting extends Model
     }
 
     /**
+     * Several settings at once: one cache round trip, and one query for whatever is missing.
+     * Returns key => value (null when there is no row), like get() without the default.
+     */
+    public static function many(array $keys, ?int $branchId = null): array
+    {
+        $branchId ??= app(CurrentBranch::class)->id();
+
+        $cacheKeys = collect($keys)->mapWithKeys(fn (string $key) => [static::cacheKey($key, $branchId) => $key]);
+        $cached = Cache::many($cacheKeys->keys()->all());
+
+        $missing = $cacheKeys->filter(fn (string $key, string $cacheKey) => $cached[$cacheKey] === null)->values()->all();
+
+        if ($missing) {
+            $rows = static::query()
+                ->whereIn('key', $missing)
+                ->where(fn ($query) => $query->where('branch_id', $branchId)->orWhereNull('branch_id'))
+                ->orderByRaw('branch_id is null')
+                ->get()
+                ->unique('key')
+                ->keyBy('key');
+
+            foreach ($missing as $key) {
+                $cached[static::cacheKey($key, $branchId)] = ['value' => $rows->get($key)?->value];
+                Cache::put(static::cacheKey($key, $branchId), $cached[static::cacheKey($key, $branchId)], self::CACHE_TTL);
+            }
+        }
+
+        return $cacheKeys
+            ->mapWithKeys(fn (string $key, string $cacheKey) => [$key => $cached[$cacheKey]['value'] ?? null])
+            ->all();
+    }
+
+    /**
      * A branch row only affects that branch, but a global row is the fallback of every branch.
      */
     public static function forgetCached(string $key, ?int $branchId): void

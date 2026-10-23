@@ -42,6 +42,21 @@ class SettingCacheTest extends TestCase
         }));
     }
 
+    public function test_many_reads_missing_keys_in_one_query_and_then_none(): void
+    {
+        $branch = Branch::create(['name' => 'A']);
+        Setting::put('center_name', 'Global');
+        Setting::put('center_name', 'Branch A', $branch->id);
+        Setting::put('center_phone', '+998', null);
+
+        $keys = ['center_name', 'center_phone', 'center_address'];
+        $expected = ['center_name' => 'Branch A', 'center_phone' => '+998', 'center_address' => null];
+
+        $this->assertSame(1, $this->queries(fn () => $this->assertSame($expected, Setting::many($keys, $branch->id))));
+        $this->assertSame(0, $this->queries(fn () => $this->assertSame($expected, Setting::many($keys, $branch->id))));
+        $this->assertSame('Branch A', Setting::get('center_name', null, $branch->id));
+    }
+
     public function test_put_invalidates_the_cached_value(): void
     {
         Setting::put('center_name', 'Eski');

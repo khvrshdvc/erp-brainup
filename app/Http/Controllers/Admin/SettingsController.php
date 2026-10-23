@@ -23,8 +23,8 @@ class SettingsController extends Controller
 
     public function edit(Request $request): View
     {
-        $center = collect(self::CENTER_KEYS)
-            ->mapWithKeys(fn (string $key) => [$key => Setting::get($key, '')])
+        $center = collect(Setting::many(self::CENTER_KEYS))
+            ->map(fn ($value) => $value ?? '')
             ->all();
 
         $center['attendance_edit_days'] = Setting::attendanceEditDays();
