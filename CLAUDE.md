@@ -14,7 +14,6 @@ Run every PHP, Composer, Artisan and npm command through Sail, never on the host
 vendor/bin/sail up -d          # start containers (stop with: vendor/bin/sail down)
 vendor/bin/sail composer install
 vendor/bin/sail npm run dev    # Vite dev server (or: sail npm run build)
-vendor/bin/sail artisan queue:work   # required: AwardAttendanceXp is queued, so no XP is awarded without a worker (.env.example uses QUEUE_CONNECTION=redis)
 vendor/bin/sail artisan schedule:work   # runs the daily notifications:prune (read notifications older than 60 days) and shop:expire-orders (pending shop orders older than 3 days are cancelled and refunded); in production run schedule:run every minute
 
 vendor/bin/sail test                                         # whole suite
@@ -56,7 +55,7 @@ Super-admin-only routes (branches, gamification) share the `admin.` prefix and n
 
 ### Events → listeners → gamification
 Controllers fire domain events, and listeners are auto-discovered from `app/Listeners`:
-- `AttendanceMarked` → `AwardAttendanceXp` (**queued**, `ShouldQueue` with `$afterCommit`; a queue worker must run or attendance awards no XP)
+- `AttendanceMarked` → `AwardAttendanceXp` (runs inline, deliberately not queued: the production host may have no worker; `AttendanceController` fires the event after commit)
 - `SubmissionUpdated` → `SyncSubmissionXp`, `SendSubmissionNotification`
 - `AssignmentPublished` → `NotifyStudentsOfAssignment`
 

@@ -14,10 +14,8 @@ use App\Models\StudyGroup;
 use App\Models\User;
 use App\Models\XpRule;
 use App\Models\XpTransaction;
-use App\Services\GamificationService;
 use Database\Seeders\GamificationSeeder;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Events\CallQueuedListener;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
@@ -96,18 +94,18 @@ class GamificationTest extends TestCase
         $this->assertSame(10 + 25, $student->fresh()->xp);
     }
 
-    public function test_attendance_xp_is_awarded_by_a_queued_listener_after_commit(): void
+    public function test_attendance_xp_is_awarded_without_a_queue_worker(): void
     {
-        $this->assertContains(ShouldQueue::class, class_implements(AwardAttendanceXp::class));
-        $this->assertTrue((new AwardAttendanceXp(app(GamificationService::class)))->afterCommit);
+        $this->assertNotContains(ShouldQueue::class, class_implements(AwardAttendanceXp::class));
 
+        // A queue that is never worked, like a server without a worker.
         Queue::fake();
 
         [$teacher, $student, $group] = $this->makeGroup();
         $this->mark($teacher, $group, $student, 'present');
 
-        Queue::assertPushed(CallQueuedListener::class, fn ($job) => $job->class === AwardAttendanceXp::class);
-        $this->assertSame(0, $student->fresh()->xp);
+        Queue::assertNothingPushed();
+        $this->assertSame(10, $student->fresh()->xp);
     }
 
     public function test_late_gives_reduced_xp(): void

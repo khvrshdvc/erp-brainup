@@ -60,14 +60,6 @@ vendor/bin/sail npm run dev
 
 The app is then available at <http://localhost>.
 
-### Run the queue worker
-
-Attendance XP is awarded by a queued listener, so **no XP is given unless a worker is running**:
-
-```sh
-vendor/bin/sail artisan queue:work
-```
-
 For scheduled jobs (for example, pruning old read notifications) run `vendor/bin/sail artisan schedule:work` locally. In production, run `schedule:run` every minute.
 
 ### Demo accounts

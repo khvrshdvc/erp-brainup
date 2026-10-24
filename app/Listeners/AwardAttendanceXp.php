@@ -4,12 +4,13 @@ namespace App\Listeners;
 
 use App\Events\AttendanceMarked;
 use App\Services\GamificationService;
-use Illuminate\Contracts\Queue\ShouldQueue;
 
-class AwardAttendanceXp implements ShouldQueue
+/**
+ * Runs inline, not on the queue: hosting without a running worker would otherwise
+ * never award attendance XP. AttendanceController fires the event after commit.
+ */
+class AwardAttendanceXp
 {
-    public bool $afterCommit = true;
-
     public function __construct(private GamificationService $gamification) {}
 
     public function handle(AttendanceMarked $event): void
