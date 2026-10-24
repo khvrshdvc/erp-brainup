@@ -514,12 +514,22 @@ html { -webkit-text-size-adjust: 100%; }
     }
     .t-right { text-align: left; }
 
+    /* Attendance buttons: four equal columns so "Keldi" lines up with the rest instead of wrapping alone. */
+    .t-row > .seg:last-child:not([data-label]):not(:first-child) {
+        display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; justify-content: stretch;
+    }
+    .seg .pill { justify-content: center; padding: 0 2px; font-size: 12px; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+
     .bar-row { grid-template-columns: 96px minmax(0, 1fr) 60px; gap: 8px; }
     .split { gap: 20px; }
     .sum-list { flex: 1 1 100%; }
     .chart { gap: 8px; }
     .due { text-align: left; }
     .kv { flex-wrap: wrap; gap: 4px 16px; }
+}
+
+@media (max-width: 340px) {
+    .t-row > .seg:last-child:not([data-label]):not(:first-child) { grid-template-columns: 1fr 1fr; }
 }
 
 /* Phones */
