@@ -27,6 +27,7 @@ class ShopOrderPlaced extends Notification
                 'item' => $this->order->item?->name ?? __('Mahsulot'),
                 'price' => $this->order->price,
             ],
+            'order_id' => $this->order->id,
             'url' => route('admin.shop.orders.index', [], false),
         ];
     }

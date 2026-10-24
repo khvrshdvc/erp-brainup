@@ -170,6 +170,26 @@ class ShopTest extends TestCase
         $this->assertSame(3, ShopOrder::count());
     }
 
+    public function test_cancelling_an_order_removes_the_branch_admins_new_order_notification(): void
+    {
+        $student = $this->student(500);
+        $admin = User::factory()->branchAdmin()->inBranch($this->branch)->create();
+        $item = ShopItem::factory()->create(['price' => 100]);
+        $other = ShopItem::factory()->create(['price' => 100]);
+
+        $this->actingAs($student)->post(route('student.shop.buy', $item));
+        $this->actingAs($student)->post(route('student.shop.buy', $other));
+
+        $this->assertSame(2, $admin->unreadNotificationsCount());
+
+        $order = ShopOrder::where('shop_item_id', $item->id)->firstOrFail();
+        $this->actingAs($student)->delete(route('student.shop.orders.cancel', $order));
+
+        $this->assertSame(1, $admin->notifications()->count());
+        $this->assertSame($other->id, ShopOrder::findOrFail($admin->notifications()->first()->data['order_id'])->shop_item_id);
+        $this->assertSame(1, $admin->unreadNotificationsCount());
+    }
+
     public function test_branch_admin_hands_over_an_order_and_student_is_notified(): void
     {
         $student = $this->student(500);

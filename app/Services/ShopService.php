@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Notifications\ShopOrderPlaced;
 use App\Notifications\ShopOrderUpdated;
 use App\Support\UzDate;
+use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -139,6 +140,22 @@ class ShopService
         Notification::send($admins, new ShopOrderPlaced($order));
     }
 
+    /**
+     * A cancelled order needs no attention from branch admins, so their "new order" notice goes away.
+     */
+    private function withdrawPlacedNotifications(ShopOrder $order): void
+    {
+        $notifications = DatabaseNotification::query()
+            ->where('type', ShopOrderPlaced::class)
+            ->where('data->order_id', $order->id);
+
+        $adminIds = (clone $notifications)->pluck('notifiable_id')->unique();
+
+        $notifications->delete();
+
+        $adminIds->each(fn ($id) => User::forgetUnreadNotificationsCount($id));
+    }
+
     private function close(ShopOrder $order, ?User $by, ShopOrderStatus $status, ?string $note = null): void
     {
         DB::transaction(function () use ($order, $by, $status, $note) {
@@ -161,6 +178,10 @@ class ShopService
 
             $order->setRawAttributes($locked->getAttributes(), true);
         });
+
+        if ($status === ShopOrderStatus::Cancelled) {
+            $this->withdrawPlacedNotifications($order);
+        }
 
         // Students hear about it only when someone else (or the deadline) closed their order.
         if ($order->user_id !== $by?->id) {
