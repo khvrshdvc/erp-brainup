@@ -64,7 +64,7 @@ class AssignmentTest extends TestCase
     private function submit(User $student, Assignment $assignment, string $name = 'essay.pdf')
     {
         return $this->actingAs($student)->post(route('student.assignments.submit.store', $assignment), [
-            'file' => UploadedFile::fake()->create($name, 100, 'application/pdf'),
+            'files' => [UploadedFile::fake()->create($name, 100, 'application/pdf')],
             'body' => 'Tayyor',
         ]);
     }
@@ -98,19 +98,82 @@ class AssignmentTest extends TestCase
         $this->assertSame(1, $submission->attachments()->count());
     }
 
-    public function test_resubmitting_replaces_the_file(): void
+    private function files(string ...$names): array
+    {
+        return array_map(fn (string $name) => UploadedFile::fake()->create($name, 50, str_ends_with($name, '.jpg') ? 'image/jpeg' : 'application/pdf'), $names);
+    }
+
+    private function sendWork(User $student, Assignment $assignment, array $data)
+    {
+        return $this->actingAs($student)->post(route('student.assignments.submit.store', $assignment), $data);
+    }
+
+    public function test_student_can_send_several_photos_and_files_at_once(): void
     {
         [, $teacher, $student, $group] = $this->makeGroup();
         $assignment = $this->createAssignment($teacher, $group);
 
-        $this->submit($student, $assignment, 'first.pdf');
-        $this->submit($student, $assignment, 'second.pdf');
+        $this->sendWork($student, $assignment, ['files' => $this->files('page1.jpg', 'page2.jpg', 'notes.pdf')])->assertSessionHasNoErrors();
 
         $submission = Submission::withoutGlobalScopes()->firstOrFail();
 
+        $this->assertSame(['notes.pdf', 'page1.jpg', 'page2.jpg'], $submission->attachments()->orderBy('original_name')->pluck('original_name')->all());
+
+        $this->actingAs($teacher)->get(route('teacher.assignments.show', [$assignment, 'student' => $student->id]))
+            ->assertOk()->assertSee('page1.jpg')->assertSee('page2.jpg')->assertSee('notes.pdf');
+    }
+
+    public function test_resubmitting_keeps_earlier_files_adds_new_ones_and_removes_chosen_ones(): void
+    {
+        [, $teacher, $student, $group] = $this->makeGroup();
+        $assignment = $this->createAssignment($teacher, $group);
+
+        $this->sendWork($student, $assignment, ['files' => $this->files('first.pdf', 'second.pdf')]);
+        $submission = Submission::withoutGlobalScopes()->firstOrFail();
+        $first = $submission->attachments()->where('original_name', 'first.pdf')->firstOrFail();
+
+        $this->sendWork($student, $assignment, ['files' => $this->files('third.pdf')]);
+        $this->assertSame(3, $submission->attachments()->count(), 'earlier files are kept');
+
+        $this->sendWork($student, $assignment, ['remove' => [$first->id]]);
+
         $this->assertSame(1, Submission::withoutGlobalScopes()->count());
-        $this->assertSame(1, $submission->attachments()->count());
-        $this->assertSame('second.pdf', $submission->attachments()->first()->original_name);
+        $this->assertSame(['second.pdf', 'third.pdf'], $submission->attachments()->orderBy('original_name')->pluck('original_name')->all());
+        Storage::disk('local')->assertMissing($first->path);
+    }
+
+    public function test_a_submission_cannot_end_up_without_files_or_with_too_many(): void
+    {
+        [, $teacher, $student, $group] = $this->makeGroup();
+        $assignment = $this->createAssignment($teacher, $group);
+
+        $this->sendWork($student, $assignment, ['body' => 'Fayl yo‘q'])->assertSessionHasErrors('files');
+
+        $this->sendWork($student, $assignment, ['files' => $this->files('only.pdf')]);
+        $only = Submission::withoutGlobalScopes()->firstOrFail()->attachments()->firstOrFail();
+
+        $this->sendWork($student, $assignment, ['remove' => [$only->id]])->assertSessionHasErrors('files');
+        $this->assertSame(1, Submission::withoutGlobalScopes()->firstOrFail()->attachments()->count());
+
+        $this->sendWork($student, $assignment, ['files' => $this->files(...array_map(fn ($i) => "extra{$i}.pdf", range(1, 10)))])
+            ->assertSessionHasErrors('files');
+        $this->assertSame(1, Submission::withoutGlobalScopes()->firstOrFail()->attachments()->count());
+    }
+
+    public function test_a_student_cannot_remove_files_of_another_submission(): void
+    {
+        [$branch, $teacher, $student, $group] = $this->makeGroup();
+        $assignment = $this->createAssignment($teacher, $group);
+
+        $other = User::factory()->student()->inBranch($branch)->create();
+        $group->students()->attach($other->id);
+
+        $this->sendWork($other, $assignment, ['files' => $this->files('theirs.pdf')]);
+        $theirs = Submission::withoutGlobalScopes()->firstOrFail()->attachments()->firstOrFail();
+
+        $this->sendWork($student, $assignment, ['files' => $this->files('mine.pdf'), 'remove' => [$theirs->id]])->assertSessionHasNoErrors();
+
+        $this->assertNotNull($theirs->fresh());
     }
 
     public function test_teacher_grades_and_high_score_gives_bonus_xp_and_badges(): void

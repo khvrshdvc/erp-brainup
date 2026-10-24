@@ -13,6 +13,11 @@ class AttachmentService
     {
         $owner->attachments()->get()->each->delete();
 
+        return $this->add($owner, $file, $uploader, $directory);
+    }
+
+    public function add(Model $owner, UploadedFile $file, User $uploader, string $directory): Attachment
+    {
         return $owner->attachments()->create([
             'uploaded_by' => $uploader->id,
             'disk' => 'local',

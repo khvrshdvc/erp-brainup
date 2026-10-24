@@ -12,6 +12,9 @@ final class Upload
 
     public const MAX_MB = 10;
 
+    /** Most files one submission can hold. */
+    public const MAX_SUBMISSION_FILES = 10;
+
     /**
      * @return list<string>
      */

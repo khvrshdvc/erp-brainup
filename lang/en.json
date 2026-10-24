@@ -661,5 +661,13 @@
     "Yana :date dan keyin olish mumkin": "Available again after :date",
     "Do‘kon: qayta xarid qilish muddati (kun) *": "Shop: repurchase wait (days) *",
     "O‘quvchi bir mahsulotni olgach, shuncha kun ichida uni qayta buyurtma qila olmaydi. Bekor qilingan buyurtma hisobga olinmaydi. 0 — cheklov yo‘q": "After a student orders a product, they cannot order the same product again for this many days. Cancelled orders do not count. 0 — no limit",
-    "qayta xarid qilish muddati": "repurchase wait"
+    "qayta xarid qilish muddati": "repurchase wait",
+    "1. Fayllarni biriktiring": "1. Attach your files",
+    "Avval yuborgan fayllaringiz saqlanadi. Ularni olib tashlashingiz yoki yangilarini qo‘shishingiz mumkin.": "The files you sent earlier are kept. You can remove them or add new ones.",
+    "Ko‘pi bilan :max ta fayl biriktirish mumkin.": "You can attach at most :max files.",
+    "Qaytarish": "Undo",
+    "Olib tashlash": "Remove",
+    "Fayllar: :count / :max": "Files: :count / :max",
+    "Fayl qo‘shish": "Add files",
+    ":types · har biri :maxmb MB gacha · ko‘pi bilan :max ta fayl · bir nechta rasm yoki faylni tanlash yoki sudrab tashlash mumkin": ":types · up to :maxmb MB each · at most :max files · you can pick or drag in several photos or files at once"
 }

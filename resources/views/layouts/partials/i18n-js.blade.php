@@ -9,6 +9,7 @@
         'dayMonth' => trans('dates.day_month'),
         'fileTypes' => __('Faqat :types fayl yuklash mumkin.'),
         'fileSize' => __('Fayl hajmi :max MB dan oshmasligi kerak.'),
+        'maxFiles' => __('Ko‘pi bilan :max ta fayl biriktirish mumkin.'),
         // Browser validation bubbles are shown in the interface language, not the browser's.
         'validity' => [
             'required' => __('Bu maydonni to‘ldiring'),

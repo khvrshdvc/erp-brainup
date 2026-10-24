@@ -110,8 +110,10 @@ class AssignmentController extends Controller
             ]
         );
 
-        if ($file = $request->file('file')) {
-            $attachments->replace($submission, $file, $student, 'submissions/'.$assignment->id);
+        $submission->attachments()->whereIn('id', $request->removedIds())->get()->each->delete();
+
+        foreach ($request->file('files', []) as $file) {
+            $attachments->add($submission, $file, $student, 'submissions/'.$assignment->id);
         }
 
         event(new SubmissionUpdated($submission));

@@ -661,5 +661,13 @@
     "Yana :date dan keyin olish mumkin": "Снова доступно после :date",
     "Do‘kon: qayta xarid qilish muddati (kun) *": "Магазин: срок до повторной покупки (дней) *",
     "O‘quvchi bir mahsulotni olgach, shuncha kun ichida uni qayta buyurtma qila olmaydi. Bekor qilingan buyurtma hisobga olinmaydi. 0 — cheklov yo‘q": "После заказа товара ученик не может заказать тот же товар повторно в течение этого числа дней. Отменённые заказы не учитываются. 0 — без ограничений",
-    "qayta xarid qilish muddati": "срок до повторной покупки"
+    "qayta xarid qilish muddati": "срок до повторной покупки",
+    "1. Fayllarni biriktiring": "1. Прикрепите файлы",
+    "Avval yuborgan fayllaringiz saqlanadi. Ularni olib tashlashingiz yoki yangilarini qo‘shishingiz mumkin.": "Ранее отправленные файлы сохраняются. Их можно убрать или добавить новые.",
+    "Ko‘pi bilan :max ta fayl biriktirish mumkin.": "Можно прикрепить не более :max файлов.",
+    "Qaytarish": "Вернуть",
+    "Olib tashlash": "Убрать",
+    "Fayllar: :count / :max": "Файлов: :count / :max",
+    "Fayl qo‘shish": "Добавить файлы",
+    ":types · har biri :maxmb MB gacha · ko‘pi bilan :max ta fayl · bir nechta rasm yoki faylni tanlash yoki sudrab tashlash mumkin": ":types · до :maxmb МБ каждый · не более :max файлов · можно выбрать или перетащить сразу несколько фото или файлов"
 }

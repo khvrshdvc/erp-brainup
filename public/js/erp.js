@@ -85,6 +85,88 @@ document.addEventListener('alpine:init', () => {
         },
     }));
 
+    // Several files in one input (<x-files-picker>): every choice is added to the list, not swapped in,
+    // and earlier uploads can be ticked off for removal. The input itself is kept in sync through DataTransfer.
+    window.Alpine.data('filesPicker', ({ maxMb, maxFiles, extensions, types, kept }) => ({
+        files: [],
+        kept: kept,
+        removed: [],
+        error: '',
+        dragging: false,
+
+        get total() {
+            return this.files.length + this.kept.filter((item) => !this.removed.includes(item.id)).length;
+        },
+
+        add(list) {
+            this.error = '';
+
+            for (const file of Array.from(list)) {
+                const ext = file.name.includes('.') ? file.name.split('.').pop().toLowerCase() : '';
+
+                if (!extensions.includes(ext)) {
+                    this.error = (window.ERP_I18N?.fileTypes ?? 'Faqat :types fayl yuklash mumkin.').replace(':types', types);
+                    continue;
+                }
+
+                if (file.size > maxMb * 1024 * 1024) {
+                    this.error = (window.ERP_I18N?.fileSize ?? 'Fayl hajmi :max MB dan oshmasligi kerak.').replace(':max', maxMb);
+                    continue;
+                }
+
+                if (this.files.some((item) => item.file.name === file.name && item.file.size === file.size && item.file.lastModified === file.lastModified)) {
+                    continue;
+                }
+
+                if (this.total >= maxFiles) {
+                    this.error = (window.ERP_I18N?.maxFiles ?? 'Ko‘pi bilan :max ta fayl biriktirish mumkin.').replace(':max', maxFiles);
+                    break;
+                }
+
+                const mb = file.size / 1024 / 1024;
+
+                this.files.push({
+                    file,
+                    ext,
+                    name: file.name,
+                    size: mb >= 1 ? `${mb.toFixed(1)} MB` : `${Math.max(1, Math.round(file.size / 1024))} KB`,
+                });
+            }
+
+            this.sync();
+        },
+
+        pick(event) {
+            this.add(event.target.files);
+        },
+
+        drop(event) {
+            this.dragging = false;
+            this.add(event.dataTransfer.files);
+        },
+
+        removeNew(index) {
+            this.files.splice(index, 1);
+            this.error = '';
+            this.sync();
+        },
+
+        toggleKept(id) {
+            this.removed = this.removed.includes(id) ? this.removed.filter((item) => item !== id) : [...this.removed, id];
+            this.error = '';
+        },
+
+        sync() {
+            if (typeof DataTransfer === 'undefined') {
+                return;
+            }
+
+            const transfer = new DataTransfer();
+            this.files.forEach((item) => transfer.items.add(item.file));
+            this.$refs.input.files = transfer.files;
+        },
+    }));
+
     window.Alpine.data('oneSubmit', oneSubmit);
 });
 

@@ -8,6 +8,7 @@ use App\Support\Upload;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Validator;
 
 class StoreSubmissionRequest extends FormRequest
 {
@@ -22,28 +23,70 @@ class StoreSubmissionRequest extends FormRequest
 
     public function rules(): array
     {
-        // A file is only optional when re-submitting work that already has one.
-        $hasFile = (bool) $this->existingSubmission()?->attachments()->exists();
-
         return [
-            'file' => [$hasFile ? 'nullable' : 'required', ...Upload::rules()],
+            'files' => ['nullable', 'array'],
+            'files.*' => Upload::rules(),
+            'remove' => ['nullable', 'array'],
+            'remove.*' => ['integer'],
             'body' => ['nullable', 'string', 'max:500'],
+        ];
+    }
+
+    /**
+     * A submission always keeps at least one file, and never more than Upload::MAX_SUBMISSION_FILES:
+     * what stays from the earlier submission plus the new files.
+     */
+    public function after(): array
+    {
+        return [
+            function (Validator $validator) {
+                if ($validator->errors()->has('files') || $validator->errors()->has('remove')) {
+                    return;
+                }
+
+                $total = $this->keptAttachmentCount() + count($this->file('files', []));
+
+                if ($total === 0) {
+                    $validator->errors()->add('files', __('Vazifa faylini biriktiring.'));
+                } elseif ($total > Upload::MAX_SUBMISSION_FILES) {
+                    $validator->errors()->add('files', __('Ko‘pi bilan :max ta fayl biriktirish mumkin.', ['max' => Upload::MAX_SUBMISSION_FILES]));
+                }
+            },
         ];
     }
 
     public function messages(): array
     {
         return [
-            'file.required' => __('Vazifa faylini biriktiring.'),
+            'files.*.mimes' => trans('validation.custom.file.mimes'),
+            'files.*.max' => trans('validation.custom.file.max'),
+            'files.*.uploaded' => trans('validation.custom.file.uploaded'),
         ];
     }
 
     public function attributes(): array
     {
         return [
-            'file' => __('fayl'),
+            'files' => __('fayl'),
+            'files.*' => __('fayl'),
             'body' => __('izoh'),
         ];
+    }
+
+    /**
+     * Earlier files the student keeps (the ones not ticked for removal).
+     */
+    public function keptAttachmentCount(): int
+    {
+        return $this->existingSubmission()?->attachments()->whereNotIn('id', $this->removedIds())->count() ?? 0;
+    }
+
+    /**
+     * @return list<int>
+     */
+    public function removedIds(): array
+    {
+        return array_map('intval', (array) $this->input('remove', []));
     }
 
     public function assignment(): Assignment

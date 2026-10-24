@@ -355,10 +355,10 @@ class FormValidationTest extends TestCase
         $store = route('student.assignments.submit.store', $this->assignment);
         $this->submission->delete();
 
-        $this->assertInvalid($this->student, 'post', $store, $form, [], ['file']);
-        $this->assertInvalid($this->student, 'post', $store, $form, ['file' => UploadedFile::fake()->create('virus.exe', 10, 'application/x-msdownload')], ['file']);
-        $this->assertInvalid($this->student, 'post', $store, $form, ['file' => UploadedFile::fake()->create('big.pdf', 11000, 'application/pdf')], ['file']);
-        $this->assertInvalid($this->student, 'post', $store, $form, ['file' => UploadedFile::fake()->create('ok.pdf', 10, 'application/pdf'), 'body' => str_repeat('a', 501)], ['body']);
+        $this->assertInvalid($this->student, 'post', $store, $form, [], ['files']);
+        $this->assertInvalid($this->student, 'post', $store, $form, ['files' => [UploadedFile::fake()->create('virus.exe', 10, 'application/x-msdownload')]], ['files.0']);
+        $this->assertInvalid($this->student, 'post', $store, $form, ['files' => [UploadedFile::fake()->create('big.pdf', 11000, 'application/pdf')]], ['files.0']);
+        $this->assertInvalid($this->student, 'post', $store, $form, ['files' => [UploadedFile::fake()->create('ok.pdf', 10, 'application/pdf')], 'body' => str_repeat('a', 501)], ['body']);
     }
 
     // ------------------------------------------------------------------ locale

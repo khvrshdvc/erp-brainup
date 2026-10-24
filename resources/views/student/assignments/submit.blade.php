@@ -39,16 +39,13 @@
         @csrf
 
         <section class="card card-pad stack">
-            <h2 class="card-title">{{ __('1. Faylni biriktiring') }} {{ $hasFile ? '' : '*' }}</h2>
+            <h2 class="card-title">{{ __('1. Fayllarni biriktiring') }} {{ $hasFile ? '' : '*' }}</h2>
 
             @if ($hasFile)
-                @foreach ($submission->attachments as $attachment)
-                    <x-file-chip :attachment="$attachment" />
-                @endforeach
-                <div class="field-hint">{{ __('Avval yuborgan faylingiz saqlanadi. Yangi fayl tanlasangiz, u almashtiriladi.') }}</div>
+                <div class="field-hint">{{ __('Avval yuborgan fayllaringiz saqlanadi. Ularni olib tashlashingiz yoki yangilarini qo‘shishingiz mumkin.') }}</div>
             @endif
 
-            <x-file-picker name="file" id="file" :required="! $hasFile" />
+            <x-files-picker name="files" id="files" :attachments="$submission?->attachments ?? collect()" />
         </section>
 
         <section class="card card-pad stack">

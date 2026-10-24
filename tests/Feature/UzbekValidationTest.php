@@ -73,11 +73,11 @@ class UzbekValidationTest extends TestCase
 
         $this->actingAs($student)->post(route('student.assignments.submit.store', $assignment), [
             'body' => 'Izoh',
-        ])->assertSessionHasErrors(['file' => 'Vazifa faylini biriktiring.']);
+        ])->assertSessionHasErrors(['files' => 'Vazifa faylini biriktiring.']);
 
         $this->actingAs($student)->post(route('student.assignments.submit.store', $assignment), [
-            'file' => UploadedFile::fake()->create('virus.exe', 10),
-        ])->assertSessionHasErrors(['file' => 'Faqat PDF, DOC, DOCX, JPG yoki PNG fayl yuklash mumkin.']);
+            'files' => [UploadedFile::fake()->create('virus.exe', 10)],
+        ])->assertSessionHasErrors(['files.0' => 'Faqat PDF, DOC, DOCX, JPG yoki PNG fayl yuklash mumkin.']);
     }
 
     public function test_deadline_is_sent_as_date_and_24_hour_time(): void

@@ -81,7 +81,7 @@ class NotificationTest extends TestCase
         $assignment = Assignment::withoutGlobalScopes()->firstOrFail();
 
         $this->actingAs($student)->post(route('student.assignments.submit.store', $assignment), [
-            'file' => UploadedFile::fake()->create('work.pdf', 50, 'application/pdf'),
+            'files' => [UploadedFile::fake()->create('work.pdf', 50, 'application/pdf')],
         ]);
 
         $this->assertSame(1, $teacher->notifications()->count());
@@ -145,7 +145,7 @@ class NotificationTest extends TestCase
         $assignment = Assignment::withoutGlobalScopes()->firstOrFail();
 
         $submit = fn () => $this->actingAs($student)->post(route('student.assignments.submit.store', $assignment), [
-            'file' => UploadedFile::fake()->create('work.pdf', 50, 'application/pdf'),
+            'files' => [UploadedFile::fake()->create('work.pdf', 50, 'application/pdf')],
         ]);
 
         $submit();
