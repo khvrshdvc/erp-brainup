@@ -20,7 +20,19 @@ class SendSubmissionNotification
         }
 
         if ($submission->status === SubmissionStatus::Submitted) {
-            $assignment->teacher?->notify(new SubmissionReceived($submission));
+            $teacher = $assignment->teacher;
+
+            if ($teacher) {
+                // A resubmission replaces the earlier "submitted" notice instead of piling up next to it.
+                $notification = new SubmissionReceived($submission);
+
+                $teacher->notifications()
+                    ->where('type', SubmissionReceived::class)
+                    ->where('data->url', $notification->toArray($teacher)['url'])
+                    ->delete();
+
+                $teacher->notify($notification);
+            }
 
             return;
         }

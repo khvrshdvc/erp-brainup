@@ -137,6 +137,28 @@ class NotificationTest extends TestCase
         $this->assertSame(0, $student->fresh()->unreadNotifications()->count());
     }
 
+    public function test_resubmitting_replaces_the_teachers_earlier_notification(): void
+    {
+        [$teacher, $student, , $group] = $this->setupGroup();
+
+        $this->actingAs($teacher)->post(route('teacher.assignments.store'), $this->assignmentPayload($group, 'publish'));
+        $assignment = Assignment::withoutGlobalScopes()->firstOrFail();
+
+        $submit = fn () => $this->actingAs($student)->post(route('student.assignments.submit.store', $assignment), [
+            'file' => UploadedFile::fake()->create('work.pdf', 50, 'application/pdf'),
+        ]);
+
+        $submit();
+        $first = $teacher->notifications()->firstOrFail();
+        $teacher->unreadNotificationsCount();
+
+        $submit();
+
+        $this->assertSame(1, $teacher->notifications()->count());
+        $this->assertNotSame($first->id, $teacher->notifications()->first()->id);
+        $this->assertSame(1, $teacher->unreadNotificationsCount());
+    }
+
     public function test_cached_unread_counter_follows_new_and_read_notifications(): void
     {
         [$teacher, $student, , $group] = $this->setupGroup();
