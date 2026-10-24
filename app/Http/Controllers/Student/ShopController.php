@@ -14,11 +14,12 @@ use Illuminate\View\View;
 
 class ShopController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request, ShopService $shop): View
     {
         return view('student.shop.index', [
             ...$this->wallet($request),
             'items' => ShopItem::active()->orderBy('price')->get(),
+            'locks' => $shop->repurchaseLocks($request->user()),
         ]);
     }
 

@@ -13,6 +13,8 @@ class Setting extends Model
 
     public const DEFAULT_SUBMISSION_FILE_RETENTION_DAYS = 180;
 
+    public const DEFAULT_SHOP_REPURCHASE_DAYS = 10;
+
     private const CACHE_TTL = 3600;
 
     protected $fillable = ['branch_id', 'key', 'value'];
@@ -120,6 +122,16 @@ class Setting extends Model
         $days = static::get('submission_file_retention_days');
 
         return is_numeric($days) ? max(0, (int) $days) : self::DEFAULT_SUBMISSION_FILE_RETENTION_DAYS;
+    }
+
+    /**
+     * How many days a student must wait before buying the same shop product again (0 = no wait).
+     */
+    public static function shopRepurchaseDays(): int
+    {
+        $days = static::get('shop_repurchase_days');
+
+        return is_numeric($days) ? max(0, (int) $days) : self::DEFAULT_SHOP_REPURCHASE_DAYS;
     }
 
     public static function put(string $key, mixed $value, ?int $branchId = null): void

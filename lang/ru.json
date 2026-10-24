@@ -656,5 +656,10 @@
     "← Oldingi": "← Назад",
     "← Vazifalar": "← Задания",
     "✓ Olingan": "✓ Получен",
-    "🔒 Qulflangan": "🔒 Закрыт"
+    "🔒 Qulflangan": "🔒 Закрыт",
+    "Bu mahsulotni yana :date dan keyin buyurtma qilish mumkin.": "Заказать этот товар снова можно после :date.",
+    "Yana :date dan keyin olish mumkin": "Снова доступно после :date",
+    "Do‘kon: qayta xarid qilish muddati (kun) *": "Магазин: срок до повторной покупки (дней) *",
+    "O‘quvchi bir mahsulotni olgach, shuncha kun ichida uni qayta buyurtma qila olmaydi. Bekor qilingan buyurtma hisobga olinmaydi. 0 — cheklov yo‘q": "После заказа товара ученик не может заказать тот же товар повторно в течение этого числа дней. Отменённые заказы не учитываются. 0 — без ограничений",
+    "qayta xarid qilish muddati": "срок до повторной покупки"
 }

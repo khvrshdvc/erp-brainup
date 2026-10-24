@@ -14,6 +14,7 @@
             @foreach ($items as $item)
                 @php
                     $missing = $item->price - $balance;
+                    $lockedUntil = $locks->get($item->id);
                 @endphp
                 <article class="card shop-card">
                     <div class="shop-media">
@@ -44,6 +45,8 @@
 
                         @if (! $item->inStock())
                             <button type="button" class="btn btn-sm" disabled>{{ __('Tugagan') }}</button>
+                        @elseif ($lockedUntil)
+                            <span class="shop-missing">{{ __('Yana :date dan keyin olish mumkin', ['date' => \App\Support\UzDate::dayMonth($lockedUntil)]) }}</span>
                         @elseif ($missing > 0)
                             <span class="shop-missing">{{ __('Yana :missing kerak', ['missing' => number_format($missing, 0, '', ' ')]) }}</span>
                         @else

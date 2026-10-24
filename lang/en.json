@@ -656,5 +656,10 @@
     "← Oldingi": "← Previous",
     "← Vazifalar": "← Assignments",
     "✓ Olingan": "✓ Earned",
-    "🔒 Qulflangan": "🔒 Locked"
+    "🔒 Qulflangan": "🔒 Locked",
+    "Bu mahsulotni yana :date dan keyin buyurtma qilish mumkin.": "You can order this product again after :date.",
+    "Yana :date dan keyin olish mumkin": "Available again after :date",
+    "Do‘kon: qayta xarid qilish muddati (kun) *": "Shop: repurchase wait (days) *",
+    "O‘quvchi bir mahsulotni olgach, shuncha kun ichida uni qayta buyurtma qila olmaydi. Bekor qilingan buyurtma hisobga olinmaydi. 0 — cheklov yo‘q": "After a student orders a product, they cannot order the same product again for this many days. Cancelled orders do not count. 0 — no limit",
+    "qayta xarid qilish muddati": "repurchase wait"
 }

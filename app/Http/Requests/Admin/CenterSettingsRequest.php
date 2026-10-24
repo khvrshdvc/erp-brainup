@@ -22,6 +22,7 @@ class CenterSettingsRequest extends FormRequest
             'academic_year' => ['nullable', 'string', 'max:20'],
             'attendance_edit_days' => ['sometimes', 'required', 'integer', 'min:0', 'max:365'],
             'submission_file_retention_days' => ['sometimes', 'required', 'integer', 'min:0', 'max:3650'],
+            'shop_repurchase_days' => ['sometimes', 'required', 'integer', 'min:0', 'max:365'],
         ];
     }
 
@@ -35,6 +36,7 @@ class CenterSettingsRequest extends FormRequest
             'academic_year' => __('o‘quv yili'),
             'attendance_edit_days' => __('davomatni tahrirlash muddati'),
             'submission_file_retention_days' => __('fayllarni saqlash muddati'),
+            'shop_repurchase_days' => __('qayta xarid qilish muddati'),
         ];
     }
 }

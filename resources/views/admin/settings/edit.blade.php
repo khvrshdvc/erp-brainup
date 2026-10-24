@@ -55,6 +55,13 @@
                         value="{{ old('submission_file_retention_days', $center['submission_file_retention_days']) }}">
                     <div class="field-hint">{{ __('Tekshirilgan topshiriqlarning fayllari shuncha kundan keyin o‘chiriladi. Ball va fikr saqlanadi. 0 — fayllar doimiy saqlanadi') }}</div>
                 </div>
+
+                <div class="field">
+                    <label for="shop_repurchase_days">{{ __('Do‘kon: qayta xarid qilish muddati (kun) *') }}</label>
+                    <input id="shop_repurchase_days" class="input" type="number" name="shop_repurchase_days" min="0" max="365" required
+                        value="{{ old('shop_repurchase_days', $center['shop_repurchase_days']) }}">
+                    <div class="field-hint">{{ __('O‘quvchi bir mahsulotni olgach, shuncha kun ichida uni qayta buyurtma qila olmaydi. Bekor qilingan buyurtma hisobga olinmaydi. 0 — cheklov yo‘q') }}</div>
+                </div>
             </div>
 
             @if ($canEditCenter)

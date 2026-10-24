@@ -4,11 +4,15 @@ namespace App\Services;
 
 use App\Enums\Role;
 use App\Enums\ShopOrderStatus;
+use App\Models\Setting;
 use App\Models\ShopItem;
 use App\Models\ShopOrder;
 use App\Models\User;
 use App\Notifications\ShopOrderPlaced;
 use App\Notifications\ShopOrderUpdated;
+use App\Support\UzDate;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
@@ -25,7 +29,10 @@ class ShopService
             $student = User::whereKey($student->id)->lockForUpdate()->firstOrFail();
             $item = ShopItem::whereKey($item->id)->lockForUpdate()->firstOrFail();
 
+            $waitUntil = $this->repurchaseLocks($student, [$item->id])->get($item->id);
+
             $error = match (true) {
+                $waitUntil !== null => __('Bu mahsulotni yana :date dan keyin buyurtma qilish mumkin.', ['date' => UzDate::dayMonth($waitUntil)]),
                 ! $item->is_active => __('Bu mahsulot hozir sotuvda yo‘q.'),
                 ! $item->inStock() => __('Bu mahsulot tugagan.'),
                 ! $student->branch_id => __('Sizga filial biriktirilmagan. Administratorga murojaat qiling.'),
@@ -53,6 +60,31 @@ class ShopService
         $this->notifyBranchAdmins($order);
 
         return $order;
+    }
+
+    /**
+     * Products the student bought recently and cannot order again yet: item id => first moment
+     * they may order it. Cancelled orders do not count, their coins were refunded.
+     *
+     * @param  array<int>|null  $itemIds  null checks every product
+     * @return Collection<int, Carbon>
+     */
+    public function repurchaseLocks(User $student, ?array $itemIds = null): Collection
+    {
+        $days = Setting::shopRepurchaseDays();
+
+        if ($days === 0) {
+            return collect();
+        }
+
+        return ShopOrder::withoutGlobalScopes()
+            ->where('user_id', $student->id)
+            ->where('status', '!=', ShopOrderStatus::Cancelled->value)
+            ->where('created_at', '>', now()->subDays($days))
+            ->when($itemIds !== null, fn ($query) => $query->whereIn('shop_item_id', $itemIds))
+            ->get(['shop_item_id', 'created_at'])
+            ->groupBy('shop_item_id')
+            ->map(fn (Collection $orders) => $orders->max('created_at')->copy()->addDays($days));
     }
 
     public function deliver(ShopOrder $order, User $admin): void

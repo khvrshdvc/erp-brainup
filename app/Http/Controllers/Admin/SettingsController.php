@@ -29,6 +29,7 @@ class SettingsController extends Controller
 
         $center['attendance_edit_days'] = Setting::attendanceEditDays();
         $center['submission_file_retention_days'] = Setting::submissionFileRetentionDays();
+        $center['shop_repurchase_days'] = Setting::shopRepurchaseDays();
 
         // Staff details are shown for one chosen branch only; "Barcha filiallar" lists nobody.
         $branchId = $this->currentBranchId();

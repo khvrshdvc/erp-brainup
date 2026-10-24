@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\ShopOrderStatus;
 use App\Models\Branch;
+use App\Models\Setting;
 use App\Models\ShopItem;
 use App\Models\ShopOrder;
 use App\Models\User;
@@ -87,6 +88,7 @@ class ShopTest extends TestCase
         $student = $this->student(400);
         $admin = User::factory()->branchAdmin()->inBranch($this->branch)->create();
         $item = ShopItem::factory()->create(['price' => 100, 'stock' => 5]);
+        Setting::put('shop_repurchase_days', 0);
 
         foreach (range(1, 3) as $i) {
             $this->actingAs($student)->post(route('student.shop.buy', $item));
@@ -112,6 +114,60 @@ class ShopTest extends TestCase
 
         $this->artisan('shop:expire-orders')->assertSuccessful();
         $this->assertSame(200, $student->fresh()->coinBalance(), 'running again changes nothing');
+    }
+
+    public function test_same_product_cannot_be_bought_again_within_the_wait_period(): void
+    {
+        $student = $this->student(1000);
+        $item = ShopItem::factory()->create(['price' => 100, 'stock' => 5]);
+        $other = ShopItem::factory()->create(['price' => 100, 'stock' => 5]);
+
+        $this->actingAs($student)->post(route('student.shop.buy', $item))->assertRedirect(route('student.shop.orders'));
+
+        $this->actingAs($student)->post(route('student.shop.buy', $item))->assertSessionHasErrors('item');
+        $this->assertSame(1, ShopOrder::count());
+        $this->assertSame(4, $item->fresh()->stock);
+        $this->assertSame(900, $student->fresh()->coinBalance());
+
+        $this->actingAs($student)->get(route('student.shop.index'))->assertOk()->assertSee('dan keyin olish mumkin');
+
+        $this->actingAs($student)->post(route('student.shop.buy', $other))->assertRedirect(route('student.shop.orders'));
+        $this->assertSame(2, ShopOrder::count());
+    }
+
+    public function test_product_can_be_bought_again_after_the_wait_period_or_after_cancelling(): void
+    {
+        $student = $this->student(1000);
+        $item = ShopItem::factory()->create(['price' => 100]);
+
+        $this->actingAs($student)->post(route('student.shop.buy', $item));
+        $order = ShopOrder::firstOrFail();
+
+        $this->actingAs($student)->delete(route('student.shop.orders.cancel', $order));
+        $this->actingAs($student)->post(route('student.shop.buy', $item))->assertSessionHasNoErrors();
+        $this->assertSame(2, ShopOrder::count(), 'a cancelled order does not lock the product');
+
+        $this->actingAs($student)->post(route('student.shop.buy', $item))->assertSessionHasErrors('item');
+
+        ShopOrder::query()->update(['created_at' => now()->subDays(10)->subMinute()]);
+        $this->actingAs($student)->post(route('student.shop.buy', $item))->assertSessionHasNoErrors();
+        $this->assertSame(3, ShopOrder::count());
+    }
+
+    public function test_wait_period_follows_the_setting_and_zero_turns_it_off(): void
+    {
+        $student = $this->student(1000);
+        $item = ShopItem::factory()->create(['price' => 100]);
+
+        $this->actingAs($student)->post(route('student.shop.buy', $item));
+        ShopOrder::query()->update(['created_at' => now()->subDays(4)]);
+
+        Setting::put('shop_repurchase_days', 3);
+        $this->actingAs($student)->post(route('student.shop.buy', $item))->assertSessionHasNoErrors();
+
+        Setting::put('shop_repurchase_days', 0);
+        $this->actingAs($student)->post(route('student.shop.buy', $item))->assertSessionHasNoErrors();
+        $this->assertSame(3, ShopOrder::count());
     }
 
     public function test_branch_admin_hands_over_an_order_and_student_is_notified(): void
