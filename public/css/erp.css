@@ -516,10 +516,14 @@ html { -webkit-text-size-adjust: 100%; }
     }
     .t-right { text-align: left; }
 
-    /* Attendance buttons: four equal columns so "Keldi" lines up with the rest instead of wrapping alone. */
+    /* Attendance buttons: one row of four equal columns. The script labels the cell "Holat" from the
+       table head; that label would sit in the row next to "Keldi" and "Kechikdi", so it is hidden here. */
+    .t-row > .seg:not(:first-child),
     .t-row > .seg:last-child:not([data-label]):not(:first-child) {
-        display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; justify-content: stretch;
+        grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; justify-content: stretch;
+        padding-top: 10px; border-top: 1px solid var(--line2);
     }
+    .t-row > .seg[data-label]:not(:first-child)::before { display: none; }
     .seg .pill { justify-content: center; padding: 0 2px; font-size: 12px; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 
     .bar-row { grid-template-columns: 96px minmax(0, 1fr) 60px; gap: 8px; }
@@ -531,6 +535,7 @@ html { -webkit-text-size-adjust: 100%; }
 }
 
 @media (max-width: 340px) {
+    .t-row > .seg:not(:first-child),
     .t-row > .seg:last-child:not([data-label]):not(:first-child) { grid-template-columns: 1fr 1fr; }
 }
 
