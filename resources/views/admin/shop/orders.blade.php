@@ -50,7 +50,7 @@
                         <div>
                             {{ $order->created_at->format('d.m.Y, H:i') }}
                             @if ($order->handled_at)
-                                <div class="card-sub">{{ $order->handler?->name }} · {{ $order->handled_at->format('d.m.Y') }}</div>
+                                <div class="card-sub">{{ $order->handler?->name ?? __('Avtomatik') }} · {{ $order->handled_at->format('d.m.Y') }}</div>
                             @endif
                         </div>
                         <div>

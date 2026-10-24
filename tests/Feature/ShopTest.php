@@ -82,6 +82,38 @@ class ShopTest extends TestCase
         $this->assertSame(5, $item->fresh()->stock);
     }
 
+    public function test_orders_not_collected_within_three_days_are_cancelled_and_refunded(): void
+    {
+        $student = $this->student(400);
+        $admin = User::factory()->branchAdmin()->inBranch($this->branch)->create();
+        $item = ShopItem::factory()->create(['price' => 100, 'stock' => 5]);
+
+        foreach (range(1, 3) as $i) {
+            $this->actingAs($student)->post(route('student.shop.buy', $item));
+        }
+
+        [$overdue, $recent, $handedOver] = ShopOrder::orderBy('id')->get()->all();
+
+        $overdue->forceFill(['created_at' => now()->subDays(3)->subMinute()])->save();
+        $handedOver->forceFill(['created_at' => now()->subDays(5)])->save();
+        $recent->forceFill(['created_at' => now()->subDays(2)])->save();
+
+        $this->actingAs($admin)->patch(route('admin.shop.orders.deliver', $handedOver));
+
+        $this->artisan('shop:expire-orders')->assertSuccessful();
+
+        $this->assertSame(ShopOrderStatus::Cancelled, $overdue->fresh()->status);
+        $this->assertNull($overdue->fresh()->handled_by);
+        $this->assertSame(ShopOrderStatus::Pending, $recent->fresh()->status);
+        $this->assertSame(ShopOrderStatus::Delivered, $handedOver->fresh()->status);
+        $this->assertSame(200, $student->fresh()->coinBalance(), 'only the overdue order is refunded');
+        $this->assertSame(3, $item->fresh()->stock, 'one unit returned to stock');
+        $this->assertContains('Buyurtma muddati o‘tdi', $student->notifications()->pluck('data')->pluck('title')->all());
+
+        $this->artisan('shop:expire-orders')->assertSuccessful();
+        $this->assertSame(200, $student->fresh()->coinBalance(), 'running again changes nothing');
+    }
+
     public function test_branch_admin_hands_over_an_order_and_student_is_notified(): void
     {
         $student = $this->student(500);

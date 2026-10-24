@@ -11,6 +11,9 @@ class ShopOrder extends Model
 {
     use BelongsToBranch;
 
+    /** A pending order not handed over within this many days is cancelled and refunded. */
+    public const PICKUP_DAYS = 3;
+
     protected $fillable = ['branch_id', 'user_id', 'shop_item_id', 'price', 'status', 'handled_by', 'handled_at', 'note'];
 
     protected function casts(): array

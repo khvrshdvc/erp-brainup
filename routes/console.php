@@ -13,3 +13,6 @@ Schedule::command('notifications:prune --days=60')->daily()->withoutOverlapping(
 
 // Graded work keeps its score and feedback, but the uploaded file is dropped after the retention period.
 Schedule::command('submissions:prune-files')->daily()->withoutOverlapping();
+
+// Orders not handed over within ShopOrder::PICKUP_DAYS are cancelled and the coins go back to the wallet.
+Schedule::command('shop:expire-orders')->daily()->withoutOverlapping();

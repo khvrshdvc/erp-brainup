@@ -1,5 +1,5 @@
 <x-app-layout :crumb="__('Do‘kon') . ' / ' . __('Buyurtmalarim')" :title="__('Buyurtmalarim')"
-    :subtitle="__('Buyurtmani filial administratoridan olasiz. Kutilayotgan buyurtmani bekor qilsangiz, BrainCoin qaytariladi.')">
+    :subtitle="__('Buyurtmani filial administratoridan :days kun ichida olasiz, aks holda u bekor qilinadi. Kutilayotgan buyurtmani bekor qilsangiz yoki muddat o‘tsa, BrainCoin qaytariladi.', ['days' => \App\Models\ShopOrder::PICKUP_DAYS])">
 
     @include('student.shop._wallet')
 

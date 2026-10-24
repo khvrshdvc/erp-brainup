@@ -69,6 +69,31 @@ class ShopService
     }
 
     /**
+     * Cancels pending orders that were not handed over within ShopOrder::PICKUP_DAYS.
+     * Nobody closes them by hand, so the student is told and handled_by stays empty.
+     */
+    public function expireOverdue(): int
+    {
+        $expired = 0;
+
+        ShopOrder::withoutGlobalScopes()
+            ->where('status', ShopOrderStatus::Pending->value)
+            ->where('created_at', '<=', now()->subDays(ShopOrder::PICKUP_DAYS))
+            ->chunkById(100, function ($orders) use (&$expired) {
+                foreach ($orders as $order) {
+                    try {
+                        $this->close($order, null, ShopOrderStatus::Cancelled);
+                        $expired++;
+                    } catch (ValidationException) {
+                        // Closed by someone in the meantime.
+                    }
+                }
+            });
+
+        return $expired;
+    }
+
+    /**
      * Branch admins hand the item over, so they hear about every new order in their branch.
      */
     private function notifyBranchAdmins(ShopOrder $order): void
@@ -82,7 +107,7 @@ class ShopService
         Notification::send($admins, new ShopOrderPlaced($order));
     }
 
-    private function close(ShopOrder $order, User $by, ShopOrderStatus $status, ?string $note = null): void
+    private function close(ShopOrder $order, ?User $by, ShopOrderStatus $status, ?string $note = null): void
     {
         DB::transaction(function () use ($order, $by, $status, $note) {
             $locked = ShopOrder::withoutGlobalScopes()->whereKey($order->id)->lockForUpdate()->firstOrFail();
@@ -93,7 +118,7 @@ class ShopService
 
             $locked->update([
                 'status' => $status,
-                'handled_by' => $by->id,
+                'handled_by' => $by?->id,
                 'handled_at' => now(),
                 'note' => $note,
             ]);
@@ -105,8 +130,8 @@ class ShopService
             $order->setRawAttributes($locked->getAttributes(), true);
         });
 
-        // Students hear about it only when someone else closed their order.
-        if ($order->user_id !== $by->id) {
+        // Students hear about it only when someone else (or the deadline) closed their order.
+        if ($order->user_id !== $by?->id) {
             $order->student?->notify(new ShopOrderUpdated($order));
         }
     }

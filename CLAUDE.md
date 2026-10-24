@@ -15,7 +15,7 @@ vendor/bin/sail up -d          # start containers (stop with: vendor/bin/sail do
 vendor/bin/sail composer install
 vendor/bin/sail npm run dev    # Vite dev server (or: sail npm run build)
 vendor/bin/sail artisan queue:work   # required: AwardAttendanceXp is queued, so no XP is awarded without a worker (.env.example uses QUEUE_CONNECTION=redis)
-vendor/bin/sail artisan schedule:work   # runs the daily notifications:prune (read notifications older than 60 days); in production run schedule:run every minute
+vendor/bin/sail artisan schedule:work   # runs the daily notifications:prune (read notifications older than 60 days) and shop:expire-orders (pending shop orders older than 3 days are cancelled and refunded); in production run schedule:run every minute
 
 vendor/bin/sail test                                         # whole suite
 vendor/bin/sail test --filter=AttendanceTest                 # single test class
