@@ -125,6 +125,11 @@ class GroupController extends Controller
         $added = DB::transaction(function () use ($studyGroup, $studentId) {
             $group = StudyGroup::withoutGlobalScopes()->lockForUpdate()->findOrFail($studyGroup->id);
 
+            // Already enrolled: nothing to add, even when the group is full.
+            if ($group->students()->where('users.id', $studentId)->exists()) {
+                return true;
+            }
+
             if (! $group->hasFreeSeats()) {
                 return false;
             }

@@ -105,6 +105,9 @@ class User extends Authenticatable
         $this->availableBranchIds = null;
     }
 
+    /**
+     * The super admin still reaches deactivated branches; everyone else only works in active ones.
+     */
     private function resolveAvailableBranchIds(): array
     {
         if ($this->isSuperAdmin()) {
@@ -112,10 +115,22 @@ class User extends Authenticatable
         }
 
         if ($this->isTeacher()) {
-            return $this->branches()->pluck('branches.id')->all();
+            return $this->branches()->active()->pluck('branches.id')->all();
         }
 
-        return $this->branch_id ? [(int) $this->branch_id] : [];
+        return $this->branch_id && Branch::whereKey($this->branch_id)->active()->exists() ? [(int) $this->branch_id] : [];
+    }
+
+    /**
+     * Every branch the user belongs to has been deactivated (EnsureUserIsActive signs them out).
+     */
+    public function hasOnlyInactiveBranches(): bool
+    {
+        if ($this->isSuperAdmin() || $this->availableBranchIds() !== []) {
+            return false;
+        }
+
+        return $this->isTeacher() ? $this->branches()->exists() : $this->branch_id !== null;
     }
 
     /**

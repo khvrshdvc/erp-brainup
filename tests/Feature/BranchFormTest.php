@@ -195,4 +195,29 @@ class BranchFormTest extends TestCase
         $this->actingAs($this->superAdmin->fresh())->get(route('admin.branches.create'))
             ->assertSee('Новый филиал')->assertSee('Название филиала *')->assertSee('Менеджер')->assertSee('Адрес')->assertSee('Филиал активен');
     }
+
+    public function test_a_deactivated_branch_signs_out_its_people_and_drops_out_of_shared_teachers(): void
+    {
+        $closed = Branch::create(['name' => 'Yopilgan', 'is_active' => false]);
+        $open = Branch::create(['name' => 'Ochiq']);
+
+        $student = User::factory()->create(['role' => Role::Student, 'branch_id' => $closed->id]);
+        $admin = User::factory()->create(['role' => Role::BranchAdmin, 'branch_id' => $closed->id]);
+
+        foreach ([$student, $admin] as $user) {
+            $this->actingAs($user)->get(route('dashboard'))
+                ->assertRedirect(route('login'))
+                ->assertSessionHasErrors('email');
+            $this->assertGuest();
+        }
+
+        $shared = User::factory()->create(['role' => Role::Teacher]);
+        $shared->branches()->attach([$closed->id, $open->id]);
+
+        $this->actingAs($shared)->get(route('teacher.dashboard'))->assertOk();
+        $this->assertSame([$open->id], $shared->availableBranchIds());
+
+        // The super admin still reaches the deactivated branch to manage it.
+        $this->assertContains($closed->id, $this->superAdmin->availableBranchIds());
+    }
 }

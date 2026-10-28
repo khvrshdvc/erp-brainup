@@ -14,6 +14,7 @@ use App\Services\CredentialGenerator;
 use App\Support\IssuedCredentials;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -72,28 +73,34 @@ class StudentController extends Controller
             ?? throw ValidationException::withMessages(['email' => __('Ismdan login yaratib bo‘lmadi, emailni qo‘lda kiriting.')]);
         $password = $data['password'] ?? $credentials->password(Role::Student);
 
-        $student = User::create([
-            'name' => $data['name'],
-            'email' => $email,
-            'phone' => $data['phone'] ?? null,
-            'password' => $password,
-            'role' => Role::Student,
-            'status' => UserStatus::Active,
-            'branch_id' => $data['branch_id'],
-            'birth_date' => $data['birth_date'] ?? null,
-        ]);
-
         $groupFull = null;
 
-        if (! empty($data['group_id'])) {
-            $group = StudyGroup::findOrFail($data['group_id']);
+        $student = DB::transaction(function () use ($data, $email, $password, &$groupFull) {
+            $student = User::create([
+                'name' => $data['name'],
+                'email' => $email,
+                'phone' => $data['phone'] ?? null,
+                'password' => $password,
+                'role' => Role::Student,
+                'status' => UserStatus::Active,
+                'branch_id' => $data['branch_id'],
+                'birth_date' => $data['birth_date'] ?? null,
+            ]);
 
-            if ($group->hasFreeSeats()) {
-                $group->students()->syncWithoutDetaching([$student->id]);
-            } else {
-                $groupFull = $group;
+            if (! empty($data['group_id'])) {
+                // StudentRequest checked the group is in the chosen branch, which may not be the one selected in the
+                // switcher. Locked like GroupController::addStudent so two admins cannot both take the last seat.
+                $group = StudyGroup::withoutGlobalScopes()->lockForUpdate()->findOrFail($data['group_id']);
+
+                if ($group->hasFreeSeats()) {
+                    $group->students()->syncWithoutDetaching([$student->id]);
+                } else {
+                    $groupFull = $group;
+                }
             }
-        }
+
+            return $student;
+        });
 
         IssuedCredentials::flash($student, $password);
 

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\AttendanceStatus;
 use App\Enums\Role;
+use App\Enums\UserStatus;
 use App\Enums\XpReason;
 use App\Listeners\AwardAttendanceXp;
 use App\Models\Attendance;
@@ -12,7 +13,9 @@ use App\Models\Level;
 use App\Models\Setting;
 use App\Models\StudyGroup;
 use App\Models\User;
+use App\Models\XpRule;
 use App\Models\XpTransaction;
+use App\Services\LeaderboardService;
 use Database\Seeders\GamificationSeeder;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -30,9 +33,6 @@ class GamificationTest extends TestCase
         $this->seed(GamificationSeeder::class);
 
         Setting::put('attendance_edit_days', 365);
-
-        // These tests cover the per-lesson rules, which apply to lessons before GamificationService::MONTHLY_RULES_FROM.
-        $this->travelTo('2026-10-20 12:00:00');
     }
 
     private function makeGroup(): array
@@ -74,6 +74,26 @@ class GamificationTest extends TestCase
 
         $this->mark($teacher, $group, $student, 'absent');
         $this->assertSame(0, $student->fresh()->xp);
+    }
+
+    public function test_editing_xp_rules_refreshes_the_cached_points(): void
+    {
+        [$teacher, $student, $group] = $this->makeGroup();
+
+        $this->mark($teacher, $group, $student, 'present', 1);
+        $this->assertSame(10, $student->fresh()->xp);
+
+        $rule = XpRule::where('code', 'attendance_present')->firstOrFail();
+        $admin = User::factory()->create(['role' => Role::SuperAdmin]);
+
+        $this->actingAs($admin)->put(route('admin.gamification.update'), [
+            'rules' => [$rule->id => ['points' => 25, 'is_active' => 1]],
+        ])->assertRedirect();
+
+        $this->assertSame(25, XpRule::pointsFor('attendance_present'));
+
+        $this->mark($teacher, $group, $student, 'present', 0);
+        $this->assertSame(10 + 25, $student->fresh()->xp);
     }
 
     public function test_attendance_xp_is_awarded_without_a_queue_worker(): void
@@ -227,6 +247,18 @@ class GamificationTest extends TestCase
 
         $this->actingAs($student)->get(route('student.achievements'))->assertOk();
         $this->actingAs($student)->get(route('student.achievements', ['scope' => 'all']))->assertOk();
+    }
+
+    public function test_deactivated_students_drop_out_of_the_leaderboard(): void
+    {
+        [, $student] = $this->makeGroup();
+        $left = User::factory()->create(['role' => Role::Student, 'branch_id' => $student->branch_id, 'xp' => 500]);
+        $left->forceFill(['status' => UserStatus::Inactive])->save();
+
+        $board = app(LeaderboardService::class)->for($student, 'branch');
+
+        $this->assertSame([$student->name], array_column($board['rows'], 'name'));
+        $this->assertSame(1, $board['myRank']);
     }
 
     public function test_only_super_admin_opens_gamification_settings(): void

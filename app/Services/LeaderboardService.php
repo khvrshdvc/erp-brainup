@@ -40,7 +40,8 @@ class LeaderboardService
 
     private function scoped(User $student, string $scope): Builder
     {
-        $query = User::query()->students();
+        // Deactivated students have left the center, so they drop out of the ranking.
+        $query = User::query()->students()->active();
 
         return match ($scope) {
             'group' => $query->whereHas(

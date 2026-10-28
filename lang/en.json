@@ -688,6 +688,6 @@
     "Yangi parol yaratildi": "A new password was generated",
     "Yangi parol yaratilsinmi? Eski parol ishlamay qoladi.": "Generate a new password? The old one will stop working.",
     "Yaratish": "Generate",
-    "Oylik davomat fondi": "Monthly attendance pool",
-    "Oy davomida birorta ham darsni qoldirmaslik": "Not missing a single lesson all month"
+    "Filialingiz faol emas. Administratorga murojaat qiling.": "Your branch is not active. Please contact the administrator.",
+    "O‘quvchilar parolini administrator tiklaydi.": "Students' passwords are reset by the administrator."
 }

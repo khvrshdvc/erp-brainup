@@ -76,8 +76,10 @@ class SettingsController extends Controller
             ...(isset($data['email']) ? ['email' => $data['email']] : []),
         ]);
 
+        // Like any password an admin sets for staff, it has to be replaced at the next sign-in.
         if (! empty($data['password'])) {
             $staff->password = $data['password'];
+            $staff->must_change_password = true;
         }
 
         $staff->save();
@@ -94,7 +96,7 @@ class SettingsController extends Controller
 
     public function updatePassword(UpdatePasswordRequest $request): RedirectResponse
     {
-        $request->user()->update(['password' => $request->validated('password')]);
+        $request->user()->update(['password' => $request->validated('password'), 'must_change_password' => false]);
 
         return back()->with('status', __('Parol o‘zgartirildi'));
     }

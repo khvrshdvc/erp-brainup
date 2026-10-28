@@ -15,6 +15,9 @@ class PasswordController extends Controller
      */
     public function update(Request $request): RedirectResponse
     {
+        // Students' passwords are managed by admins only (UserPolicy::updateProfile).
+        abort_unless($request->user()->can('updateProfile', $request->user()), 403);
+
         $validated = $request->validateWithBag('updatePassword', [
             'current_password' => ['required', 'current_password'],
             'password' => ['required', Password::defaults(), 'confirmed'],

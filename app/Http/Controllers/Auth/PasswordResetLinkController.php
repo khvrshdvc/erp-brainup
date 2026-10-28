@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
@@ -29,6 +30,12 @@ class PasswordResetLinkController extends Controller
         $request->validate([
             'email' => ['required', 'email'],
         ]);
+
+        // Students cannot change their own password, so they cannot reset it by email either.
+        if (User::where('email', $request->input('email'))->first()?->isStudent()) {
+            return back()->withInput($request->only('email'))
+                ->withErrors(['email' => __('O‘quvchilar parolini administrator tiklaydi.')]);
+        }
 
         // We will send the password reset link to this user. Once we have attempted
         // to send the link, we will examine the response then see the message we

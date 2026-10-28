@@ -43,6 +43,11 @@ class NewPasswordController extends Controller
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function (User $user) use ($request) {
+                // A reset link issued before the student rule existed must not work either.
+                if ($user->isStudent()) {
+                    throw ValidationException::withMessages(['email' => __('O‘quvchilar parolini administrator tiklaydi.')]);
+                }
+
                 $user->forceFill([
                     'password' => Hash::make($request->password),
                     'must_change_password' => false,

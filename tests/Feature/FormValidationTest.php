@@ -291,6 +291,8 @@ class FormValidationTest extends TestCase
         $this->assertInvalid($this->teacher, 'post', $store, $form, ['lesson_date' => today()->addDay()->toDateString(), 'records' => $records], ['lesson_date']);
         $this->assertInvalid($this->teacher, 'post', $store, $form, ['lesson_date' => today()->subDays(30)->toDateString(), 'records' => $records], ['lesson_date']);
         $this->assertInvalid($this->teacher, 'post', $store, $form, ['lesson_date' => 'someday', 'records' => $records], ['lesson_date']);
+        // A time of day would miss the existing row and hit the unique index.
+        $this->assertInvalid($this->teacher, 'post', $store, $form, ['lesson_date' => today()->toDateString().' 10:00', 'records' => $records], ['lesson_date']);
     }
 
     public function test_assignment_form(): void

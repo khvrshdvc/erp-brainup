@@ -23,7 +23,7 @@ class PasswordResetTest extends TestCase
     {
         Notification::fake();
 
-        $user = User::factory()->create();
+        $user = User::factory()->teacher()->create();
 
         $this->post('/forgot-password', ['email' => $user->email]);
 
@@ -34,7 +34,7 @@ class PasswordResetTest extends TestCase
     {
         Notification::fake();
 
-        $user = User::factory()->create();
+        $user = User::factory()->teacher()->create();
 
         $this->post('/forgot-password', ['email' => $user->email]);
 
@@ -51,7 +51,7 @@ class PasswordResetTest extends TestCase
     {
         Notification::fake();
 
-        $user = User::factory()->create();
+        $user = User::factory()->teacher()->create();
 
         $this->post('/forgot-password', ['email' => $user->email]);
 
@@ -69,5 +69,16 @@ class PasswordResetTest extends TestCase
 
             return true;
         });
+    }
+
+    public function test_students_cannot_request_a_reset_link(): void
+    {
+        Notification::fake();
+
+        $student = User::factory()->student()->create();
+
+        $this->post('/forgot-password', ['email' => $student->email])->assertSessionHasErrors('email');
+
+        Notification::assertNothingSent();
     }
 }

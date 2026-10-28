@@ -20,6 +20,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => EnsureRole::class,
         ]);
 
+        // A password change (or an admin reset) signs the account out of every other session.
+        $middleware->authenticateSessions();
+
         $middleware->web(append: [
             SetLocale::class,
             EnsureUserIsActive::class,

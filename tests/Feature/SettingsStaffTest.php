@@ -109,6 +109,7 @@ class SettingsStaffTest extends TestCase
         $this->assertSame('+998 90 111 22 33', $admin->phone);
         $this->assertSame('yangi@brainup.uz', $admin->email);
         $this->assertTrue(Hash::check('yangi-parol-1', $admin->password));
+        $this->assertTrue($admin->must_change_password);
         $this->assertSame(Role::BranchAdmin, $admin->role);
         $this->assertSame($this->first->id, $admin->branch_id);
     }
@@ -125,6 +126,7 @@ class SettingsStaffTest extends TestCase
         ])->assertSessionHasNoErrors();
 
         $this->assertSame($hash, $admin->fresh()->password);
+        $this->assertFalse($admin->fresh()->must_change_password);
     }
 
     public function test_branch_admin_cannot_edit_branch_admins_and_does_not_see_them(): void
@@ -164,6 +166,7 @@ class SettingsStaffTest extends TestCase
         $this->assertSame('Yangi Ustoz', $teacher->name);
         $this->assertSame('ustoz@brainup.uz', $teacher->email);
         $this->assertTrue(Hash::check('ustoz-parol-1', $teacher->password));
+        $this->assertTrue($teacher->must_change_password);
         $this->assertSame([$this->first->id], $teacher->branches()->pluck('branches.id')->all());
     }
 

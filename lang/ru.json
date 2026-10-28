@@ -688,6 +688,6 @@
     "Yangi parol yaratildi": "Новый пароль создан",
     "Yangi parol yaratilsinmi? Eski parol ishlamay qoladi.": "Создать новый пароль? Старый перестанет работать.",
     "Yaratish": "Создать",
-    "Oylik davomat fondi": "Месячный фонд за посещаемость",
-    "Oy davomida birorta ham darsni qoldirmaslik": "Ни одного пропуска за месяц"
+    "Filialingiz faol emas. Administratorga murojaat qiling.": "Ваш филиал неактивен. Обратитесь к администратору.",
+    "O‘quvchilar parolini administrator tiklaydi.": "Пароль ученика восстанавливает администратор."
 }

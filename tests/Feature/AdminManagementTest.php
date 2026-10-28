@@ -149,6 +149,11 @@ class AdminManagementTest extends TestCase
             ->post(route('admin.groups.students.add', $group), ['student_id' => $two->id])
             ->assertSessionHasErrors('student_id');
 
+        // Adding someone who is already enrolled is not refused because the group is full.
+        $this->actingAs($admin)
+            ->post(route('admin.groups.students.add', $group), ['student_id' => $one->id])
+            ->assertSessionHasNoErrors();
+
         $this->assertSame(1, $group->students()->count());
     }
 
@@ -209,6 +214,24 @@ class AdminManagementTest extends TestCase
 
         $this->assertSame(1, $group->students()->count());
         $this->assertDatabaseHas('users', ['email' => 'yangi@test.uz']);
+    }
+
+    public function test_super_admin_creates_a_student_with_a_group_outside_the_selected_branch(): void
+    {
+        [, $second] = $this->branches();
+        $group = StudyGroup::create(['branch_id' => $second->id, 'name' => 'Ikkinchi guruh', 'capacity' => 5]);
+
+        // With nothing chosen in the switcher the super admin works in the first branch.
+        $this->actingAs($this->superAdmin())->post(route('admin.students.store'), [
+            'name' => 'Yangi talaba',
+            'email' => 'yangi@test.uz',
+            'password' => 'password123',
+            'branch_id' => $second->id,
+            'group_id' => $group->id,
+        ])->assertRedirect()->assertSessionMissing('warning');
+
+        $student = User::where('email', 'yangi@test.uz')->firstOrFail();
+        $this->assertSame([$student->id], $group->students()->pluck('users.id')->all());
     }
 
     public function test_student_can_be_removed_from_group(): void

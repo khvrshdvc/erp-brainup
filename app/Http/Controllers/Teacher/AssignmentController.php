@@ -177,7 +177,8 @@ class AssignmentController extends Controller
 
         abort_unless($assignment->isClosed(), 422);
 
-        $assignment->update(['status' => AssignmentStatus::Published]);
+        // A closed assignment keeps its author; once open again it belongs to the group's teacher like other open work.
+        $assignment->update(['status' => AssignmentStatus::Published, 'teacher_id' => $request->user()->id]);
 
         return back()->with('status', __('Vazifa qayta ochildi'));
     }
