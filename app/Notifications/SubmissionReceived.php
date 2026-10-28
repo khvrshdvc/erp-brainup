@@ -7,9 +7,7 @@ use Illuminate\Notifications\Notification;
 
 class SubmissionReceived extends Notification
 {
-    public function __construct(private Submission $submission)
-    {
-    }
+    public function __construct(private Submission $submission) {}
 
     public function via(object $notifiable): array
     {

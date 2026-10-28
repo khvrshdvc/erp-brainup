@@ -7,9 +7,7 @@ use App\Services\GamificationService;
 
 class SyncSubmissionXp
 {
-    public function __construct(private GamificationService $gamification)
-    {
-    }
+    public function __construct(private GamificationService $gamification) {}
 
     public function handle(SubmissionUpdated $event): void
     {

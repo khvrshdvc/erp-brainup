@@ -10,7 +10,5 @@ class AssignmentPublished
 {
     use Dispatchable, SerializesModels;
 
-    public function __construct(public Assignment $assignment)
-    {
-    }
+    public function __construct(public Assignment $assignment) {}
 }

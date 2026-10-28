@@ -7,9 +7,7 @@ use Illuminate\Notifications\Notification;
 
 class NewAssignment extends Notification
 {
-    public function __construct(private Assignment $assignment)
-    {
-    }
+    public function __construct(private Assignment $assignment) {}
 
     public function via(object $notifiable): array
     {
