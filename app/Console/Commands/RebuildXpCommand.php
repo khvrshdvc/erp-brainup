@@ -8,7 +8,6 @@ use App\Models\User;
 use App\Models\XpTransaction;
 use App\Services\GamificationService;
 use Illuminate\Console\Command;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class RebuildXpCommand extends Command
@@ -45,27 +44,6 @@ class RebuildXpCommand extends Command
                 }
             });
 
-        $months = 0;
-
-        // Monthly coins are synced once per student and month instead of after every attendance.
-        Attendance::withoutGlobalScopes()
-            ->when($branchId, fn ($query) => $query->where('branch_id', $branchId))
-            ->where('lesson_date', '>=', GamificationService::MONTHLY_RULES_FROM)
-            ->selectRaw("student_id, DATE_FORMAT(lesson_date, '%Y-%m-01') as month")
-            ->distinct()
-            ->orderBy('student_id')
-            ->orderBy('month')
-            ->get()
-            ->groupBy('student_id')
-            ->each(function ($rows, $studentId) use ($gamification, &$months) {
-                $student = User::find($studentId);
-
-                foreach ($student ? $rows : [] as $row) {
-                    $gamification->syncAttendanceMonth($student, Carbon::parse($row->month));
-                    $months++;
-                }
-            });
-
         Submission::withoutGlobalScopes()
             ->when($branchId, fn ($query) => $query->where('branch_id', $branchId))
             ->orderBy('id')
@@ -76,7 +54,7 @@ class RebuildXpCommand extends Command
                 }
             });
 
-        $this->info("Qayta hisoblandi: {$attendances} ta davomat, {$months} ta oylik davomat, {$submissions} ta topshiriq");
+        $this->info("Qayta hisoblandi: {$attendances} ta davomat, {$submissions} ta topshiriq");
 
         return self::SUCCESS;
     }

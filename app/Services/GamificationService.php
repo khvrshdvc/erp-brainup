@@ -19,32 +19,15 @@ use Illuminate\Support\Collection;
 class GamificationService
 {
     /**
-     * Lessons and submissions from this day on earn coins by the monthly rules: every student's
-     * attendance shares the same monthly pool, and assignment coins are split by the number of
-     * groups, so taking two subjects or a daily group no longer earns more than one 3-day group.
-     * Earlier lessons keep their per-lesson coins and streak bonuses.
-     */
-    public const MONTHLY_RULES_FROM = '2026-11-01';
-
-    public function __construct(private LessonPlan $plan) {}
-
-    public static function usesMonthlyRules(CarbonInterface $date): bool
-    {
-        return $date->toDateString() >= self::MONTHLY_RULES_FROM;
-    }
-
-    /**
      * $cascade re-syncs the streak bonuses of the student's later lessons too, since an edit
-     * here can create or break streaks that end after this date, and the monthly coins of the
-     * lesson's month and the month before (whose cancelled lessons drop out of the plan once the
-     * edit window has passed). Bulk rebuilds pass false: they visit every attendance themselves
-     * and call syncAttendanceMonth() once per student and month.
+     * here can create or break streaks that end after this date. Bulk rebuilds pass false:
+     * they visit every attendance themselves and each bonus is computed from the full history.
      */
     public function syncAttendance(Attendance $attendance, bool $cascade = true): void
     {
         $student = User::findOrFail($attendance->student_id);
 
-        $points = self::usesMonthlyRules($attendance->lesson_date) ? 0 : match ($attendance->status) {
+        $points = match ($attendance->status) {
             AttendanceStatus::Present => XpRule::pointsFor('attendance_present'),
             AttendanceStatus::Late => XpRule::pointsFor('attendance_late'),
             default => 0,
@@ -54,43 +37,7 @@ class GamificationService
 
         $this->syncStreakBonuses($student->id, $attendance->lesson_date, $cascade);
 
-        if ($cascade) {
-            $this->syncMonth($student, $attendance->lesson_date->copy()->subMonthNoOverflow());
-            $this->syncMonth($student, $attendance->lesson_date);
-        }
-
         $this->refresh($student);
-    }
-
-    public function syncAttendanceMonth(User $student, CarbonInterface $month): void
-    {
-        $this->syncMonth($student, $month);
-
-        $this->refresh($student);
-    }
-
-    /**
-     * The monthly attendance coins: the pool times the share of expected lessons attended, so they
-     * grow with every lesson, plus the bonus once every expected lesson of the month was attended.
-     */
-    private function syncMonth(User $student, CarbonInterface $month): void
-    {
-        if (! self::usesMonthlyRules($month->copy()->startOfMonth())) {
-            return;
-        }
-
-        $attendance = $this->plan->forMonth($student->id, $month);
-        $branchId = $attendance->branchId ?? $student->branch_id;
-
-        if ($branchId === null) {
-            return;
-        }
-
-        $share = $attendance->share(XpRule::pointsFor('attendance_month'));
-        $bonus = $attendance->isPerfect() ? XpRule::pointsFor('perfect_month') : 0;
-
-        $this->record($student->id, $branchId, XpReason::AttendanceMonth, $attendance->key, $share);
-        $this->record($student->id, $branchId, XpReason::PerfectMonth, $attendance->key, $bonus);
     }
 
     public function syncSubmission(Submission $submission): void
@@ -99,14 +46,7 @@ class GamificationService
 
         $assignment = Assignment::withoutGlobalScopes()->withTrashed()->find($submission->assignment_id);
 
-        // Under the monthly rules assignment coins are split by the number of groups the student has that month.
-        $groups = 1;
-
-        if (self::usesMonthlyRules($submission->submitted_at)) {
-            $groups = max(1, $this->plan->forMonth($student->id, $submission->submitted_at)->groups);
-        }
-
-        $onTime = $submission->is_late ? 0 : (int) round(XpRule::pointsFor('assignment_on_time') / $groups);
+        $onTime = $submission->is_late ? 0 : XpRule::pointsFor('assignment_on_time');
 
         $this->record($student->id, $submission->branch_id, XpReason::Assignment, $submission->id, $onTime);
 
@@ -119,7 +59,7 @@ class GamificationService
             && $assignment->max_score > 0
             && $submission->score / $assignment->max_score >= 0.9
         ) {
-            $highScore = (int) round(XpRule::pointsFor('assignment_high_score') / $groups);
+            $highScore = XpRule::pointsFor('assignment_high_score');
         }
 
         $this->record($student->id, $submission->branch_id, XpReason::AssignmentScore, $submission->id, $highScore);
@@ -160,8 +100,7 @@ class GamificationService
                 continue;
             }
 
-            // Streak bonuses belong to the per-lesson rules; under the monthly rules the perfect-month bonus replaces them.
-            $bonusRowId = $streaks[$date] > 0 && $streaks[$date] % 7 === 0 && $date < self::MONTHLY_RULES_FROM
+            $bonusRowId = $streaks[$date] > 0 && $streaks[$date] % 7 === 0
                 ? $rows->first(fn (Attendance $row) => $row->isAttended())?->id
                 : null;
 

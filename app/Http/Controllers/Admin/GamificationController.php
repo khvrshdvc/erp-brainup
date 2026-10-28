@@ -15,7 +15,7 @@ class GamificationController extends Controller
     public function index(): View
     {
         return view('admin.gamification', [
-            'rules' => XpRule::current()->orderBy('id')->get(),
+            'rules' => XpRule::orderBy('id')->get(),
             'levels' => Level::orderBy('min_xp')->get(),
             'badges' => Badge::orderBy('id')->get(),
         ]);
@@ -25,7 +25,7 @@ class GamificationController extends Controller
     {
         $data = $request->validated();
 
-        foreach (XpRule::current()->get() as $rule) {
+        foreach (XpRule::all() as $rule) {
             $input = $data['rules'][$rule->id] ?? null;
 
             if ($input === null) {
