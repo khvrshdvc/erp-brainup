@@ -17,7 +17,7 @@ class StoreAttendanceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'lesson_date' => ['required', 'date', 'before_or_equal:today', ...$this->windowRules()],
+            'lesson_date' => ['required', 'date_format:Y-m-d', 'before_or_equal:today', ...$this->windowRules()],
             'records' => ['required', 'array', 'min:1'],
             'records.*' => ['required', Rule::enum(AttendanceStatus::class)],
         ];

@@ -358,6 +358,25 @@ class AssignmentTest extends TestCase
             ->assertDontSee($student->name);
     }
 
+    public function test_reopened_assignment_moves_to_the_current_teacher_who_hears_about_new_work(): void
+    {
+        [$branch, $oldTeacher, $student, $group] = $this->makeGroup();
+        $assignment = $this->createAssignment($oldTeacher, $group);
+        $assignment->update(['status' => AssignmentStatus::Closed]);
+
+        $newTeacher = User::factory()->create(['role' => Role::Teacher]);
+        $newTeacher->branches()->attach($branch->id);
+        $group->update(['teacher_id' => $newTeacher->id]);
+
+        $this->actingAs($newTeacher)->post(route('teacher.assignments.reopen', $assignment))->assertRedirect();
+        $this->assertSame($newTeacher->id, $assignment->fresh()->teacher_id);
+
+        $this->submit($student, $assignment)->assertRedirect();
+
+        $this->assertSame(1, $newTeacher->notifications()->count());
+        $this->assertSame(0, $oldTeacher->notifications()->count());
+    }
+
     public function test_student_outside_group_cannot_open_assignment(): void
     {
         [$branch, $teacher, , $group] = $this->makeGroup();

@@ -12,7 +12,7 @@ class NotifyStudentsOfAssignment
     {
         $assignment = $event->assignment->loadMissing('studyGroup');
 
-        $students = $assignment->studyGroup?->students()->get() ?? collect();
+        $students = $assignment->studyGroup?->students()->active()->get() ?? collect();
 
         Notification::send($students, new NewAssignment($assignment));
     }

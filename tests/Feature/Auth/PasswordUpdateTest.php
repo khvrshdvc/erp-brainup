@@ -13,7 +13,7 @@ class PasswordUpdateTest extends TestCase
 
     public function test_password_can_be_updated(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->teacher()->create();
 
         $response = $this
             ->actingAs($user)
@@ -33,7 +33,7 @@ class PasswordUpdateTest extends TestCase
 
     public function test_correct_password_must_be_provided_to_update_password(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->teacher()->create();
 
         $response = $this
             ->actingAs($user)
@@ -47,5 +47,20 @@ class PasswordUpdateTest extends TestCase
         $response
             ->assertSessionHasErrorsIn('updatePassword', 'current_password')
             ->assertRedirect('/profile');
+    }
+
+    public function test_students_cannot_change_their_own_password(): void
+    {
+        $student = User::factory()->student()->create();
+
+        $this->actingAs($student)
+            ->put('/password', [
+                'current_password' => 'password',
+                'password' => 'new-password',
+                'password_confirmation' => 'new-password',
+            ])
+            ->assertForbidden();
+
+        $this->assertTrue(Hash::check('password', $student->refresh()->password));
     }
 }

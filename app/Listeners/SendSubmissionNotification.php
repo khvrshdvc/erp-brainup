@@ -11,7 +11,7 @@ class SendSubmissionNotification
 {
     public function handle(SubmissionUpdated $event): void
     {
-        $submission = $event->submission->loadMissing(['assignment', 'student']);
+        $submission = $event->submission->loadMissing(['assignment.studyGroup.teacher', 'student']);
 
         $assignment = $submission->assignment;
 
@@ -20,7 +20,8 @@ class SendSubmissionNotification
         }
 
         if ($submission->status === SubmissionStatus::Submitted) {
-            $teacher = $assignment->teacher;
+            // The group's current teacher grades it (Assignment::isTaughtBy), not necessarily the author.
+            $teacher = $assignment->studyGroup?->teacher;
 
             if ($teacher) {
                 // A resubmission replaces the earlier "submitted" notice instead of piling up next to it.

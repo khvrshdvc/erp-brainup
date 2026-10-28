@@ -14,13 +14,20 @@ class EnsureUserIsActive
     {
         $user = $request->user();
 
-        if ($user && $user->status === UserStatus::Inactive) {
+        $message = match (true) {
+            $user === null => null,
+            $user->status === UserStatus::Inactive => __('Hisobingiz faol emas. Administratorga murojaat qiling.'),
+            $user->hasOnlyInactiveBranches() => __('Filialingiz faol emas. Administratorga murojaat qiling.'),
+            default => null,
+        };
+
+        if ($message) {
             Auth::guard('web')->logout();
 
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
-            return redirect()->route('login')->withErrors(['email' => __('Hisobingiz faol emas. Administratorga murojaat qiling.')]);
+            return redirect()->route('login')->withErrors(['email' => $message]);
         }
 
         return $next($request);

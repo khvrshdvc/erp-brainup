@@ -35,15 +35,16 @@ Tests use PHPUnit (not Pest) with `RefreshDatabase`. They run against the separa
 ## Architecture
 
 ### Roles and routing
-`App\Enums\Role` has four roles: `super_admin`, `branch_admin`, `teacher` and `student`, stored in `users.role`. Routes in `routes/web.php` are grouped by the `role:` middleware alias (`EnsureRole`, registered in `bootstrap/app.php`), and controllers live in matching namespaces: `Admin\`, `Teacher\`, `Student\`, plus shared staff controllers at the root (`GroupController`, `AttendanceController`). `/dashboard` (`DashboardController`) redirects to the dashboard for the user's role. `EnsureUserIsActive` is appended to the whole `web` group, so a deactivated user is kicked out on every request.
+`App\Enums\Role` has four roles: `super_admin`, `branch_admin`, `teacher` and `student`, stored in `users.role`. Routes in `routes/web.php` are grouped by the `role:` middleware alias (`EnsureRole`, registered in `bootstrap/app.php`), and controllers live in matching namespaces: `Admin\`, `Teacher\`, `Student\`, plus shared staff controllers at the root (`GroupController`, `AttendanceController`). `/dashboard` (`DashboardController`) redirects to the dashboard for the user's role. `EnsureUserIsActive` is appended to the whole `web` group, so a deactivated user, or anyone but the super admin whose every branch is deactivated (`User::hasOnlyInactiveBranches()`), is kicked out on every request. `authenticateSessions()` is on as well: changing a password (by the user or an admin) signs the account out of every other session.
 
 Super-admin-only routes (branches, gamification) share the `admin.` prefix and name with branch-admin routes but sit in a separate middleware group.
 
 ### Branch multi-tenancy (the key cross-cutting concern)
 - `App\Services\CurrentBranch` (a singleton) resolves the active branch for the logged-in user. It uses `session('branch_id')` (set by `BranchSwitchController` / `x-branch-switcher`) and checks it against `User::availableBranchIds()`:
   - super admin: all branches. With no branch selected, `id()` returns `null`, which means **no filtering**.
-  - teacher: branches attached through the `branch_user` pivot.
-  - branch admin and student: their single `users.branch_id`.
+  - teacher: active branches attached through the `branch_user` pivot.
+  - branch admin and student: their single `users.branch_id`, if that branch is active.
+  - A deactivated branch (`branches.is_active`) is therefore reachable by the super admin only.
 - Models using the `Models\Concerns\BelongsToBranch` trait (`StudyGroup`, `Assignment`, `Attendance`, `Submission`) get the global `BranchScope` and have `branch_id` filled automatically on create. If no branch can be resolved, creation throws `RuntimeException('Filial tanlanmagan')`.
 - Code that has to cross branches (gamification, console commands, cross-branch lookups) calls `withoutGlobalScopes()`. Keep this in mind when queries unexpectedly return nothing, for example in tests or CLI, where there is no authenticated user.
 - `CurrentBranch` caches its result per user id. Call `forget()` after changing the session branch inside one request or test.
@@ -65,7 +66,7 @@ Controllers fire domain events, and listeners are auto-discovered from `app/List
 - Enums in `app/Enums` use the `HasValues` concern and provide `label()` methods with Uzbek text. Use them for casts and validation.
 - File uploads go through `AttachmentService` and the polymorphic `Attachment` model (`HasAttachments` trait). They are downloaded through the authorized `attachments.download` route, never through public URLs.
 - Use `App\Support\UzDate` to format dates and durations; it follows the interface language (`lang/{uz,en,ru}/dates.php`).
-- Accounts created by admins get their login and password from `App\Services\CredentialGenerator` (domain `config('erp.login_domain')`, env `ERP_LOGIN_DOMAIN`, default `brainup.uz`): empty email/password fields are generated on save, and the create forms' "Yaratish" buttons call `admin.credentials.generate`. The plain password is shown once through `App\Support\IssuedCredentials` (encrypted session flash rendered by `<x-issued-credentials>` in the layout, sent with `Cache-Control: no-store`); never log it or store it anywhere but as the hash. Staff created or reset by an admin get `users.must_change_password`, and `EnsurePasswordIsChanged` keeps them on the profile page until they change it. Students are exempt: they cannot change their own password.
+- Accounts created by admins get their login and password from `App\Services\CredentialGenerator` (domain `config('erp.login_domain')`, env `ERP_LOGIN_DOMAIN`, default `brainup.uz`): empty email/password fields are generated on save, and the create forms' "Yaratish" buttons call `admin.credentials.generate`. The plain password is shown once through `App\Support\IssuedCredentials` (encrypted session flash rendered by `<x-issued-credentials>` in the layout, sent with `Cache-Control: no-store`); never log it or store it anywhere but as the hash. Staff created or reset by an admin get `users.must_change_password`, and `EnsurePasswordIsChanged` keeps them on the profile page until they change it. Students are exempt: they cannot change their own password, through the profile, Breeze's `PUT /password` or the forgot-password flow.
 
 ### Languages (uz / en / ru)
 - The Uzbek text is the translation **key**: views and PHP code call `__('Uzbek text')` (placeholders as `:name`), and `lang/en.json` / `lang/ru.json` hold the translations. A missing key shows the Uzbek text. Only validation, auth, passwords, pagination and dates use PHP files (`lang/{uz,en,ru}/*.php`).

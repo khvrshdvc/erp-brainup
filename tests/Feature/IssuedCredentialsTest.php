@@ -189,6 +189,19 @@ class IssuedCredentialsTest extends TestCase
         $this->assertTrue($teacher->must_change_password);
     }
 
+    public function test_a_new_password_signs_the_account_out_of_sessions_opened_with_the_old_one(): void
+    {
+        $student = User::factory()->create(['role' => Role::Student, 'branch_id' => $this->branch->id]);
+
+        $this->actingAs($student)->get(route('student.dashboard'))->assertOk();
+
+        // The admin resets it while the student's browser still holds the old session.
+        $student->forceFill(['password' => 'olma1234'])->save();
+
+        $this->actingAs($student)->get(route('student.dashboard'))->assertRedirect(route('login'));
+        $this->assertGuest();
+    }
+
     public function test_branch_admin_cannot_reset_a_teacher_shared_with_another_branch(): void
     {
         $teacher = $this->teacher($this->branch, Branch::create(['name' => 'Toshkent']));

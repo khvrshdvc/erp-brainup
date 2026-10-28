@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\Role;
+use App\Enums\UserStatus;
 use App\Models\Assignment;
 use App\Models\Branch;
 use App\Models\StudyGroup;
@@ -71,6 +72,18 @@ class NotificationTest extends TestCase
         $this->assertSame(1, $student->notifications()->count());
         $this->assertSame(0, $outsider->notifications()->count());
         $this->assertSame('Yangi vazifa', $student->notifications()->first()->data['title']);
+    }
+
+    public function test_publishing_skips_deactivated_students(): void
+    {
+        [$teacher, $student, , $group] = $this->setupGroup();
+        $left = User::factory()->create(['role' => Role::Student, 'branch_id' => $student->branch_id, 'status' => UserStatus::Inactive]);
+        $group->students()->attach($left->id);
+
+        $this->actingAs($teacher)->post(route('teacher.assignments.store'), $this->assignmentPayload($group, 'publish'));
+
+        $this->assertSame(1, $student->notifications()->count());
+        $this->assertSame(0, $left->notifications()->count());
     }
 
     public function test_submission_and_grading_send_notifications(): void

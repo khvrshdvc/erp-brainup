@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\AttendanceStatus;
 use App\Enums\Role;
+use App\Enums\UserStatus;
 use App\Enums\XpReason;
 use App\Listeners\AwardAttendanceXp;
 use App\Models\Attendance;
@@ -14,6 +15,7 @@ use App\Models\StudyGroup;
 use App\Models\User;
 use App\Models\XpRule;
 use App\Models\XpTransaction;
+use App\Services\LeaderboardService;
 use Database\Seeders\GamificationSeeder;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -245,6 +247,18 @@ class GamificationTest extends TestCase
 
         $this->actingAs($student)->get(route('student.achievements'))->assertOk();
         $this->actingAs($student)->get(route('student.achievements', ['scope' => 'all']))->assertOk();
+    }
+
+    public function test_deactivated_students_drop_out_of_the_leaderboard(): void
+    {
+        [, $student] = $this->makeGroup();
+        $left = User::factory()->create(['role' => Role::Student, 'branch_id' => $student->branch_id, 'xp' => 500]);
+        $left->forceFill(['status' => UserStatus::Inactive])->save();
+
+        $board = app(LeaderboardService::class)->for($student, 'branch');
+
+        $this->assertSame([$student->name], array_column($board['rows'], 'name'));
+        $this->assertSame(1, $board['myRank']);
     }
 
     public function test_only_super_admin_opens_gamification_settings(): void

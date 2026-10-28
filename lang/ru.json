@@ -687,5 +687,7 @@
     "Yangi parol yaratiladi va faqat bir marta ko‘rsatiladi. O‘qituvchi birinchi kirishda uni o‘zgartiradi.": "Будет создан новый пароль, он покажется только один раз. Учитель сменит его при первом входе.",
     "Yangi parol yaratildi": "Новый пароль создан",
     "Yangi parol yaratilsinmi? Eski parol ishlamay qoladi.": "Создать новый пароль? Старый перестанет работать.",
-    "Yaratish": "Создать"
+    "Yaratish": "Создать",
+    "Filialingiz faol emas. Administratorga murojaat qiling.": "Ваш филиал неактивен. Обратитесь к администратору.",
+    "O‘quvchilar parolini administrator tiklaydi.": "Пароль ученика восстанавливает администратор."
 }
