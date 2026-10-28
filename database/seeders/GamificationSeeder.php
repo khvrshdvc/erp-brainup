@@ -28,6 +28,7 @@ class GamificationSeeder extends Seeder
             ['code' => 'streak_7', 'title' => '7 darslik seriya', 'points' => 30],
             ['code' => 'assignment_on_time', 'title' => 'Vazifani o‘z vaqtida topshirish', 'points' => 20],
             ['code' => 'assignment_high_score', 'title' => 'Vazifadan 90–100 ball', 'points' => 50],
+            ...XpRule::MONTHLY_RULES,
         ];
 
         foreach ($rules as $rule) {
