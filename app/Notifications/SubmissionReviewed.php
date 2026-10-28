@@ -9,9 +9,7 @@ use Illuminate\Support\Str;
 
 class SubmissionReviewed extends Notification
 {
-    public function __construct(private Submission $submission)
-    {
-    }
+    public function __construct(private Submission $submission) {}
 
     public function via(object $notifiable): array
     {

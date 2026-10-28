@@ -168,6 +168,68 @@ document.addEventListener('alpine:init', () => {
     }));
 
     window.Alpine.data('oneSubmit', oneSubmit);
+
+    // "Yaratish" buttons of the student and teacher forms: asks the server for a login or password
+    // built from the name and phone typed so far (Admin\CredentialController).
+    window.Alpine.data('credentialFields', ({ url, role, needName }) => ({
+        error: '',
+
+        async fill(field) {
+            const form = this.$root;
+            const value = (name) => form.querySelector(`[name="${name}"]`)?.value ?? '';
+            this.error = '';
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                },
+                body: JSON.stringify({ role, name: value('name'), phone: value('phone') }),
+            });
+
+            if (! response.ok) {
+                return;
+            }
+
+            const data = await response.json();
+            const input = form.querySelector(`[name="${field}"]`);
+
+            if (! data[field]) {
+                this.error = needName;
+                return;
+            }
+
+            input.value = data[field];
+
+            // A generated password is shown so the admin can check it before saving.
+            if (field === 'password') {
+                input.type = 'text';
+            }
+        },
+    }));
+
+    // Copy button of <x-issued-credentials>.
+    window.Alpine.data('issuedCredentials', ({ text, label, copied }) => ({
+        label,
+
+        async copy() {
+            try {
+                await navigator.clipboard.writeText(text);
+            } catch {
+                // Plain http (no secure context) has no clipboard API.
+                const area = document.createElement('textarea');
+                area.value = text;
+                document.body.appendChild(area);
+                area.select();
+                document.execCommand('copy');
+                area.remove();
+            }
+
+            this.label = copied;
+        },
+    }));
 });
 
 // Stops a second click from sending the same form twice.

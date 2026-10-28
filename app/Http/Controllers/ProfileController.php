@@ -30,7 +30,10 @@ class ProfileController extends Controller
 
     public function updatePassword(UpdatePasswordRequest $request): RedirectResponse
     {
-        $request->user()->update(['password' => $request->validated('password')]);
+        $request->user()->update([
+            'password' => $request->validated('password'),
+            'must_change_password' => false,
+        ]);
 
         return back()->with('status', __('Parol o‘zgartirildi'));
     }

@@ -10,7 +10,5 @@ class SubmissionUpdated
 {
     use Dispatchable, SerializesModels;
 
-    public function __construct(public Submission $submission)
-    {
-    }
+    public function __construct(public Submission $submission) {}
 }

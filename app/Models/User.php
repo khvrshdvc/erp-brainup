@@ -24,6 +24,7 @@ class User extends Authenticatable
         'email',
         'phone',
         'password',
+        'must_change_password',
         'role',
         'status',
         'branch_id',
@@ -40,6 +41,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'must_change_password' => 'boolean',
             'role' => Role::class,
             'status' => UserStatus::class,
             'birth_date' => 'date',

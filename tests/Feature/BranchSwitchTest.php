@@ -2,7 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Enums\GroupStatus;
 use App\Models\Branch;
+use App\Models\StudyGroup;
 use App\Models\User;
 use App\Services\CurrentBranch;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -39,12 +41,12 @@ class BranchSwitchTest extends TestCase
     {
         $branch = Branch::create(['name' => 'A']);
         $admin = User::factory()->branchAdmin()->inBranch($branch)->create();
-        $group = \App\Models\StudyGroup::factory()->create(['branch_id' => $branch->id]);
+        $group = StudyGroup::factory()->create(['branch_id' => $branch->id]);
 
         $this->actingAs($admin)->patch(route('admin.groups.status', $group))->assertRedirect();
-        $this->assertSame(\App\Enums\GroupStatus::Archived, $group->fresh()->status);
+        $this->assertSame(GroupStatus::Archived, $group->fresh()->status);
 
         $this->patch(route('admin.groups.status', $group));
-        $this->assertSame(\App\Enums\GroupStatus::Active, $group->fresh()->status);
+        $this->assertSame(GroupStatus::Active, $group->fresh()->status);
     }
 }

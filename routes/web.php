@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AssignmentController as AdminAssignmentController;
 use App\Http\Controllers\Admin\BranchController;
+use App\Http\Controllers\Admin\CredentialController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\GamificationController;
 use App\Http\Controllers\Admin\GroupController as AdminGroupController;
@@ -71,11 +72,15 @@ Route::middleware('auth')->group(function () {
         Route::post('/groups/{studyGroup}/students', [AdminGroupController::class, 'addStudent'])->name('groups.students.add');
         Route::delete('/groups/{studyGroup}/students/{student}', [AdminGroupController::class, 'removeStudent'])->name('groups.students.remove');
 
+        Route::post('/credentials', CredentialController::class)->name('credentials.generate');
+
         Route::resource('students', AdminStudentController::class)->except(['destroy']);
         Route::patch('/students/{student}/status', [AdminStudentController::class, 'toggleStatus'])->name('students.status');
+        Route::post('/students/{student}/password', [AdminStudentController::class, 'resetPassword'])->name('students.password');
 
         Route::resource('teachers', AdminTeacherController::class)->except(['show', 'destroy']);
         Route::patch('/teachers/{teacher}/status', [AdminTeacherController::class, 'toggleStatus'])->name('teachers.status');
+        Route::post('/teachers/{teacher}/password', [AdminTeacherController::class, 'resetPassword'])->name('teachers.password');
 
         Route::get('/assignments', [AdminAssignmentController::class, 'index'])->name('assignments.index');
         Route::get('/assignments/{assignment}', [AdminAssignmentController::class, 'show'])->name('assignments.show');

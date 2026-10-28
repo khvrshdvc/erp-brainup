@@ -12,7 +12,7 @@ trait BelongsToBranch
 {
     protected static function bootBelongsToBranch(): void
     {
-        static::addGlobalScope(new BranchScope());
+        static::addGlobalScope(new BranchScope);
 
         static::creating(function ($model) {
             if ($model->branch_id) {

@@ -66,6 +66,10 @@
             </div>
         </section>
     @else
+        @if ($user->must_change_password)
+            <div class="alert alert-warn">{{ __('Siz administrator bergan vaqtinchalik parol bilan kirdingiz. Davom etish uchun parolni o‘zgartiring.') }}</div>
+        @endif
+
         <form method="POST" action="{{ route('profile.update') }}" class="card card-pad stack">
             @csrf
             @method('PATCH')

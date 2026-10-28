@@ -164,7 +164,8 @@ class FormValidationTest extends TestCase
         $store = route('admin.students.store');
         $valid = ['name' => 'Ali Valiyev', 'email' => 'ali@test.uz', 'password' => 'password123', 'branch_id' => $this->branch->id];
 
-        $this->assertInvalid($this->admin, 'post', $store, $form, [], ['name', 'email', 'password', 'branch_id']);
+        // Email and password may be left empty: they are generated (IssuedCredentialsTest).
+        $this->assertInvalid($this->admin, 'post', $store, $form, [], ['name', 'branch_id']);
         $this->assertInvalid($this->admin, 'post', $store, $form, [...$valid, 'email' => 'not-an-email'], ['email']);
         $this->assertInvalid($this->admin, 'post', $store, $form, [...$valid, 'email' => 'student@test.uz'], ['email']);
         $this->assertInvalid($this->admin, 'post', $store, $form, [...$valid, 'password' => 'short'], ['password']);
@@ -187,7 +188,7 @@ class FormValidationTest extends TestCase
         $store = route('admin.teachers.store');
         $valid = ['name' => 'Ustoz Ustozov', 'email' => 'new-teacher@test.uz', 'password' => 'password123', 'branches' => [$this->branch->id]];
 
-        $this->assertInvalid($this->admin, 'post', $store, $form, [], ['name', 'email', 'password', 'branches']);
+        $this->assertInvalid($this->admin, 'post', $store, $form, [], ['name', 'branches']);
         $this->assertInvalid($this->admin, 'post', $store, $form, [...$valid, 'branches' => []], ['branches']);
         $this->assertInvalid($this->admin, 'post', $store, $form, [...$valid, 'branches' => [$this->other->id]], ['branches.0']);
         $this->assertInvalid($this->admin, 'post', $store, $form, [...$valid, 'email' => 'teacher@test.uz'], ['email']);
