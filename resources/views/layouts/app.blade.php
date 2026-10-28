@@ -34,6 +34,8 @@
                         <div class="alert alert-warn">@coins(session('warning'))</div>
                     @endif
 
+                    <x-issued-credentials />
+
                     @if ($errors->any())
                         <div class="alert alert-err">
                             @foreach ($errors->all() as $error)

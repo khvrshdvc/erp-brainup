@@ -36,6 +36,9 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
      */
     protected function hideSensitiveRequestDetails(): void
     {
+        // Generated passwords (admin.credentials.generate) are not recorded, not even locally.
+        Telescope::hideResponseParameters(['password']);
+
         if ($this->app->environment('local')) {
             return;
         }

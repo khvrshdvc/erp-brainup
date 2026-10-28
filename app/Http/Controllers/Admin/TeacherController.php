@@ -8,9 +8,12 @@ use App\Http\Controllers\Admin\Concerns\ResolvesBranches;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\TeacherRequest;
 use App\Models\User;
+use App\Services\CredentialGenerator;
+use App\Support\IssuedCredentials;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class TeacherController extends Controller
@@ -42,20 +45,28 @@ class TeacherController extends Controller
         return view('admin.teachers.create', $this->formData());
     }
 
-    public function store(TeacherRequest $request): RedirectResponse
+    public function store(TeacherRequest $request, CredentialGenerator $credentials): RedirectResponse
     {
         $data = $request->validated();
 
+        // Left empty, the login and password are generated here.
+        $email = $data['email'] ?? $credentials->login(Role::Teacher, $data['name'])
+            ?? throw ValidationException::withMessages(['email' => __('Ismdan login yaratib bo‘lmadi, emailni qo‘lda kiriting.')]);
+        $password = $data['password'] ?? $credentials->password(Role::Teacher);
+
         $teacher = User::create([
             'name' => $data['name'],
-            'email' => $data['email'],
+            'email' => $email,
             'phone' => $data['phone'] ?? null,
-            'password' => $data['password'],
+            'password' => $password,
+            'must_change_password' => true,
             'role' => Role::Teacher,
             'status' => UserStatus::Active,
         ]);
 
         $teacher->branches()->sync($data['branches']);
+
+        IssuedCredentials::flash($teacher, $password);
 
         return redirect()->route('admin.teachers.index')->with('status', __('O‘qituvchi qo‘shildi'));
     }
@@ -83,6 +94,7 @@ class TeacherController extends Controller
 
         if (! empty($data['password'])) {
             $teacher->password = $data['password'];
+            $teacher->must_change_password = true;
         }
 
         $teacher->save();
@@ -93,6 +105,21 @@ class TeacherController extends Controller
         $teacher->branches()->sync($untouched->merge($data['branches'])->unique()->values()->all());
 
         return redirect()->route('admin.teachers.index')->with('status', __('O‘qituvchi yangilandi'));
+    }
+
+    public function resetPassword(User $teacher, CredentialGenerator $credentials): RedirectResponse
+    {
+        Gate::authorize('manageTeacher', $teacher);
+        // Same rule as TeacherRequest: a teacher shared with other branches keeps their password.
+        Gate::authorize('manageTeacherCredentials', $teacher);
+
+        $password = $credentials->password(Role::Teacher);
+
+        $teacher->update(['password' => $password, 'must_change_password' => true]);
+
+        IssuedCredentials::flash($teacher, $password);
+
+        return back()->with('status', __('Yangi parol yaratildi'));
     }
 
     public function toggleStatus(User $teacher): RedirectResponse

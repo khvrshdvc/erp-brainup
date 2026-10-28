@@ -10,9 +10,12 @@ use App\Http\Requests\Admin\StudentRequest;
 use App\Models\Attendance;
 use App\Models\StudyGroup;
 use App\Models\User;
+use App\Services\CredentialGenerator;
+use App\Support\IssuedCredentials;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class StudentController extends Controller
@@ -60,15 +63,20 @@ class StudentController extends Controller
         return view('admin.students.create', $this->formData());
     }
 
-    public function store(StudentRequest $request): RedirectResponse
+    public function store(StudentRequest $request, CredentialGenerator $credentials): RedirectResponse
     {
         $data = $request->validated();
 
+        // Left empty, the login and password are generated here.
+        $email = $data['email'] ?? $credentials->login(Role::Student, $data['name'], $data['phone'] ?? null)
+            ?? throw ValidationException::withMessages(['email' => __('Ismdan login yaratib bo‘lmadi, emailni qo‘lda kiriting.')]);
+        $password = $data['password'] ?? $credentials->password(Role::Student);
+
         $student = User::create([
             'name' => $data['name'],
-            'email' => $data['email'],
+            'email' => $email,
             'phone' => $data['phone'] ?? null,
-            'password' => $data['password'],
+            'password' => $password,
             'role' => Role::Student,
             'status' => UserStatus::Active,
             'branch_id' => $data['branch_id'],
@@ -86,6 +94,8 @@ class StudentController extends Controller
                 $groupFull = $group;
             }
         }
+
+        IssuedCredentials::flash($student, $password);
 
         $redirect = redirect()->route('admin.students.show', $student)->with('status', __('O‘quvchi qo‘shildi'));
 
@@ -142,6 +152,19 @@ class StudentController extends Controller
         $student->save();
 
         return redirect()->route('admin.students.show', $student)->with('status', __('O‘quvchi yangilandi'));
+    }
+
+    public function resetPassword(User $student, CredentialGenerator $credentials): RedirectResponse
+    {
+        Gate::authorize('manageStudent', $student);
+
+        $password = $credentials->password(Role::Student);
+
+        $student->update(['password' => $password]);
+
+        IssuedCredentials::flash($student, $password);
+
+        return back()->with('status', __('Yangi parol yaratildi'));
     }
 
     public function toggleStatus(User $student): RedirectResponse

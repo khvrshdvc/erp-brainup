@@ -1,7 +1,10 @@
 @php $editing = isset($student) && $student; @endphp
 
 <form method="POST" class="stack-lg"
-    action="{{ $editing ? route('admin.students.update', $student) : route('admin.students.store') }}">
+    action="{{ $editing ? route('admin.students.update', $student) : route('admin.students.store') }}"
+    @unless ($editing)
+        x-data="credentialFields({ url: @js(route('admin.credentials.generate')), role: 'student', needName: @js(__('Login yaratish uchun avval ism yoki telefonni kiriting.')) })"
+    @endunless>
     @csrf
     @if ($editing)
         @method('PUT')
@@ -18,9 +21,18 @@
             </div>
 
             <div class="field">
-                <label for="email">{{ __('Email *') }}</label>
-                <input id="email" class="input" type="email" name="email" maxlength="255" required autocomplete="off"
-                    value="{{ old('email', $student->email ?? '') }}">
+                <label for="email">{{ $editing ? __('Email *') : __('Email (login)') }}</label>
+                <div style="display: flex; gap: 8px">
+                    <input id="email" class="input" style="flex: 1; min-width: 0" type="email" name="email" maxlength="255" autocomplete="off"
+                        value="{{ old('email', $student->email ?? '') }}" {{ $editing ? 'required' : '' }}>
+                    @unless ($editing)
+                        <button type="button" class="btn" @click="fill('email')">{{ __('Yaratish') }}</button>
+                    @endunless
+                </div>
+                @unless ($editing)
+                    <div class="field-hint" style="color: var(--err)" x-show="error" x-text="error" x-cloak></div>
+                    <div class="field-hint">{{ __('Bo‘sh qoldirsangiz, avtomatik yaratiladi') }}</div>
+                @endunless
             </div>
 
             <div class="field">
@@ -37,10 +49,14 @@
             </div>
 
             <div class="field">
-                <label for="password">{{ __('Parol') }} {{ $editing ? '' : '*' }}</label>
-                <input id="password" class="input" type="password" name="password" minlength="8" autocomplete="new-password"
-                    {{ $editing ? '' : 'required' }}>
-                <div class="field-hint">{{ $editing ? __('O‘zgartirmasangiz, bo‘sh qoldiring') : __('Kamida 8 ta belgi') }}</div>
+                <label for="password">{{ __('Parol') }}</label>
+                <div style="display: flex; gap: 8px">
+                    <input id="password" class="input" style="flex: 1; min-width: 0" type="password" name="password" minlength="8" autocomplete="new-password">
+                    @unless ($editing)
+                        <button type="button" class="btn" @click="fill('password')">{{ __('Yaratish') }}</button>
+                    @endunless
+                </div>
+                <div class="field-hint">{{ $editing ? __('O‘zgartirmasangiz, bo‘sh qoldiring') : __('Bo‘sh qoldirsangiz, avtomatik yaratiladi') }}</div>
             </div>
         </div>
     </section>

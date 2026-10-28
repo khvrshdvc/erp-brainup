@@ -970,3 +970,12 @@ b, strong { font-weight: 500; }
     .coin:hover .coin-mark, .kpi:hover .coin-mark { animation: none; }
     .wallet::before, .wallet::after { display: none; }
 }
+
+/* <x-issued-credentials>: the login card is the only thing printed while it is on the page. */
+.cred-secret { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 16px; letter-spacing: .02em; }
+@media print {
+    body:has(.cred-card) * { visibility: hidden; }
+    body:has(.cred-card) .cred-card, body:has(.cred-card) .cred-card * { visibility: visible; }
+    .cred-card { position: absolute; top: 0; left: 0; width: 100%; border: 1px dashed #000; }
+    .cred-card .cred-hide { display: none; }
+}
