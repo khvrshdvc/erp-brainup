@@ -669,5 +669,7 @@
     "Olib tashlash": "Remove",
     "Fayllar: :count / :max": "Files: :count / :max",
     "Fayl qo‘shish": "Add files",
-    ":types · har biri :maxmb MB gacha · ko‘pi bilan :max ta fayl · bir nechta rasm yoki faylni tanlash yoki sudrab tashlash mumkin": ":types · up to :maxmb MB each · at most :max files · you can pick or drag in several photos or files at once"
+    ":types · har biri :maxmb MB gacha · ko‘pi bilan :max ta fayl · bir nechta rasm yoki faylni tanlash yoki sudrab tashlash mumkin": ":types · up to :maxmb MB each · at most :max files · you can pick or drag in several photos or files at once",
+    "Oylik davomat fondi": "Monthly attendance pool",
+    "Oy davomida birorta ham darsni qoldirmaslik": "Not missing a single lesson all month"
 }

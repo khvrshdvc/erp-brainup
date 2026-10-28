@@ -669,5 +669,7 @@
     "Olib tashlash": "Убрать",
     "Fayllar: :count / :max": "Файлов: :count / :max",
     "Fayl qo‘shish": "Добавить файлы",
-    ":types · har biri :maxmb MB gacha · ko‘pi bilan :max ta fayl · bir nechta rasm yoki faylni tanlash yoki sudrab tashlash mumkin": ":types · до :maxmb МБ каждый · не более :max файлов · можно выбрать или перетащить сразу несколько фото или файлов"
+    ":types · har biri :maxmb MB gacha · ko‘pi bilan :max ta fayl · bir nechta rasm yoki faylni tanlash yoki sudrab tashlash mumkin": ":types · до :maxmb МБ каждый · не более :max файлов · можно выбрать или перетащить сразу несколько фото или файлов",
+    "Oylik davomat fondi": "Месячный фонд за посещаемость",
+    "Oy davomida birorta ham darsni qoldirmaslik": "Ни одного пропуска за месяц"
 }
