@@ -26,6 +26,7 @@ vendor/bin/sail pint           # code style (Laravel Pint)
 vendor/bin/sail artisan migrate:fresh --seed   # seeds levels/XP rules/badges, branches, courses, and DemoSeeder outside production
 vendor/bin/sail artisan gamification:rebuild [--branch=ID] [--fresh]   # recompute XP, levels, streaks and badges from attendance and submissions
 vendor/bin/sail artisan db:seed --class=ChirchiqSeeder   # real Chirchiq branch: 4 teachers, 13 groups, 104 Uzbek-named students, 3 assignments per group; idempotent, not part of DatabaseSeeder
+vendor/bin/sail artisan db:seed --class=ProductionSeeder   # fresh production DB: XP rules/levels/badges and the Chirchiq branch, staff, courses and 13 groups only (ChirchiqSeeder with structureOnly); staff passwords are generated, printed once and must be changed; then load students with students:import <csv>
 vendor/bin/sail artisan db:seed --class=LoadTestSeeder   # 2000 students and 3 months of data for local performance checks; not part of DatabaseSeeder
 vendor/bin/sail artisan tinker
 ```
