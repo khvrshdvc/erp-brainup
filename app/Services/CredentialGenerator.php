@@ -15,7 +15,7 @@ use Illuminate\Support\Str;
  */
 class CredentialGenerator
 {
-    /** Words children know (4 to 6 Latin letters, no apostrophes) for student and admin passwords. */
+    /** Words children know (4 to 6 Latin letters, no apostrophes) for student passwords. */
     public const WORDS = [
         'olma', 'anor', 'uzum', 'behi', 'gilos', 'limon', 'banan', 'qovun', 'tarvuz', 'sabzi',
         'piyoz', 'bodom', 'kitob', 'qalam', 'daftar', 'maktab', 'ruchka', 'doska', 'quyosh', 'yulduz',
@@ -28,8 +28,8 @@ class CredentialGenerator
         'palov', 'manti',
     ];
 
-    /** Letters and digits for teacher passwords, without the look-alikes 0 O 1 l I. */
-    private const TEACHER_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
+    /** Letters and digits for staff (teacher and admin) passwords, without the look-alikes 0 O 1 l I. */
+    private const STAFF_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
 
     private const CYRILLIC = [
         'а' => 'a', 'б' => 'b', 'в' => 'v', 'г' => 'g', 'д' => 'd', 'е' => 'e', 'ё' => 'yo', 'ж' => 'j',
@@ -79,8 +79,7 @@ class CredentialGenerator
     {
         return match ($role) {
             Role::Student => $this->word().sprintf('%04d', random_int(0, 9999)),
-            Role::Teacher => $this->teacherPassword(),
-            Role::SuperAdmin, Role::BranchAdmin => implode('-', [...$this->words(3), sprintf('%02d', random_int(0, 99))]),
+            Role::Teacher, Role::SuperAdmin, Role::BranchAdmin => $this->staffPassword(),
         };
     }
 
@@ -142,15 +141,15 @@ class CredentialGenerator
         return User::where('email', $email)->exists();
     }
 
-    private function teacherPassword(): string
+    private function staffPassword(): string
     {
-        $last = strlen(self::TEACHER_ALPHABET) - 1;
+        $last = strlen(self::STAFF_ALPHABET) - 1;
 
         do {
             $password = '';
 
             for ($i = 0; $i < 10; $i++) {
-                $password .= self::TEACHER_ALPHABET[random_int(0, $last)];
+                $password .= self::STAFF_ALPHABET[random_int(0, $last)];
             }
         } while (! preg_match('/[A-Z]/', $password) || ! preg_match('/[a-z]/', $password) || ! preg_match('/\d/', $password));
 
@@ -160,19 +159,5 @@ class CredentialGenerator
     private function word(): string
     {
         return self::WORDS[random_int(0, count(self::WORDS) - 1)];
-    }
-
-    /**
-     * @return list<string> $count different words
-     */
-    private function words(int $count): array
-    {
-        $words = [];
-
-        while (count($words) < $count) {
-            $words[$this->word()] = true;
-        }
-
-        return array_keys($words);
     }
 }
