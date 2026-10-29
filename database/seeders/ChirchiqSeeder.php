@@ -13,6 +13,7 @@ use App\Models\Course;
 use App\Models\StudyGroup;
 use App\Models\Submission;
 use App\Models\User;
+use App\Services\CredentialGenerator;
 use Carbon\CarbonImmutable;
 use Database\Seeders\Data\UzbekNames;
 use Illuminate\Database\Seeder;
@@ -113,6 +114,15 @@ class ChirchiqSeeder extends Seeder
     /** Overrides the default storage/app/private/students.csv (used by tests). */
     public ?string $rosterPath = null;
 
+    /**
+     * Production (ProductionSeeder): only the branch, staff, courses and groups. Staff get a
+     * generated password, printed once, that they must change at first sign-in.
+     */
+    public bool $structureOnly = false;
+
+    /** @var list<array{string, string, string}> name, login, password of staff created in this run */
+    private array $issued = [];
+
     /** @var array<string, true> */
     private array $usedEmails = [];
 
@@ -128,6 +138,7 @@ class ChirchiqSeeder extends Seeder
 
         // A fresh run must generate the same people, even on a reused seeder instance.
         $this->usedEmails = $this->usedPhones = $this->usedNames = [];
+        $this->issued = [];
 
         $this->call([GamificationSeeder::class]);
 
@@ -137,13 +148,17 @@ class ChirchiqSeeder extends Seeder
             $courses = $this->createCourses();
             $groups = $this->createGroups($branch, $teachers, $courses);
 
-            $this->createStudents($branch, $groups);
-            $this->createAssignments($branch, $groups);
+            if (! $this->structureOnly) {
+                $this->createStudents($branch, $groups);
+                $this->createAssignments($branch, $groups);
+            }
         });
 
         $branch = Branch::where('name', 'Chirchiq filiali')->firstOrFail();
 
-        Artisan::call('gamification:rebuild', ['--branch' => $branch->id]);
+        if (! $this->structureOnly) {
+            Artisan::call('gamification:rebuild', ['--branch' => $branch->id]);
+        }
 
         $this->command?->info(sprintf(
             'Chirchiq filiali tayyor: %d guruh, %d o‘quvchi, %d vazifa.',
@@ -151,6 +166,11 @@ class ChirchiqSeeder extends Seeder
             User::students()->inBranch($branch->id)->count(),
             Assignment::withoutGlobalScopes()->where('branch_id', $branch->id)->count(),
         ));
+
+        if ($this->issued !== []) {
+            $this->command?->table(['Ism', 'Login', 'Parol'], $this->issued);
+            $this->command?->warn('Parollar faqat hozir ko‘rsatiladi. Birinchi kirishda ularni almashtirish so‘raladi.');
+        }
     }
 
     /**
@@ -175,14 +195,24 @@ class ChirchiqSeeder extends Seeder
 
     private function staff(string $name, string $email, Role $role, ?int $branchId = null): User
     {
-        return User::unguarded(fn () => User::firstOrCreate(['email' => $email], [
+        $password = $this->structureOnly ? app(CredentialGenerator::class)->password($role) : 'password';
+
+        $user = User::unguarded(fn () => User::firstOrCreate(['email' => $email], [
             'name' => $name,
-            'password' => 'password',
+            'password' => $password,
+            'must_change_password' => $this->structureOnly,
             'role' => $role,
             'status' => UserStatus::Active,
             'branch_id' => $branchId,
             'email_verified_at' => now(),
         ]));
+
+        // An existing account keeps its password; only new ones are shown.
+        if ($this->structureOnly && $user->wasRecentlyCreated) {
+            $this->issued[] = [$name, $email, $password];
+        }
+
+        return $user;
     }
 
     /**
