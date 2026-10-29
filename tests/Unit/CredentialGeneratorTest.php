@@ -114,31 +114,18 @@ class CredentialGeneratorTest extends TestCase
         }
     }
 
-    public function test_teacher_password_is_ten_unambiguous_mixed_characters(): void
+    public function test_staff_passwords_are_ten_unambiguous_mixed_characters(): void
     {
-        foreach (range(1, 50) as $ignored) {
-            $password = $this->credentials->password(Role::Teacher);
-
-            $this->assertSame(10, strlen($password));
-            $this->assertMatchesRegularExpression('/^[A-Za-z2-9]+$/', $password);
-            $this->assertDoesNotMatchRegularExpression('/[0O1lI]/', $password);
-            $this->assertMatchesRegularExpression('/[A-Z]/', $password);
-            $this->assertMatchesRegularExpression('/[a-z]/', $password);
-            $this->assertMatchesRegularExpression('/\d/', $password);
-        }
-    }
-
-    public function test_admin_passwords_are_three_words_and_two_digits(): void
-    {
-        foreach ([Role::SuperAdmin, Role::BranchAdmin] as $role) {
-            foreach (range(1, 20) as $ignored) {
+        foreach ([Role::Teacher, Role::SuperAdmin, Role::BranchAdmin] as $role) {
+            foreach (range(1, 30) as $ignored) {
                 $password = $this->credentials->password($role);
 
-                $this->assertMatchesRegularExpression('/^[a-z]{4,6}-[a-z]{4,6}-[a-z]{4,6}-\d{2}$/', $password);
-
-                $words = array_slice(explode('-', $password), 0, 3);
-                $this->assertCount(3, array_unique($words));
-                $this->assertEmpty(array_diff($words, CredentialGenerator::WORDS));
+                $this->assertSame(10, strlen($password));
+                $this->assertMatchesRegularExpression('/^[A-Za-z2-9]+$/', $password);
+                $this->assertDoesNotMatchRegularExpression('/[0O1lI]/', $password);
+                $this->assertMatchesRegularExpression('/[A-Z]/', $password);
+                $this->assertMatchesRegularExpression('/[a-z]/', $password);
+                $this->assertMatchesRegularExpression('/\d/', $password);
             }
         }
     }
