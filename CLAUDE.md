@@ -14,7 +14,7 @@ Run every PHP, Composer, Artisan and npm command through Sail, never on the host
 vendor/bin/sail up -d          # start containers (stop with: vendor/bin/sail down)
 vendor/bin/sail composer install
 vendor/bin/sail npm run dev    # Vite dev server (or: sail npm run build)
-vendor/bin/sail artisan schedule:work   # runs the daily notifications:prune (read notifications older than 60 days) and shop:expire-orders (pending shop orders older than 3 days are cancelled and refunded); in production run schedule:run every minute
+vendor/bin/sail artisan schedule:work   # runs the daily notifications:prune (read notifications older than 60 days), submissions:prune-files (files of graded submissions older than submission_file_retention_days; score and feedback stay) and shop:expire-orders (pending shop orders older than 3 days are cancelled and refunded); in production run schedule:run every minute
 
 vendor/bin/sail test                                         # whole suite
 vendor/bin/sail test --filter=AttendanceTest                 # single test class
@@ -31,6 +31,13 @@ vendor/bin/sail artisan db:seed --class=LoadTestSeeder   # 2000 students and 3 m
 vendor/bin/sail artisan tinker
 ```
 
+Seeding rules:
+- **Don't combine `DatabaseSeeder` (its `DemoSeeder`) and `ChirchiqSeeder` in one database.** Both fill "Chirchiq filiali": the result is 304 students, 25 groups, two super admins (`admin@erp.test` and `admin@brainup.uz`), two Robiyas (`robia@` from the demo, `robiya@` from Chirchiq), and `filial.admin@`/`sabina@` keep the demo names. For a clean Chirchiq database run `migrate:fresh` and then `db:seed --class=ChirchiqSeeder` alone. `DemoSeeder` does nothing once any student exists.
+- **Never run `db:seed` / `migrate:fresh --seed` in production.** `DemoSeeder` is skipped there, but `BranchSeeder` still creates four fake Tashkent branches and the super admin `admin@erp.test` / `password`. Use `ProductionSeeder` only. It adds no shop items (add them in the UI, or `db:seed --class=ShopSeeder --force` for the six stock items).
+- The student roster for `students:import` (`storage/app/private/students-import.csv`) is git-ignored, so it has to be copied to the server by hand. Delete it there, along with the `storage/app/private/credentials-*.csv` file the import writes, once the logins have been handed out. `ChirchiqSeeder` reads a different, optional roster (`storage/app/private/students.csv`, columns `full_name, phone, birth_date, group_name`) and otherwise generates 104 students.
+- `ChirchiqSeeder` creates no attendance, so its XP comes from submissions only. `LoadTestSeeder` writes random XP/levels/streaks; run `gamification:rebuild` after it.
+- Rerunning `GamificationSeeder` overwrites level and badge names but keeps XP rule points an admin has changed (`firstOrCreate`).
+
 Tests use PHPUnit (not Pest) with `RefreshDatabase`. They run against the separate MySQL `testing` database, which Sail's MySQL init script creates (`DB_DATABASE=testing` in `phpunit.xml`). `QUEUE_CONNECTION=sync` in tests, so listeners run inline. Demo users from `DemoSeeder` all use the password `password`.
 
 ## Architecture
@@ -42,11 +49,11 @@ Super-admin-only routes (branches, gamification) share the `admin.` prefix and n
 
 ### Branch multi-tenancy (the key cross-cutting concern)
 - `App\Services\CurrentBranch` (a singleton) resolves the active branch for the logged-in user. It uses `session('branch_id')` (set by `BranchSwitchController` / `x-branch-switcher`) and checks it against `User::availableBranchIds()`:
-  - super admin: all branches. With no branch selected, `id()` returns `null`, which means **no filtering**.
+  - super admin: all branches. With nothing in the session yet, `id()` defaults to the first branch (lowest id); only an explicit "all branches" choice (`branch_id` = 0 in the session) makes it return `null`, which means **no filtering**.
   - teacher: active branches attached through the `branch_user` pivot.
   - branch admin and student: their single `users.branch_id`, if that branch is active.
   - A deactivated branch (`branches.is_active`) is therefore reachable by the super admin only.
-- Models using the `Models\Concerns\BelongsToBranch` trait (`StudyGroup`, `Assignment`, `Attendance`, `Submission`) get the global `BranchScope` and have `branch_id` filled automatically on create. If no branch can be resolved, creation throws `RuntimeException('Filial tanlanmagan')`.
+- Models using the `Models\Concerns\BelongsToBranch` trait (`StudyGroup`, `Assignment`, `Attendance`, `Submission`, `ShopOrder`) get the global `BranchScope` and have `branch_id` filled automatically on create. If no branch can be resolved, creation throws `RuntimeException('Filial tanlanmagan')`.
 - Code that has to cross branches (gamification, console commands, cross-branch lookups) calls `withoutGlobalScopes()`. Keep this in mind when queries unexpectedly return nothing, for example in tests or CLI, where there is no authenticated user.
 - `CurrentBranch` caches its result per user id. Call `forget()` after changing the session branch inside one request or test.
 - `User` is **not** branch-scoped. Filter users explicitly with `scopeInBranch`, `students()`, `teachers()` and `active()`.
@@ -62,6 +69,15 @@ Controllers fire domain events, and listeners are auto-discovered from `app/List
 - `AssignmentPublished` → `NotifyStudentsOfAssignment`
 
 `GamificationService` is **idempotent**. Each award is an `XpTransaction` upserted on `(user_id, reason, source_id)`, so re-syncing the same attendance or submission overwrites the earlier award instead of adding a second one. After each sync it recalculates the user's cached `xp`, `level_id`, `streak` and badges. Point values come from the `XpRule` table (`XpRule::pointsFor('attendance_present')` and so on, seeded by `GamificationSeeder`, editable by the super admin). `pointsFor()` is cached forever per code and forgotten by the model's `saved`/`deleted` hooks, so always change rules through Eloquent, not raw queries. If you change the rules, run `gamification:rebuild` to recompute. `LeaderboardService` ranks students within a scope.
+
+`assignments.max_score` is locked once any submission is graded with a score (`Assignment::hasScoredSubmissions()`, enforced in `AssignmentRequest`, read-only in the edit form): lowering it would show scores above the maximum and leave the high-score XP stale.
+
+### Shop (BrainCoin)
+- XP doubles as the BrainCoin currency. `User::coinBalance()` is `users.xp` minus the price of the student's `pending` and `delivered` orders, so it is computed, not stored: an attendance or grade change that lowers XP lowers the balance too (floored at 0).
+- `ShopItem` is global (managed by the super admin; `stock` null = unlimited; images stored on the private `local` disk and served to any signed-in user through the `shop.items.image` route). `ShopOrder` is branch-scoped and takes the student's `branch_id`.
+- All order changes go through `ShopService`: `purchase()` locks the user and item rows so double clicks cannot overspend, `cancel()`/`deliver()` lock the order and only close a pending one (cancelling returns the stock unit; the coins come back because cancelled orders don't count as spent). Branch admins of the order's branch are notified of new orders, and the "new order" notice is deleted when the order is cancelled; the student is notified when someone else (or the deadline) closes the order.
+- A student cannot order the same item again within `shop_repurchase_days` (global setting, default 10, 0 = no limit). Pending orders not handed over within `ShopOrder::PICKUP_DAYS` (3) are cancelled by `shop:expire-orders`.
+- The same super-admin settings page also holds `submission_file_retention_days` (global, default 180, 0 = keep forever), used by `submissions:prune-files`.
 
 ### Other conventions
 - Enums in `app/Enums` use the `HasValues` concern and provide `label()` methods with Uzbek text. Use them for casts and validation.
