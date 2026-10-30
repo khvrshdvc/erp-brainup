@@ -78,8 +78,9 @@
                 <label for="max_score">{{ __('Maksimal ball *') }}</label>
                 <input id="max_score" type="number" name="max_score" min="1" max="1000" required inputmode="numeric"
                     @class(['input', 'is-invalid' => $errors->has('max_score')])
-                    value="{{ old('max_score', $assignment->max_score ?? 100) }}">
-                <div class="field-hint">{{ __('1 dan 1000 gacha') }}</div>
+                    @readonly($maxScoreLocked ?? false)
+                    value="{{ ($maxScoreLocked ?? false) ? $assignment->max_score : old('max_score', $assignment->max_score ?? 100) }}">
+                <div class="field-hint">{{ ($maxScoreLocked ?? false) ? __('Baholangan javoblar bor, maksimal ball o‘zgarmaydi') : __('1 dan 1000 gacha') }}</div>
                 <x-field-error name="max_score" />
             </div>
         </div>

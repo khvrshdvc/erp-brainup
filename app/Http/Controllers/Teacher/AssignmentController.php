@@ -116,6 +116,7 @@ class AssignmentController extends Controller
         return view('teacher.assignments.edit', [
             'assignment' => $assignment->load(['attachments', 'studyGroup']),
             'groups' => $this->groups($request),
+            'maxScoreLocked' => $assignment->hasScoredSubmissions(),
         ]);
     }
 

@@ -52,6 +52,8 @@
     "Baho": "Оценка",
     "Baho manfiy bo‘lishi mumkin emas.": "Оценка не может быть отрицательной.",
     "Baholash": "Оценить",
+    "Baholangan javoblar bor, maksimal ball o‘zgarmaydi": "Есть оценённые ответы, максимальный балл не меняется",
+    "Baholangan javoblar bor, maksimal ballni o‘zgartirib bo‘lmaydi.": "Ответы уже оценены, максимальный балл изменить нельзя.",
     "Bahoni o‘zgartirish": "Изменить оценку",
     "Ball qo‘yilmagan": "Балл не выставлен",
     "Barcha filiallar": "Все филиалы",

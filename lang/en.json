@@ -52,6 +52,8 @@
     "Baho": "Grade",
     "Baho manfiy bo‘lishi mumkin emas.": "The grade cannot be negative.",
     "Baholash": "Grade",
+    "Baholangan javoblar bor, maksimal ball o‘zgarmaydi": "Graded answers exist, so the maximum score stays fixed",
+    "Baholangan javoblar bor, maksimal ballni o‘zgartirib bo‘lmaydi.": "Answers have already been graded, so the maximum score cannot be changed.",
     "Bahoni o‘zgartirish": "Change grade",
     "Ball qo‘yilmagan": "No score given",
     "Barcha filiallar": "All branches",

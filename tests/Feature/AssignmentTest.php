@@ -319,6 +319,41 @@ class AssignmentTest extends TestCase
         $this->assertSame($group->id, $assignment->study_group_id);
     }
 
+    public function test_max_score_is_fixed_once_a_submission_has_a_score(): void
+    {
+        [, $teacher, $student, $group] = $this->makeGroup();
+        $assignment = $this->createAssignment($teacher, $group);
+        $this->submit($student, $assignment);
+
+        $edit = fn (int $maxScore) => $this->actingAs($teacher)->put(route('teacher.assignments.update', $assignment), [
+            'title' => 'Writing Task 2',
+            'description' => 'Insho yozing',
+            'max_score' => $maxScore,
+            'due_at' => now()->addDays(2)->format('Y-m-d\TH:i'),
+            'action' => 'publish',
+        ]);
+
+        // Submitted but not scored yet: the maximum can still change.
+        $edit(80)->assertSessionHasNoErrors();
+        $this->assertSame(80, $assignment->fresh()->max_score);
+
+        $submission = Submission::withoutGlobalScopes()->firstOrFail();
+        $this->actingAs($teacher)->put(route('teacher.submissions.update', $submission), [
+            'action' => 'grade',
+            'score' => 75,
+        ])->assertSessionHasNoErrors();
+
+        $edit(50)->assertSessionHasErrors('max_score');
+        $this->assertSame(80, $assignment->fresh()->max_score);
+
+        // Sending the unchanged value (the read-only field) still saves the rest of the form.
+        $edit(80)->assertSessionHasNoErrors();
+
+        $this->actingAs($teacher)->get(route('teacher.assignments.edit', $assignment))
+            ->assertOk()
+            ->assertSee('Baholangan javoblar bor, maksimal ball o‘zgarmaydi');
+    }
+
     public function test_lists_follow_the_current_group_teacher_including_closed_assignments(): void
     {
         [$branch, $oldTeacher, $student, $group] = $this->makeGroup();

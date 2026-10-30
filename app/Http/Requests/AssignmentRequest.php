@@ -38,7 +38,10 @@ class AssignmentRequest extends FormRequest
                 Rule::exists('study_groups', 'id')->where('teacher_id', $this->user()->id),
             ]] : []),
             'description' => ['required', 'string', 'max:2000'],
-            'max_score' => ['required', 'integer', 'min:1', 'max:1000'],
+            'max_score' => [
+                'required', 'integer', 'min:1', 'max:1000',
+                ...($this->maxScoreLocked() ? [Rule::in([$this->route('assignment')->max_score])] : []),
+            ],
             'due_at' => $creating ? ['required', 'date', 'after:now'] : ['required', 'date'],
             'material' => ['nullable', ...Upload::rules()],
             'action' => ['required', Rule::in(['draft', 'publish'])],
@@ -53,6 +56,7 @@ class AssignmentRequest extends FormRequest
             'due_at.after' => __('Topshirish muddati hozirgi vaqtdan keyin bo‘lishi kerak.'),
             'max_score.min' => __('Maksimal ball kamida 1 bo‘lishi kerak.'),
             'max_score.max' => __('Maksimal ball 1000 dan oshmasligi kerak.'),
+            'max_score.in' => __('Baholangan javoblar bor, maksimal ballni o‘zgartirib bo‘lmaydi.'),
             'action.*' => __('Vazifani saqlash yoki e‘lon qilish tugmasini bosing.'),
         ];
     }
@@ -67,5 +71,10 @@ class AssignmentRequest extends FormRequest
             'due_at' => __('topshirish muddati'),
             'material' => __('fayl'),
         ];
+    }
+
+    private function maxScoreLocked(): bool
+    {
+        return $this->route('assignment')?->hasScoredSubmissions() ?? false;
     }
 }
