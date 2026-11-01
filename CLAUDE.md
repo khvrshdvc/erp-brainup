@@ -96,7 +96,7 @@ Controllers fire domain events, and listeners are auto-discovered from `app/List
 
 ## Monitoring
 
-Laravel Pulse runs at `/pulse`, for the super admin only (`viewPulse` gate in `AppServiceProvider`). It records into the `pulse_*` tables during the request (`PULSE_INGEST_DRIVER=storage`), so it needs no queue worker and keeps 7 days of data. Only the Servers card needs a long-running process (`artisan pulse:check`); without it the card stays empty. Telescope stays local-only.
+Laravel Pulse runs at `/pulse`. Only the account with the email `erp.pulse_admin_email` (`PULSE_ADMIN_EMAIL`, default `utkirbek@brainup.uz`) can open it, whatever its role (`viewPulse` gate in `AppServiceProvider`). That account must exist: the email is the only check, so while it is free, anyone who can set their email to it gets in. It records into the `pulse_*` tables during the request (`PULSE_INGEST_DRIVER=storage`), so it needs no queue worker and keeps 7 days of data. Only the Servers card needs a long-running process (`artisan pulse:check`); without it the card stays empty. Telescope stays local-only.
 
 ## Laravel Boost
 

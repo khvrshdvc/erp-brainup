@@ -22,13 +22,13 @@ class PulseTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_only_the_super_admin_can_open_the_dashboard(): void
+    public function test_only_the_configured_email_can_open_the_dashboard(): void
     {
         $this->get('/pulse')->assertForbidden();
 
         $branch = Branch::create(['name' => 'Test filial']);
 
-        foreach ([Role::BranchAdmin, Role::Student] as $role) {
+        foreach ([Role::SuperAdmin, Role::BranchAdmin, Role::Student] as $role) {
             $this->actingAs(User::factory()->create(['role' => $role, 'branch_id' => $branch->id]))
                 ->get('/pulse')->assertForbidden();
         }
@@ -37,8 +37,9 @@ class PulseTest extends TestCase
         $teacher->branches()->attach($branch->id);
         $this->actingAs($teacher)->get('/pulse')->assertForbidden();
 
-        $this->actingAs(User::factory()->create(['role' => Role::SuperAdmin]))
-            ->get('/pulse')->assertOk();
+        $owner = User::factory()->create(['role' => Role::Teacher, 'email' => 'UTKIRBEK@brainup.uz']);
+        $owner->branches()->attach($branch->id);
+        $this->actingAs($owner)->get('/pulse')->assertOk();
     }
 
     public function test_user_cards_do_not_send_emails_to_gravatar(): void

@@ -26,7 +26,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Gate::define('manage-center', fn (User $user) => $user->isSuperAdmin());
-        Gate::define('viewPulse', fn (User $user) => $user->isSuperAdmin());
+        Gate::define('viewPulse', fn (User $user) => strcasecmp($user->email, config('erp.pulse_admin_email')) === 0);
 
         // No avatar: Pulse's default would send a hash of every student's email to Gravatar.
         Pulse::user(fn (User $user) => ['name' => $user->name, 'extra' => $user->email]);
