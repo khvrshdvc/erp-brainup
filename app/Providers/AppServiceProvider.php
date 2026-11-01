@@ -8,6 +8,7 @@ use App\Support\CoinText;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Pulse\Facades\Pulse;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -25,6 +26,10 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Gate::define('manage-center', fn (User $user) => $user->isSuperAdmin());
+        Gate::define('viewPulse', fn (User $user) => $user->isSuperAdmin());
+
+        // No avatar: Pulse's default would send a hash of every student's email to Gravatar.
+        Pulse::user(fn (User $user) => ['name' => $user->name, 'extra' => $user->email]);
 
         // @coins(text) prints the text with every "BrainCoin" shown as the animated coin.
         Blade::directive('coins', fn (string $expression) => '<?php echo '.CoinText::class."::render({$expression}); ?>");
