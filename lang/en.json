@@ -690,5 +690,8 @@
     "Yangi parol yaratilsinmi? Eski parol ishlamay qoladi.": "Generate a new password? The old one will stop working.",
     "Yaratish": "Generate",
     "Filialingiz faol emas. Administratorga murojaat qiling.": "Your branch is not active. Please contact the administrator.",
-    "O‘quvchilar parolini administrator tiklaydi.": "Students' passwords are reset by the administrator."
+    "O‘quvchilar parolini administrator tiklaydi.": "Students' passwords are reset by the administrator.",
+    ":name faylini o‘qib bo‘lmadi. Uni telefonning «Fayllar» ilovasidan qaytadan tanlang.": "Could not read :name. Please choose it again from your phone’s Files app.",
+    "Fayllar tayyorlanmoqda…": "Preparing files…",
+    "Fayl tayyorlanmoqda…": "Preparing the file…"
 }

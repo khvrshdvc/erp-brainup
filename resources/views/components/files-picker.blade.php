@@ -21,7 +21,7 @@
     $errorMessages = collect($errors->get($name))->merge(collect($errors->get($name.'.*'))->flatten())->unique();
 @endphp
 
-<div class="field" x-data="filesPicker({ maxMb: {{ (int) $maxMb }}, maxFiles: {{ (int) $maxFiles }}, extensions: @js($extensions), types: @js($types), kept: @js($kept) })">
+<div class="field" x-data="filesPicker({ maxMb: {{ (int) $maxMb }}, maxFiles: {{ (int) $maxFiles }}, extensions: @js($extensions), types: @js($types), kept: @js($kept) })" :aria-busy="reading > 0 ? 'true' : null">
     <template x-for="item in kept" :key="item.id">
         <div class="file-chip" :class="{ 'is-removed': removed.includes(item.id) }">
             <div class="file-ext" x-text="item.ext"></div>
@@ -67,6 +67,7 @@
         <label for="{{ $id }}" class="btn btn-sm">{{ __('Fayl qo‘shish') }}</label>
     </div>
 
+    <div class="field-hint" x-show="reading > 0" x-cloak>{{ __('Fayllar tayyorlanmoqda…') }}</div>
     <div class="field-hint">{{ __(':types · har biri :maxmb MB gacha · ko‘pi bilan :max ta fayl · bir nechta rasm yoki faylni tanlash yoki sudrab tashlash mumkin', ['types' => $types, 'maxmb' => $maxMb, 'max' => $maxFiles]) }}</div>
     <div class="field-error" x-show="error" x-cloak x-text="error" role="alert"></div>
     @foreach ($errorMessages as $message)

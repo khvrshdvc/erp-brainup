@@ -690,5 +690,8 @@
     "Yangi parol yaratilsinmi? Eski parol ishlamay qoladi.": "Создать новый пароль? Старый перестанет работать.",
     "Yaratish": "Создать",
     "Filialingiz faol emas. Administratorga murojaat qiling.": "Ваш филиал неактивен. Обратитесь к администратору.",
-    "O‘quvchilar parolini administrator tiklaydi.": "Пароль ученика восстанавливает администратор."
+    "O‘quvchilar parolini administrator tiklaydi.": "Пароль ученика восстанавливает администратор.",
+    ":name faylini o‘qib bo‘lmadi. Uni telefonning «Fayllar» ilovasidan qaytadan tanlang.": "Не удалось прочитать файл :name. Выберите его заново в приложении «Файлы» на телефоне.",
+    "Fayllar tayyorlanmoqda…": "Подготовка файлов…",
+    "Fayl tayyorlanmoqda…": "Подготовка файла…"
 }

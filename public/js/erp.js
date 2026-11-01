@@ -29,12 +29,19 @@ document.querySelectorAll('.t-min').forEach((table) => {
 // Alpine component behind <x-file-picker>: drag and drop, file preview,
 // and the same type/size limits the server enforces, checked before upload.
 document.addEventListener('alpine:init', () => {
+    const snapshot = async (file) => typeof file.arrayBuffer === 'function'
+        ? new File([await file.arrayBuffer()], file.name, { type: file.type, lastModified: file.lastModified })
+        : file;
+
+    const unreadable = (name) => (window.ERP_I18N?.fileUnreadable ?? ':name faylini o‘qib bo‘lmadi. Uni telefonning «Fayllar» ilovasidan qaytadan tanlang.').replace(':name', name);
+
     window.Alpine.data('filePicker', ({ maxMb, extensions, types }) => ({
         file: null,
         error: '',
         dragging: false,
+        reading: 0,
 
-        pick(file) {
+        async pick(file) {
             this.error = '';
             this.file = null;
 
@@ -54,6 +61,24 @@ document.addEventListener('alpine:init', () => {
                 this.error = (window.ERP_I18N?.fileSize ?? 'Fayl hajmi :max MB dan oshmasligi kerak.').replace(':max', maxMb);
                 this.$refs.input.value = '';
                 return;
+            }
+
+            this.reading++;
+
+            try {
+                const copy = await snapshot(file);
+
+                if (copy !== file && typeof DataTransfer !== 'undefined') {
+                    const transfer = new DataTransfer();
+                    transfer.items.add(copy);
+                    this.$refs.input.files = transfer.files;
+                }
+            } catch {
+                this.error = unreadable(file.name);
+                this.$refs.input.value = '';
+                return;
+            } finally {
+                this.reading--;
             }
 
             const mb = file.size / 1024 / 1024;
@@ -93,47 +118,61 @@ document.addEventListener('alpine:init', () => {
         removed: [],
         error: '',
         dragging: false,
+        reading: 0,
 
         get total() {
             return this.files.length + this.kept.filter((item) => !this.removed.includes(item.id)).length;
         },
 
-        add(list) {
+        async add(list) {
             this.error = '';
+            this.reading++;
 
-            for (const file of Array.from(list)) {
-                const ext = file.name.includes('.') ? file.name.split('.').pop().toLowerCase() : '';
+            try {
+                for (const file of Array.from(list)) {
+                    const ext = file.name.includes('.') ? file.name.split('.').pop().toLowerCase() : '';
 
-                if (!extensions.includes(ext)) {
-                    this.error = (window.ERP_I18N?.fileTypes ?? 'Faqat :types fayl yuklash mumkin.').replace(':types', types);
-                    continue;
+                    if (!extensions.includes(ext)) {
+                        this.error = (window.ERP_I18N?.fileTypes ?? 'Faqat :types fayl yuklash mumkin.').replace(':types', types);
+                        continue;
+                    }
+
+                    if (file.size > maxMb * 1024 * 1024) {
+                        this.error = (window.ERP_I18N?.fileSize ?? 'Fayl hajmi :max MB dan oshmasligi kerak.').replace(':max', maxMb);
+                        continue;
+                    }
+
+                    if (this.files.some((item) => item.file.name === file.name && item.file.size === file.size && item.file.lastModified === file.lastModified)) {
+                        continue;
+                    }
+
+                    if (this.total >= maxFiles) {
+                        this.error = (window.ERP_I18N?.maxFiles ?? 'Ko‘pi bilan :max ta fayl biriktirish mumkin.').replace(':max', maxFiles);
+                        break;
+                    }
+
+                    let copy;
+
+                    try {
+                        copy = await snapshot(file);
+                    } catch {
+                        this.error = unreadable(file.name);
+                        continue;
+                    }
+
+                    const mb = file.size / 1024 / 1024;
+
+                    this.files.push({
+                        file: copy,
+                        ext,
+                        name: file.name,
+                        size: mb >= 1 ? `${mb.toFixed(1)} MB` : `${Math.max(1, Math.round(file.size / 1024))} KB`,
+                    });
                 }
-
-                if (file.size > maxMb * 1024 * 1024) {
-                    this.error = (window.ERP_I18N?.fileSize ?? 'Fayl hajmi :max MB dan oshmasligi kerak.').replace(':max', maxMb);
-                    continue;
-                }
-
-                if (this.files.some((item) => item.file.name === file.name && item.file.size === file.size && item.file.lastModified === file.lastModified)) {
-                    continue;
-                }
-
-                if (this.total >= maxFiles) {
-                    this.error = (window.ERP_I18N?.maxFiles ?? 'Ko‘pi bilan :max ta fayl biriktirish mumkin.').replace(':max', maxFiles);
-                    break;
-                }
-
-                const mb = file.size / 1024 / 1024;
-
-                this.files.push({
-                    file,
-                    ext,
-                    name: file.name,
-                    size: mb >= 1 ? `${mb.toFixed(1)} MB` : `${Math.max(1, Math.round(file.size / 1024))} KB`,
-                });
+            } finally {
+                this.reading--;
+                this.sync();
             }
-
-            this.sync();
         },
 
         pick(event) {
@@ -238,7 +277,7 @@ function oneSubmit() {
         submitting: false,
 
         guard(event) {
-            if (this.submitting) {
+            if (this.submitting || event.target.querySelector('[aria-busy="true"]')) {
                 event.preventDefault();
                 return;
             }
