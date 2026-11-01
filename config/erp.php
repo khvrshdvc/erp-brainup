@@ -9,4 +9,10 @@ return [
 
     'login_domain' => env('ERP_LOGIN_DOMAIN', 'brainup.uz'),
 
+    /*
+    | The one account that may open Laravel Pulse, whatever its role.
+    */
+
+    'pulse_admin_email' => env('PULSE_ADMIN_EMAIL', 'utkirbek@brainup.uz'),
+
 ];

@@ -94,6 +94,10 @@ Controllers fire domain events, and listeners are auto-discovered from `app/List
 - Notifications use the database channel (`notifications` table) and are shown at `/notifications`.
 - Shared Blade components live in `resources/views/components` (`stat-card`, `badge`, `pager`, `file-chip`, `branch-switcher`). The authenticated layout is `layouts/app.blade.php` with `partials/sidebar` and `partials/topbar`.
 
+## Monitoring
+
+Laravel Pulse runs at `/pulse`. Only the account with the email `erp.pulse_admin_email` (`PULSE_ADMIN_EMAIL`, default `utkirbek@brainup.uz`) can open it, whatever its role (`viewPulse` gate in `AppServiceProvider`). That account must exist: the email is the only check, so while it is free, anyone who can set their email to it gets in. It records into the `pulse_*` tables during the request (`PULSE_INGEST_DRIVER=storage`), so it needs no queue worker and keeps 7 days of data. Only the Servers card needs a long-running process (`artisan pulse:check`); without it the card stays empty. Telescope stays local-only.
+
 ## Laravel Boost
 
 `AGENTS.md` contains Laravel Boost bootstrap instructions. Boost isn't installed yet (it's not in `composer.json`). If it gets installed (`vendor/bin/sail composer require laravel/boost --dev && vendor/bin/sail artisan boost:install`), merge its generated guidelines into this file rather than overwriting it.
