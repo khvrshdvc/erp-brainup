@@ -52,6 +52,8 @@
     "Baho": "Grade",
     "Baho manfiy bo‘lishi mumkin emas.": "The grade cannot be negative.",
     "Baholash": "Grade",
+    "Baholangan javoblar bor, maksimal ball o‘zgarmaydi": "Graded answers exist, so the maximum score stays fixed",
+    "Baholangan javoblar bor, maksimal ballni o‘zgartirib bo‘lmaydi.": "Answers have already been graded, so the maximum score cannot be changed.",
     "Bahoni o‘zgartirish": "Change grade",
     "Ball qo‘yilmagan": "No score given",
     "Barcha filiallar": "All branches",
@@ -573,7 +575,6 @@
     "Yakunlangan": "Completed",
     "Yana :missing kerak": ":missing more needed",
     "Yangi": "New",
-    "Yangi fayl tanlasangiz, joriy fayl almashtiriladi.": "If you choose a new file, the current file will be replaced.",
     "Yangi filial": "New branch",
     "Yangi guruh": "New group",
     "Yangi o‘qituvchi": "New teacher",
@@ -689,5 +690,8 @@
     "Yangi parol yaratilsinmi? Eski parol ishlamay qoladi.": "Generate a new password? The old one will stop working.",
     "Yaratish": "Generate",
     "Filialingiz faol emas. Administratorga murojaat qiling.": "Your branch is not active. Please contact the administrator.",
-    "O‘quvchilar parolini administrator tiklaydi.": "Students' passwords are reset by the administrator."
+    "O‘quvchilar parolini administrator tiklaydi.": "Students' passwords are reset by the administrator.",
+    ":name faylini o‘qib bo‘lmadi. Uni telefonning «Fayllar» ilovasidan qaytadan tanlang.": "Could not read :name. Please choose it again from your phone’s Files app.",
+    "Fayllar tayyorlanmoqda…": "Preparing files…",
+    "Fayl tayyorlanmoqda…": "Preparing the file…"
 }

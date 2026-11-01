@@ -9,13 +9,6 @@ use Illuminate\Http\UploadedFile;
 
 class AttachmentService
 {
-    public function replace(Model $owner, UploadedFile $file, User $uploader, string $directory): Attachment
-    {
-        $owner->attachments()->get()->each->delete();
-
-        return $this->add($owner, $file, $uploader, $directory);
-    }
-
     public function add(Model $owner, UploadedFile $file, User $uploader, string $directory): Attachment
     {
         return $owner->attachments()->create([

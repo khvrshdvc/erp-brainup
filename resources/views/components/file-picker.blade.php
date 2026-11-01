@@ -11,7 +11,7 @@
     $types = strtoupper(implode(', ', array_diff($extensions, ['jpeg'])));
 @endphp
 
-<div class="field" x-data="filePicker({ maxMb: {{ (int) $maxMb }}, extensions: @js($extensions), types: @js($types) })">
+<div class="field" x-data="filePicker({ maxMb: {{ (int) $maxMb }}, extensions: @js($extensions), types: @js($types) })" :aria-busy="reading > 0 ? 'true' : null">
     <div @class(['file-input', 'is-invalid' => $errors->has($name)])
         :class="{ drag: dragging, picked: file, 'is-invalid': error }"
         @dragover.prevent="dragging = true" @dragleave.prevent="dragging = false" @drop.prevent="drop($event)">
@@ -36,6 +36,7 @@
         <label for="{{ $id }}" class="btn btn-sm" x-text="file ? 'Almashtirish' : 'Tanlash'">{{ __('Tanlash') }}</label>
     </div>
 
+    <div class="field-hint" x-show="reading > 0" x-cloak>{{ __('Fayl tayyorlanmoqda…') }}</div>
     <div class="field-hint">{{ __(':types · :maxmb MB gacha · faylni shu qatorga sudrab tashlash ham mumkin', ['types' => $types, 'maxmb' => $maxMb]) }}</div>
     <div class="field-error" x-show="error" x-cloak x-text="error" role="alert"></div>
     <x-field-error :name="$name" />

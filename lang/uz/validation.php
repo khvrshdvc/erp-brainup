@@ -171,11 +171,6 @@ return [
             'max' => 'Fayl hajmi 10 MB dan oshmasligi kerak.',
             'uploaded' => 'Fayl yuklanmadi. Hajmi 10 MB dan oshmasligini tekshiring.',
         ],
-        'material' => [
-            'mimes' => 'Faqat PDF, DOC, DOCX, JPG yoki PNG fayl yuklash mumkin.',
-            'max' => 'Fayl hajmi 10 MB dan oshmasligi kerak.',
-            'uploaded' => 'Fayl yuklanmadi. Hajmi 10 MB dan oshmasligini tekshiring.',
-        ],
     ],
 
     /*

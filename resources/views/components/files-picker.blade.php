@@ -5,6 +5,7 @@
     'extensions' => \App\Support\Upload::EXTENSIONS,
     'maxMb' => \App\Support\Upload::MAX_MB,
     'maxFiles' => \App\Support\Upload::MAX_SUBMISSION_FILES,
+    'required' => true,
 ])
 
 @php
@@ -20,7 +21,7 @@
     $errorMessages = collect($errors->get($name))->merge(collect($errors->get($name.'.*'))->flatten())->unique();
 @endphp
 
-<div class="field" x-data="filesPicker({ maxMb: {{ (int) $maxMb }}, maxFiles: {{ (int) $maxFiles }}, extensions: @js($extensions), types: @js($types), kept: @js($kept) })">
+<div class="field" x-data="filesPicker({ maxMb: {{ (int) $maxMb }}, maxFiles: {{ (int) $maxFiles }}, extensions: @js($extensions), types: @js($types), kept: @js($kept) })" :aria-busy="reading > 0 ? 'true' : null">
     <template x-for="item in kept" :key="item.id">
         <div class="file-chip" :class="{ 'is-removed': removed.includes(item.id) }">
             <div class="file-ext" x-text="item.ext"></div>
@@ -52,7 +53,7 @@
 
         <input x-ref="input" id="{{ $id }}" type="file" name="{{ $name }}[]" class="sr-only" multiple
             accept="{{ collect($extensions)->map(fn ($e) => '.'.$e)->implode(',') }}"
-            @change="pick($event)" :required="total === 0">
+            @change="pick($event)" :required="{{ $required ? 'total === 0' : 'false' }}">
 
         <svg class="file-input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M21 11.5l-8.6 8.6a5 5 0 01-7.1-7.1l8.6-8.6a3.3 3.3 0 014.7 4.7l-8.6 8.6a1.7 1.7 0 01-2.4-2.4l7.9-7.9"/>
@@ -66,6 +67,7 @@
         <label for="{{ $id }}" class="btn btn-sm">{{ __('Fayl qo‘shish') }}</label>
     </div>
 
+    <div class="field-hint" x-show="reading > 0" x-cloak>{{ __('Fayllar tayyorlanmoqda…') }}</div>
     <div class="field-hint">{{ __(':types · har biri :maxmb MB gacha · ko‘pi bilan :max ta fayl · bir nechta rasm yoki faylni tanlash yoki sudrab tashlash mumkin', ['types' => $types, 'maxmb' => $maxMb, 'max' => $maxFiles]) }}</div>
     <div class="field-error" x-show="error" x-cloak x-text="error" role="alert"></div>
     @foreach ($errorMessages as $message)

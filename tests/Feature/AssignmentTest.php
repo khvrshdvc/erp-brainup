@@ -10,6 +10,7 @@ use App\Models\Branch;
 use App\Models\StudyGroup;
 use App\Models\Submission;
 use App\Models\User;
+use App\Support\Upload;
 use Database\Seeders\GamificationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -317,6 +318,128 @@ class AssignmentTest extends TestCase
 
         $this->assertSame('Yangi nom', $assignment->title);
         $this->assertSame($group->id, $assignment->study_group_id);
+    }
+
+    public function test_teacher_can_attach_several_files_to_an_assignment(): void
+    {
+        [, $teacher, $student, $group] = $this->makeGroup();
+
+        $this->actingAs($teacher)->post(route('teacher.assignments.store'), [
+            'title' => 'Writing Task 2',
+            'study_group_id' => $group->id,
+            'description' => 'Insho yozing',
+            'max_score' => 100,
+            'due_at' => now()->addDay()->format('Y-m-d\TH:i'),
+            'action' => 'publish',
+            'files' => $this->files('page1.jpg', 'page2.jpg', 'task.pdf'),
+        ])->assertSessionHasNoErrors()->assertRedirect();
+
+        $assignment = Assignment::withoutGlobalScopes()->latest('id')->firstOrFail();
+
+        $this->assertSame(['page1.jpg', 'page2.jpg', 'task.pdf'], $assignment->attachments()->orderBy('original_name')->pluck('original_name')->all());
+
+        $this->actingAs($student)->get(route('student.assignments.show', $assignment))
+            ->assertSee('page1.jpg')->assertSee('page2.jpg')->assertSee('task.pdf');
+    }
+
+    public function test_editing_keeps_materials_adds_new_ones_and_removes_chosen_ones(): void
+    {
+        [, $teacher, $student, $group] = $this->makeGroup();
+        $assignment = $this->createAssignment($teacher, $group);
+
+        $form = [
+            'title' => 'Writing Task 2',
+            'description' => 'Insho yozing',
+            'max_score' => 100,
+            'due_at' => now()->addDay()->format('Y-m-d\TH:i'),
+            'action' => 'publish',
+        ];
+
+        $this->actingAs($teacher)->put(route('teacher.assignments.update', $assignment), [...$form, 'files' => $this->files('first.pdf', 'second.pdf')])
+            ->assertSessionHasNoErrors();
+
+        $this->actingAs($teacher)->put(route('teacher.assignments.update', $assignment), [...$form, 'files' => $this->files('third.pdf')])
+            ->assertSessionHasNoErrors();
+        $this->assertSame(3, $assignment->attachments()->count(), 'earlier files are kept');
+
+        $this->actingAs($teacher)->put(route('teacher.assignments.update', $assignment), $form)->assertSessionHasNoErrors();
+        $this->assertSame(3, $assignment->attachments()->count(), 'saving without files changes nothing');
+
+        $first = $assignment->attachments()->where('original_name', 'first.pdf')->firstOrFail();
+        $this->submit($student, $assignment);
+        $studentFile = Submission::withoutGlobalScopes()->firstOrFail()->attachments()->firstOrFail();
+
+        $this->actingAs($teacher)->put(route('teacher.assignments.update', $assignment), [...$form, 'remove' => [$first->id, $studentFile->id]])
+            ->assertSessionHasNoErrors();
+
+        Storage::disk('local')->assertMissing($first->path);
+        Storage::disk('local')->assertExists($studentFile->path);
+        $this->assertSame(['second.pdf', 'third.pdf'], $assignment->attachments()->orderBy('original_name')->pluck('original_name')->all());
+        $this->assertTrue($studentFile->fresh()->exists, 'a file of another owner stays');
+    }
+
+    public function test_an_assignment_cannot_hold_too_many_files(): void
+    {
+        [, $teacher, , $group] = $this->makeGroup();
+        $assignment = $this->createAssignment($teacher, $group);
+
+        $form = [
+            'title' => 'Writing Task 2',
+            'description' => 'Insho yozing',
+            'max_score' => 100,
+            'due_at' => now()->addDay()->format('Y-m-d\TH:i'),
+            'action' => 'publish',
+        ];
+        $names = fn (string $prefix, int $count) => array_map(fn ($i) => "{$prefix}{$i}.pdf", range(1, $count));
+
+        $this->actingAs($teacher)->put(route('teacher.assignments.update', $assignment), [...$form, 'files' => $this->files(...$names('a', Upload::MAX_ASSIGNMENT_FILES))])
+            ->assertSessionHasNoErrors();
+
+        $this->actingAs($teacher)->put(route('teacher.assignments.update', $assignment), [...$form, 'files' => $this->files('extra.pdf')])
+            ->assertSessionHasErrors('files');
+        $this->assertSame(Upload::MAX_ASSIGNMENT_FILES, $assignment->attachments()->count());
+
+        $this->actingAs($teacher)->put(route('teacher.assignments.update', $assignment), [
+            ...$form,
+            'files' => $this->files('extra.pdf'),
+            'remove' => [$assignment->attachments()->firstOrFail()->id],
+        ])->assertSessionHasNoErrors();
+        $this->assertSame(Upload::MAX_ASSIGNMENT_FILES, $assignment->attachments()->count());
+    }
+
+    public function test_max_score_is_fixed_once_a_submission_has_a_score(): void
+    {
+        [, $teacher, $student, $group] = $this->makeGroup();
+        $assignment = $this->createAssignment($teacher, $group);
+        $this->submit($student, $assignment);
+
+        $edit = fn (int $maxScore) => $this->actingAs($teacher)->put(route('teacher.assignments.update', $assignment), [
+            'title' => 'Writing Task 2',
+            'description' => 'Insho yozing',
+            'max_score' => $maxScore,
+            'due_at' => now()->addDays(2)->format('Y-m-d\TH:i'),
+            'action' => 'publish',
+        ]);
+
+        // Submitted but not scored yet: the maximum can still change.
+        $edit(80)->assertSessionHasNoErrors();
+        $this->assertSame(80, $assignment->fresh()->max_score);
+
+        $submission = Submission::withoutGlobalScopes()->firstOrFail();
+        $this->actingAs($teacher)->put(route('teacher.submissions.update', $submission), [
+            'action' => 'grade',
+            'score' => 75,
+        ])->assertSessionHasNoErrors();
+
+        $edit(50)->assertSessionHasErrors('max_score');
+        $this->assertSame(80, $assignment->fresh()->max_score);
+
+        // Sending the unchanged value (the read-only field) still saves the rest of the form.
+        $edit(80)->assertSessionHasNoErrors();
+
+        $this->actingAs($teacher)->get(route('teacher.assignments.edit', $assignment))
+            ->assertOk()
+            ->assertSee('Baholangan javoblar bor, maksimal ball o‘zgarmaydi');
     }
 
     public function test_lists_follow_the_current_group_teacher_including_closed_assignments(): void

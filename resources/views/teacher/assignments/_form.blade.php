@@ -1,7 +1,6 @@
 @php
     $editing = isset($assignment) && $assignment;
     $published = $editing && ! $assignment->isDraft();
-    $hasMaterial = $editing && $assignment->attachments->isNotEmpty();
 @endphp
 
 <form method="POST" enctype="multipart/form-data" class="stack-lg"
@@ -78,8 +77,9 @@
                 <label for="max_score">{{ __('Maksimal ball *') }}</label>
                 <input id="max_score" type="number" name="max_score" min="1" max="1000" required inputmode="numeric"
                     @class(['input', 'is-invalid' => $errors->has('max_score')])
-                    value="{{ old('max_score', $assignment->max_score ?? 100) }}">
-                <div class="field-hint">{{ __('1 dan 1000 gacha') }}</div>
+                    @readonly($maxScoreLocked ?? false)
+                    value="{{ ($maxScoreLocked ?? false) ? $assignment->max_score : old('max_score', $assignment->max_score ?? 100) }}">
+                <div class="field-hint">{{ ($maxScoreLocked ?? false) ? __('Baholangan javoblar bor, maksimal ball o‘zgarmaydi') : __('1 dan 1000 gacha') }}</div>
                 <x-field-error name="max_score" />
             </div>
         </div>
@@ -98,14 +98,9 @@
     <section class="card card-pad stack">
         <h2 class="card-title">{{ __('2. Qo‘shimcha materiallar') }} <span class="card-sub" style="font-weight: 400">{{ __('(ixtiyoriy)') }}</span></h2>
 
-        @if ($hasMaterial)
-            @foreach ($assignment->attachments as $attachment)
-                <x-file-chip :attachment="$attachment" />
-            @endforeach
-            <div class="field-hint">{{ __('Yangi fayl tanlasangiz, joriy fayl almashtiriladi.') }}</div>
-        @endif
-
-        <x-file-picker name="material" id="material" />
+        <x-files-picker name="files" id="files" :required="false"
+            :attachments="$editing ? $assignment->attachments : collect()"
+            :max-files="\App\Support\Upload::MAX_ASSIGNMENT_FILES" />
     </section>
 
     <div class="form-actions" style="justify-content: space-between; align-items: center">

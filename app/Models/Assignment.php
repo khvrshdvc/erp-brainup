@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\AssignmentStatus;
+use App\Enums\SubmissionStatus;
 use App\Models\Concerns\BelongsToBranch;
 use App\Models\Concerns\HasAttachments;
 use Illuminate\Database\Eloquent\Builder;
@@ -58,6 +59,18 @@ class Assignment extends Model
     public function isTaughtBy(User $user): bool
     {
         return $this->studyGroup?->teacher_id === $user->id;
+    }
+
+    /**
+     * Scores already given are out of the current max_score, so it stays fixed once one exists
+     * (a lower maximum would show 95 / 50 and leave the high-score XP stale).
+     */
+    public function hasScoredSubmissions(): bool
+    {
+        return $this->submissions()
+            ->where('status', SubmissionStatus::Graded->value)
+            ->whereNotNull('score')
+            ->exists();
     }
 
     public function isDraft(): bool

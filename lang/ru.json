@@ -52,6 +52,8 @@
     "Baho": "Оценка",
     "Baho manfiy bo‘lishi mumkin emas.": "Оценка не может быть отрицательной.",
     "Baholash": "Оценить",
+    "Baholangan javoblar bor, maksimal ball o‘zgarmaydi": "Есть оценённые ответы, максимальный балл не меняется",
+    "Baholangan javoblar bor, maksimal ballni o‘zgartirib bo‘lmaydi.": "Ответы уже оценены, максимальный балл изменить нельзя.",
     "Bahoni o‘zgartirish": "Изменить оценку",
     "Ball qo‘yilmagan": "Балл не выставлен",
     "Barcha filiallar": "Все филиалы",
@@ -573,7 +575,6 @@
     "Yakunlangan": "Завершена",
     "Yana :missing kerak": "Нужно ещё :missing",
     "Yangi": "Новая",
-    "Yangi fayl tanlasangiz, joriy fayl almashtiriladi.": "Если выбрать новый файл, текущий будет заменён.",
     "Yangi filial": "Новый филиал",
     "Yangi guruh": "Новая группа",
     "Yangi o‘qituvchi": "Новый преподаватель",
@@ -689,5 +690,8 @@
     "Yangi parol yaratilsinmi? Eski parol ishlamay qoladi.": "Создать новый пароль? Старый перестанет работать.",
     "Yaratish": "Создать",
     "Filialingiz faol emas. Administratorga murojaat qiling.": "Ваш филиал неактивен. Обратитесь к администратору.",
-    "O‘quvchilar parolini administrator tiklaydi.": "Пароль ученика восстанавливает администратор."
+    "O‘quvchilar parolini administrator tiklaydi.": "Пароль ученика восстанавливает администратор.",
+    ":name faylini o‘qib bo‘lmadi. Uni telefonning «Fayllar» ilovasidan qaytadan tanlang.": "Не удалось прочитать файл :name. Выберите его заново в приложении «Файлы» на телефоне.",
+    "Fayllar tayyorlanmoqda…": "Подготовка файлов…",
+    "Fayl tayyorlanmoqda…": "Подготовка файла…"
 }

@@ -323,8 +323,8 @@ class FormValidationTest extends TestCase
         $foreignGroup = StudyGroup::create(['branch_id' => $this->branch->id, 'name' => 'Not mine']);
         $this->assertInvalid($this->teacher, 'post', $store, $form, [...$valid, 'study_group_id' => $foreignGroup->id], ['study_group_id']);
 
-        $this->assertInvalid($this->teacher, 'post', $store, $form, [...$valid, 'material' => UploadedFile::fake()->create('virus.exe', 10, 'application/x-msdownload')], ['material']);
-        $this->assertInvalid($this->teacher, 'post', $store, $form, [...$valid, 'material' => UploadedFile::fake()->create('big.pdf', 11000, 'application/pdf')], ['material']);
+        $this->assertInvalid($this->teacher, 'post', $store, $form, [...$valid, 'files' => [UploadedFile::fake()->create('virus.exe', 10, 'application/x-msdownload')]], ['files.0']);
+        $this->assertInvalid($this->teacher, 'post', $store, $form, [...$valid, 'files' => [UploadedFile::fake()->create('big.pdf', 11000, 'application/pdf')]], ['files.0']);
     }
 
     public function test_assignment_edit_form(): void
