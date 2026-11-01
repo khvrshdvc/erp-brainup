@@ -15,6 +15,9 @@ final class Upload
     /** Most files one submission can hold. */
     public const MAX_SUBMISSION_FILES = 10;
 
+    /** Most files one assignment can hold. */
+    public const MAX_ASSIGNMENT_FILES = 10;
+
     /**
      * @return list<string>
      */

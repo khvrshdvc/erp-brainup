@@ -5,6 +5,7 @@
     'extensions' => \App\Support\Upload::EXTENSIONS,
     'maxMb' => \App\Support\Upload::MAX_MB,
     'maxFiles' => \App\Support\Upload::MAX_SUBMISSION_FILES,
+    'required' => true,
 ])
 
 @php
@@ -52,7 +53,7 @@
 
         <input x-ref="input" id="{{ $id }}" type="file" name="{{ $name }}[]" class="sr-only" multiple
             accept="{{ collect($extensions)->map(fn ($e) => '.'.$e)->implode(',') }}"
-            @change="pick($event)" :required="total === 0">
+            @change="pick($event)" :required="{{ $required ? 'total === 0' : 'false' }}">
 
         <svg class="file-input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M21 11.5l-8.6 8.6a5 5 0 01-7.1-7.1l8.6-8.6a3.3 3.3 0 014.7 4.7l-8.6 8.6a1.7 1.7 0 01-2.4-2.4l7.9-7.9"/>

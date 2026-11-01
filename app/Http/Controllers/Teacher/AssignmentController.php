@@ -65,8 +65,8 @@ class AssignmentController extends Controller
             'published_at' => $publish ? now() : null,
         ]);
 
-        if ($file = $request->file('material')) {
-            $attachments->replace($assignment, $file, $request->user(), 'assignments/'.$assignment->id);
+        foreach ($request->file('files', []) as $file) {
+            $attachments->add($assignment, $file, $request->user(), 'assignments/'.$assignment->id);
         }
 
         if ($publish) {
@@ -135,8 +135,11 @@ class AssignmentController extends Controller
             ...($publish ? ['status' => AssignmentStatus::Published, 'published_at' => now()] : []),
         ]);
 
-        if ($file = $request->file('material')) {
-            $attachments->replace($assignment, $file, $request->user(), 'assignments/'.$assignment->id);
+        // Only this assignment's own files can be removed, whatever ids the form sends.
+        $assignment->attachments()->whereIn('id', $request->removedIds())->get()->each->delete();
+
+        foreach ($request->file('files', []) as $file) {
+            $attachments->add($assignment, $file, $request->user(), 'assignments/'.$assignment->id);
         }
 
         if ($publish) {

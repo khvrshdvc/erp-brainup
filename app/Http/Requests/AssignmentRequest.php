@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Support\Upload;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class AssignmentRequest extends FormRequest
 {
@@ -43,14 +44,40 @@ class AssignmentRequest extends FormRequest
                 ...($this->maxScoreLocked() ? [Rule::in([$this->route('assignment')->max_score])] : []),
             ],
             'due_at' => $creating ? ['required', 'date', 'after:now'] : ['required', 'date'],
-            'material' => ['nullable', ...Upload::rules()],
+            'files' => ['nullable', 'array'],
+            'files.*' => Upload::rules(),
+            'remove' => ['nullable', 'array'],
+            'remove.*' => ['integer'],
             'action' => ['required', Rule::in(['draft', 'publish'])],
+        ];
+    }
+
+    /**
+     * An assignment never holds more than Upload::MAX_ASSIGNMENT_FILES: what stays from before plus the new files.
+     */
+    public function after(): array
+    {
+        return [
+            function (Validator $validator) {
+                if ($validator->errors()->has('files') || $validator->errors()->has('remove')) {
+                    return;
+                }
+
+                $kept = $this->route('assignment')?->attachments()->whereNotIn('id', $this->removedIds())->count() ?? 0;
+
+                if ($kept + count($this->file('files', [])) > Upload::MAX_ASSIGNMENT_FILES) {
+                    $validator->errors()->add('files', __('Ko‘pi bilan :max ta fayl biriktirish mumkin.', ['max' => Upload::MAX_ASSIGNMENT_FILES]));
+                }
+            },
         ];
     }
 
     public function messages(): array
     {
         return [
+            'files.*.mimes' => trans('validation.custom.file.mimes'),
+            'files.*.max' => trans('validation.custom.file.max'),
+            'files.*.uploaded' => trans('validation.custom.file.uploaded'),
             'study_group_id.required' => __('Guruhni tanlang.'),
             'study_group_id.exists' => __('Faqat o‘zingizga biriktirilgan guruhni tanlashingiz mumkin.'),
             'due_at.after' => __('Topshirish muddati hozirgi vaqtdan keyin bo‘lishi kerak.'),
@@ -69,8 +96,17 @@ class AssignmentRequest extends FormRequest
             'description' => __('vazifa tavsifi'),
             'max_score' => __('maksimal ball'),
             'due_at' => __('topshirish muddati'),
-            'material' => __('fayl'),
+            'files' => __('fayl'),
+            'files.*' => __('fayl'),
         ];
+    }
+
+    /**
+     * @return list<int>
+     */
+    public function removedIds(): array
+    {
+        return array_map('intval', (array) $this->input('remove', []));
     }
 
     private function maxScoreLocked(): bool

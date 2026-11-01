@@ -178,11 +178,6 @@ return [
             'max' => 'The file must not exceed 10 MB.',
             'uploaded' => 'The file could not be uploaded. Check that it does not exceed 10 MB.',
         ],
-        'material' => [
-            'mimes' => 'Only PDF, DOC, DOCX, JPG or PNG files can be uploaded.',
-            'max' => 'The file must not exceed 10 MB.',
-            'uploaded' => 'The file could not be uploaded. Check that it does not exceed 10 MB.',
-        ],
     ],
 
     /*
