@@ -142,9 +142,11 @@ return [
             'sample_rate' => env('PULSE_CACHE_INTERACTIONS_SAMPLE_RATE', 1),
             'ignore' => [
                 ...Pulse::defaultVendorCacheKeys(),
+                '/^livewire-checksum-failures:/',
             ],
             'groups' => [
                 '/^job-exceptions:.*/' => 'job-exceptions:*',
+                '/^unread-notifications:\d+$/' => 'unread-notifications:*',
                 // '/:\d+/' => ':*',
             ],
         ],
@@ -213,6 +215,7 @@ return [
             'ignore' => [
                 '#^/'.env('PULSE_PATH', 'pulse').'$#', // Pulse dashboard...
                 '#^/telescope#', // Telescope dashboard...
+                '#^/livewire-[^/]+/update$#', // Pulse cards polling...
             ],
         ],
 
@@ -230,6 +233,7 @@ return [
             'ignore' => [
                 '#^/'.env('PULSE_PATH', 'pulse').'$#', // Pulse dashboard...
                 '#^/telescope#', // Telescope dashboard...
+                '#^/livewire-[^/]+/update$#', // Pulse cards polling...
             ],
         ],
     ],

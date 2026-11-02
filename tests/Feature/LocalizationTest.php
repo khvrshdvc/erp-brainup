@@ -156,6 +156,16 @@ class LocalizationTest extends TestCase
         return UzDate::remaining(now()->addDays(2)->addHours(5)->addSeconds(30));
     }
 
+    public function test_carbon_writes_uzbek_in_latin_script(): void
+    {
+        $this->get(route('login'))->assertOk();
+
+        $text = Carbon::now()->subMinutes(5)->diffForHumans();
+
+        $this->assertStringContainsString('daqiqa', $text);
+        $this->assertDoesNotMatchRegularExpression('/\p{Cyrillic}/u', $text);
+    }
+
     public function test_validation_messages_and_attribute_names_are_translated(): void
     {
         $admin = User::factory()->create(['role' => Role::SuperAdmin]);
