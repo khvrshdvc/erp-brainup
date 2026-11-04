@@ -15,6 +15,7 @@ use App\Models\XpRule;
 use App\Models\XpTransaction;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class GamificationService
 {
@@ -202,10 +203,21 @@ class GamificationService
             $codes[] = 'excellent';
         }
 
-        $sync = Badge::whereIn('code', $codes)->pluck('id')
-            ->mapWithKeys(fn ($id) => [$id => ['awarded_at' => now()]])
-            ->all();
+        $missing = Badge::whereIn('code', $codes)->pluck('id')
+            ->diff($student->badges()->pluck('badges.id'));
 
-        $student->badges()->syncWithoutDetaching($sync);
+        if ($missing->isEmpty()) {
+            return;
+        }
+
+        $awardedAt = now();
+
+        DB::table('badge_user')->insertOrIgnore(
+            $missing->map(fn ($badgeId) => [
+                'badge_id' => $badgeId,
+                'user_id' => $student->id,
+                'awarded_at' => $awardedAt,
+            ])->values()->all()
+        );
     }
 }
