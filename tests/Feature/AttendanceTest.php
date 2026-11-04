@@ -44,6 +44,23 @@ class AttendanceTest extends TestCase
         ];
     }
 
+    public function test_unsaved_attendance_starts_unmarked_and_requires_a_choice(): void
+    {
+        [, $teacher, $student, $group] = $this->makeGroup();
+        $notice = __('Bu sana uchun davomat hali saqlanmagan. Har bir o‘quvchining holatini belgilang.');
+
+        $this->actingAs($teacher)->get(route('attendance.create', $group))
+            ->assertOk()
+            ->assertSee($notice)
+            ->assertSee('x-model="state['.$student->id.']" required', false);
+
+        $this->actingAs($teacher)->post(route('attendance.store', $group), $this->payload($student, 'absent'));
+
+        $this->actingAs($teacher)->get(route('attendance.create', $group))
+            ->assertOk()
+            ->assertDontSee($notice);
+    }
+
     public function test_teacher_can_mark_attendance(): void
     {
         [, $teacher, $student, $group] = $this->makeGroup();

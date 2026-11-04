@@ -7,14 +7,28 @@
         <section class="card" style="margin-bottom: 16px">
             <div class="card-title" style="padding: 16px 16px 0">{{ __('O‘quvchilar') }}</div>
             @foreach ($students as $student)
-                <div class="t-row" style="--cols: 2fr 1.4fr .8fr">
-                    <div><a class="link" href="{{ route('admin.students.show', $student) }}">{{ $student->name }}</a>
-                        <div class="card-sub" style="font-weight: 400">{{ $student->email }}</div></div>
-                    <div>{{ $student->phone ?? '—' }}</div>
-                    <div class="t-right"><x-edit-button :href="route('admin.students.edit', $student)" /></div>
-                </div>
+                @if ($isAdmin)
+                    <div class="t-row" style="--cols: 2fr 1.4fr .8fr">
+                        <div><a class="link" href="{{ route('admin.students.show', $student) }}">{{ $student->name }}</a>
+                            <div class="card-sub" style="font-weight: 400">{{ $student->email }}</div></div>
+                        <div>{{ $student->phone ?? '—' }}</div>
+                        <div class="t-right"><x-edit-button :href="route('admin.students.edit', $student)" /></div>
+                    </div>
+                @else
+                    <div class="t-row" style="--cols: 2fr 1.4fr .8fr">
+                        <div>{{ $student->name }}</div>
+                        <div>{{ $student->studyGroups->pluck('name')->join(', ') }}</div>
+                        <div class="t-right">
+                            @if ($studentGroup = $student->studyGroups->first())
+                                <a class="btn btn-sm" href="{{ route('attendance.create', $studentGroup) }}">{{ __('Davomat') }}</a>
+                            @endif
+                        </div>
+                    </div>
+                @endif
             @endforeach
-            <div style="padding: 8px 16px 16px"><a class="link" href="{{ route('admin.students.index', ['q' => $term]) }}">{{ __('Barchasini ko‘rish') }}</a></div>
+            @if ($isAdmin)
+                <div style="padding: 8px 16px 16px"><a class="link" href="{{ route('admin.students.index', ['q' => $term]) }}">{{ __('Barchasini ko‘rish') }}</a></div>
+            @endif
         </section>
     @endif
 

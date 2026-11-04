@@ -56,6 +56,17 @@ class SearchController extends Controller
                     ->orderBy('users.name')
                     ->limit(self::LIMIT)
                     ->get();
+            } elseif ($user->isTeacher()) {
+                $ownGroups = fn ($query) => $query->where('teacher_id', $user->id);
+
+                $students = User::students()
+                    ->active()
+                    ->where('users.name', 'like', $pattern)
+                    ->whereHas('studyGroups', $ownGroups)
+                    ->with(['studyGroups' => fn ($query) => $ownGroups($query)->orderBy('name')])
+                    ->orderBy('users.name')
+                    ->limit(self::LIMIT)
+                    ->get();
             }
         }
 
