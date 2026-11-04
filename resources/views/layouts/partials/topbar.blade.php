@@ -15,7 +15,7 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" aria-hidden="true">
             <path d="M21 21l-4.3-4.3M11 18a7 7 0 100-14 7 7 0 000 14"/>
         </svg>
-        <input type="text" name="q" value="{{ request()->routeIs('search') ? request('q') : '' }}" aria-label="{{ __('Qidirish') }}" placeholder="{{ __('Qidirish: o‘quvchi, guruh, o‘qituvchi…') }}">
+        <input type="text" name="q" value="{{ request()->routeIs('search') ? request('q') : '' }}" aria-label="{{ __('Qidirish') }}" placeholder="{{ $user->isTeacher() ? __('Qidirish: o‘quvchi, guruh…') : __('Qidirish: o‘quvchi, guruh, o‘qituvchi…') }}">
     </form>
     @endif
 

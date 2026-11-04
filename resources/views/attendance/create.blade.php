@@ -1,6 +1,6 @@
 @php
     $statuses = \App\Enums\AttendanceStatus::cases();
-    $initial = $students->mapWithKeys(fn ($student) => [$student->id => $existing[$student->id] ?? 'present'])->all();
+    $initial = $students->mapWithKeys(fn ($student) => [$student->id => $existing[$student->id] ?? null])->all();
     $lessonDate = \Carbon\Carbon::parse($date);
 @endphp
 
@@ -11,6 +11,10 @@
             setAll(value) { Object.keys(this.state).forEach(key => this.state[key] = value) },
             count(value) { return Object.values(this.state).filter(item => item === value).length }
         }">
+
+        @if ($students->isNotEmpty() && empty($existing))
+            <div class="alert alert-warn">{{ __('Bu sana uchun davomat hali saqlanmagan. Har bir o‘quvchining holatini belgilang.') }}</div>
+        @endif
 
         <section class="card filters">
             <div class="field" style="min-width: 260px">
@@ -52,6 +56,7 @@
                         @foreach ($statuses as $status)
                             · {{ $status->label() }} <b x-text="count('{{ $status->value }}')">0</b>
                         @endforeach
+                        · {{ __('Belgilanmagan') }} <b x-text="count(null)">{{ $students->count() - count($existing) }}</b>
                     </div>
                 </div>
 
@@ -74,7 +79,7 @@
                                         <label class="pill {{ $status->badge() }}"
                                             :class="{ 'on': state[{{ $student->id }}] === '{{ $status->value }}' }">
                                             <input type="radio" name="records[{{ $student->id }}]"
-                                                value="{{ $status->value }}" x-model="state[{{ $student->id }}]">
+                                                value="{{ $status->value }}" x-model="state[{{ $student->id }}]" required>
                                             {{ $status->label() }}
                                         </label>
                                     @endforeach
