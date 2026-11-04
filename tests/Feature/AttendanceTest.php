@@ -97,6 +97,16 @@ class AttendanceTest extends TestCase
             ->assertNotFound();
     }
 
+    public function test_attendance_form_blocks_a_second_submit(): void
+    {
+        [, $teacher, , $group] = $this->makeGroup();
+
+        $this->actingAs($teacher)
+            ->get(route('attendance.create', $group))
+            ->assertOk()
+            ->assertSee('x-data="oneSubmit" @submit="guard($event)"', false);
+    }
+
     public function test_student_cannot_open_attendance_form(): void
     {
         [, , $student, $group] = $this->makeGroup();

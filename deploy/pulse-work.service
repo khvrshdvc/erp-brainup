@@ -3,7 +3,8 @@ Description=BrainUp ERP Pulse worker
 After=network.target redis-server.service mysql.service
 
 [Service]
-User=www-data
+User=brainup
+Group=brainup
 WorkingDirectory=/var/www/erp-brainup
 ExecStart=/usr/bin/php artisan pulse:work
 Restart=always

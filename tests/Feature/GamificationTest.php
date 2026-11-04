@@ -8,6 +8,7 @@ use App\Enums\UserStatus;
 use App\Enums\XpReason;
 use App\Listeners\AwardAttendanceXp;
 use App\Models\Attendance;
+use App\Models\Badge;
 use App\Models\Branch;
 use App\Models\Level;
 use App\Models\Setting;
@@ -18,7 +19,9 @@ use App\Models\XpTransaction;
 use App\Services\LeaderboardService;
 use Database\Seeders\GamificationSeeder;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 
@@ -270,5 +273,48 @@ class GamificationTest extends TestCase
         $admin = User::factory()->create(['role' => Role::SuperAdmin]);
 
         $this->actingAs($admin)->get(route('admin.gamification.index'))->assertOk();
+    }
+
+    public function test_badge_awarded_by_a_parallel_save_does_not_fail_the_request(): void
+    {
+        [$teacher, $student, $group] = $this->makeGroup();
+
+        $badgeId = Badge::where('code', 'first_step')->value('id');
+        $raced = false;
+
+        DB::listen(function (QueryExecuted $query) use (&$raced, $badgeId, $student) {
+            if ($raced || ! str_starts_with($query->sql, 'select') || ! str_contains($query->sql, 'badge_user')) {
+                return;
+            }
+
+            $raced = true;
+
+            DB::table('badge_user')->insert([
+                'badge_id' => $badgeId,
+                'user_id' => $student->id,
+                'awarded_at' => now(),
+            ]);
+        });
+
+        $this->mark($teacher, $group, $student, 'present');
+
+        $this->assertTrue($raced);
+        $this->assertSame(['first_step'], $student->badges()->pluck('code')->all());
+        $this->assertSame(10, $student->fresh()->xp);
+    }
+
+    public function test_resyncing_attendance_keeps_the_original_badge_date(): void
+    {
+        [$teacher, $student, $group] = $this->makeGroup();
+
+        $this->mark($teacher, $group, $student, 'present');
+
+        $awardedAt = $student->badges()->first()->pivot->awarded_at;
+
+        $this->travel(10)->minutes();
+
+        $this->mark($teacher, $group, $student, 'late');
+
+        $this->assertSame($awardedAt, $student->badges()->first()->pivot->awarded_at);
     }
 }

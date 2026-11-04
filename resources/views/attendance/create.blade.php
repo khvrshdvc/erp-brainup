@@ -39,7 +39,8 @@
             @endif
         </section>
 
-        <form method="POST" action="{{ route('attendance.store', $studyGroup) }}" class="stack-lg">
+        <form method="POST" action="{{ route('attendance.store', $studyGroup) }}" class="stack-lg"
+            x-data="oneSubmit" @submit="guard($event)" :aria-busy="submitting">
             @csrf
             <input type="hidden" name="lesson_date" value="{{ $date }}">
 
