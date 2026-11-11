@@ -179,7 +179,7 @@ class ChirchiqSeeder extends Seeder
     private function createStaff(Branch $branch): array
     {
         $this->staff('Super Admin', 'admin@'.self::EMAIL_DOMAIN, Role::SuperAdmin);
-        $this->staff('Karimov Sherzod', 'filial.admin@'.self::EMAIL_DOMAIN, Role::BranchAdmin, $branch->id);
+        $this->staff('Xamidullayeva Gavhar', 'filial.admin@'.self::EMAIL_DOMAIN, Role::BranchAdmin, $branch->id);
 
         $teachers = [];
 
