@@ -444,7 +444,20 @@ document.addEventListener('alpine:init', () => {
     }, true);
 
     // A custom message would otherwise keep the field invalid after the user fixes it.
-    const clear = (event) => event.target?.setCustomValidity?.('');
+    // For radios the message sits on the first button of the group, not on the one that was clicked.
+    const clear = (event) => {
+        const field = event.target;
+
+        field?.setCustomValidity?.('');
+
+        if (field?.type === 'radio' && field.name && field.form) {
+            field.form.querySelectorAll('input[type="radio"]').forEach((radio) => {
+                if (radio.name === field.name) {
+                    radio.setCustomValidity('');
+                }
+            });
+        }
+    };
     document.addEventListener('input', clear, true);
     document.addEventListener('change', clear, true);
 })();
