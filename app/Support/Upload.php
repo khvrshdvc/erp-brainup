@@ -8,7 +8,7 @@ namespace App\Support;
  */
 final class Upload
 {
-    public const EXTENSIONS = ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'];
+    public const EXTENSIONS = ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png', 'html'];
 
     public const MAX_MB = 10;
 
