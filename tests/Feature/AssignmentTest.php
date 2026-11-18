@@ -70,6 +70,27 @@ class AssignmentTest extends TestCase
         ]);
     }
 
+    public function test_teacher_attaches_html_and_student_downloads_it_instead_of_rendering(): void
+    {
+        [, $teacher, $student, $group] = $this->makeGroup();
+
+        $this->actingAs($teacher)->post(route('teacher.assignments.store'), [
+            'title' => 'HTML sahifa',
+            'study_group_id' => $group->id,
+            'description' => 'Sahifani oching',
+            'max_score' => 100,
+            'due_at' => now()->addDay()->format('Y-m-d\TH:i'),
+            'action' => 'publish',
+            'files' => [UploadedFile::fake()->createWithContent('dars.html', '<!doctype html><html><body><script>alert(1)</script></body></html>')],
+        ])->assertSessionHasNoErrors()->assertRedirect();
+
+        $attachment = Assignment::withoutGlobalScopes()->latest('id')->firstOrFail()->attachments()->firstOrFail();
+        $this->assertSame('dars.html', $attachment->original_name);
+
+        $response = $this->actingAs($student)->get(route('attachments.download', $attachment))->assertOk();
+        $this->assertStringStartsWith('attachment;', $response->headers->get('Content-Disposition'));
+    }
+
     public function test_draft_is_hidden_from_students_until_published(): void
     {
         [, $teacher, $student, $group] = $this->makeGroup();
